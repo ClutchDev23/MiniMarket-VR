@@ -1,2 +1,0 @@
-# MiniMarket-VR-Game
-
