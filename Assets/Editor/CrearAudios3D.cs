@@ -26,16 +26,19 @@ public static class CrearAudios3D
 
         EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
 
-        var heladeraGO = CrearFuente("Audio_Ambiente_Heladera", heladera,
+        var heladeraGO = ObtenerOCrear("Audio_Ambiente_Heladera", heladera,
             new Vector3(0f, 1.5f, -12f), 20f, true, true, 0.6f);
-        var puertaGO = CrearFuente("Audio_Puerta", puerta,
+        var puertaGO = ObtenerOCrear("Audio_Puerta", puerta,
             new Vector3(0f, 2f, 1.79f), 15f, false, false, 1f);
-        var cajaGO = CrearFuente("Audio_Caja", caja,
+        var cajaGO = ObtenerOCrear("Audio_Caja", caja,
             new Vector3(-3.55f, 1.2f, -4.4f), 15f, false, false, 1f);
 
-        var doorTrig = GameObject.Find("DoorTrig_01");
+        var doorTrig = EncontrarEnEscena("DoorTrig_01");
         if (doorTrig != null)
         {
+            if (!doorTrig.activeSelf)
+                doorTrig.SetActive(true);
+
             var trigger = doorTrig.GetComponent<TriggerAudio>();
             if (trigger == null)
                 trigger = doorTrig.AddComponent<TriggerAudio>();
@@ -65,9 +68,16 @@ public static class CrearAudios3D
             EditorApplication.Exit(0);
     }
 
-    static GameObject CrearFuente(string nombre, AudioClip clip, Vector3 pos,
+    static GameObject ObtenerOCrear(string nombre, AudioClip clip, Vector3 pos,
         float maxDistance, bool loop, bool playOnAwake, float volume)
     {
+        var existente = EncontrarEnEscena(nombre);
+        if (existente != null)
+        {
+            Debug.Log("[CrearAudios3D] ya existe " + nombre + ", reutilizando");
+            return existente;
+        }
+
         var go = new GameObject(nombre);
         go.transform.position = pos;
 
@@ -84,5 +94,22 @@ public static class CrearAudios3D
 
         Debug.Log("[CrearAudios3D] creado " + nombre + " en " + pos);
         return go;
+    }
+
+    static GameObject EncontrarEnEscena(string nombre)
+    {
+        var activo = GameObject.Find(nombre);
+        if (activo != null)
+            return activo;
+
+        foreach (var root in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+        {
+            foreach (var t in root.GetComponentsInChildren<Transform>(true))
+            {
+                if (t.name == nombre)
+                    return t.gameObject;
+            }
+        }
+        return null;
     }
 }
