@@ -31,15 +31,19 @@ public static class HornearLighting
                     nombre.Contains("XR Origin") ||
                     nombre.Contains("XR Device") ||
                     nombre.Contains("Directional Light") ||
-                    nombre.Contains("Area Light"))
+                    nombre.Contains("Area Light") ||
+                    nombre.Contains("Camera") ||
+                    nombre.Contains("Volume"))
                     continue;
 
-                // Solo marcar objetos con MeshRenderer (los que se hornean)
-                var mr = go.GetComponent<MeshRenderer>();
-                if (mr == null)
+                // No marcar luces, audio, ni volúmenes
+                if (go.GetComponent<Light>() != null ||
+                    go.GetComponent<AudioSource>() != null ||
+                    go.GetComponent<Camera>() != null)
                     continue;
 
-                // Marcar como Static + Contribute GI
+                // Marcar como Static + Contribute GI (sin filtrar por MeshRenderer,
+                // porque los meshes estan dentro de prefab instances)
                 var flags = GameObjectUtility.GetStaticEditorFlags(go);
                 bool yaStatic = (flags & StaticEditorFlags.ContributeGI) != 0;
 
