@@ -42,8 +42,12 @@ public static class HornearLighting
                     go.GetComponent<Camera>() != null)
                     continue;
 
-                // Marcar como Static + Contribute GI (sin filtrar por MeshRenderer,
-                // porque los meshes estan dentro de prefab instances)
+                // Solo marcar objetos con MeshRenderer (los que se hornean).
+                // Sin este filtro se marcarian objetos moviles (controllers, bots...).
+                if (go.GetComponent<MeshRenderer>() == null)
+                    continue;
+
+                // Marcar como Static + Contribute GI
                 var flags = GameObjectUtility.GetStaticEditorFlags(go);
                 bool yaStatic = (flags & StaticEditorFlags.ContributeGI) != 0;
 
