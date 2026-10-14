@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: Assets/Scenes/MinimarketXR_Full.unity
     guid: 19d5cde615962544da6345f45fde3d92
   m_configObjects:
-    Unity.XR.Oculus.Settings: {fileID: 11400000, guid: e17dbac989ea4ec45915871ed1084336,
-      type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 50001cc51bae207449b60292da5d0f15,
+      type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 43c5f17493c94a349b41727106d774d6,
       type: 2}
