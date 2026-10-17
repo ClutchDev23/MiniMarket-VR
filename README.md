@@ -172,7 +172,7 @@ Todo lo editable está al inicio de `Assets/Editor/MenuBuilder.cs`:
 | | |
 |---|---|
 | 👨‍💻 **Abner Gonzales** | Desarrollo |
-| 👨‍💻 **Hubert Hilaario** | Desarrollo |
+| 👨‍💻 **Hubert Hilario** | Desarrollo |
 
 ## 🙏 Créditos
 
