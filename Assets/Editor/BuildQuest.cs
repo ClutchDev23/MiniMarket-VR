@@ -16,6 +16,7 @@ public static class BuildQuest
     {
         string[] scenes =
         {
+            "Assets/Scenes/Menu.unity",
             "Assets/Scenes/MinimarketXR_Full.unity",
             "Assets/Scenes/MinimarketXR_Night.unity",
         };

@@ -17044,7 +17044,7 @@ MonoBehaviour:
   head: {fileID: 178099388}
   leftController: {fileID: 178099387}
   rightController: {fileID: 178099386}
-  allowControllerSwing: 0
+  allowControllerSwing: 1
   extendedDistance: 0.35
   requireBothExtended: 1
   walkWhileExtended: 0

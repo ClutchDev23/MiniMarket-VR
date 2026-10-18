@@ -157935,17 +157935,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 353591773}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 857ab26b5fd161840a6d5f58035c71b5, type: 3}
+  m_Script: {fileID: 11500000, guid: aae122ecea7da6a45b3b43d40882d239, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ArmSwingLocomotion
   head: {fileID: 353591778}
   leftController: {fileID: 353591777}
   rightController: {fileID: 353591775}
+  allowControllerSwing: 1
+  extendedDistance: 0.35
+  requireBothExtended: 1
+  walkWhileExtended: 0
+  extendedWalkSpeed: 1.5
   speedMultiplier: 1.5
   minHandSpeed: 0.3
   maxSpeed: 3
   ignoreSpikesAbove: 10
-  requireBothArms: 0
 --- !u!1 &1614653553
 GameObject:
   m_ObjectHideFlags: 0

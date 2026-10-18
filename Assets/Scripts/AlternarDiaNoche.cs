@@ -12,10 +12,19 @@ public class AlternarDiaNoche : MonoBehaviour
     float t;
     int idx;
 
+    static bool EscenaDeJuego()
+    {
+        string activa = SceneManager.GetActiveScene().name;
+        return activa == Escenas[0] || activa == Escenas[1];
+    }
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Iniciar()
     {
         if (I != null)
+            return;
+
+        if (!EscenaDeJuego())
             return;
 
         var go = new GameObject("AlternarDiaNoche");
@@ -38,6 +47,12 @@ public class AlternarDiaNoche : MonoBehaviour
 
     void Update()
     {
+        if (!EscenaDeJuego())
+        {
+            t = 0f;
+            return;
+        }
+
         bool forzar = false;
 #if ENABLE_INPUT_SYSTEM
         var kb = UnityEngine.InputSystem.Keyboard.current;
