@@ -14,7 +14,11 @@ public static class BuildQuest
 
     static void Build()
     {
-        string[] scenes = { "Assets/Scenes/MinimarketXR_Full.unity" };
+        string[] scenes =
+        {
+            "Assets/Scenes/MinimarketXR_Full.unity",
+            "Assets/Scenes/MinimarketXR_Night.unity",
+        };
         string outputPath = "Builds/Quest/MiniMarketVR.apk";
 
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
