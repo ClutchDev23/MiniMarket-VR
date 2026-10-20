@@ -19,6 +19,9 @@ public static class ConectarCalibraciones
 {
     const string Escena = "Assets/Scenes/MinimarketXR_Full.unity";
 
+    /// <summary>Si es true, no cierra Unity al terminar (para encadenar herramientas).</summary>
+    public static bool noSalir = false;
+
     [MenuItem("Tools/Minimarket/Agarrar/Conectar Calibraciones (escena de juego)")]
     public static void Ejecutar()
     {
@@ -50,6 +53,14 @@ public static class ConectarCalibraciones
         }
 
         // ---- 2. CalibrarTamanoProducto en cada producto ----
+        // Los productos son hijos anadidos al GameObject "Productos" (no son
+        // instancias de prefab), asi que el componente se anade directamente a
+        // cada uno.
+        //
+        // OJO: Unity reserializa la escena y puede perder estos componentes
+        // anadidos. Por eso el InstaladorSistemasJuego tambien los comprueba y
+        // los anade en tiempo de ejecucion si faltan (esa es la red de seguridad
+        // que hace que el tamano de los productos SIEMPRE funcione).
         var root = BuscarRoot(scene, "Productos");
         if (root == null)
         {
@@ -97,7 +108,7 @@ public static class ConectarCalibraciones
         Directory.CreateDirectory(@"C:\Users\abner\AppData\Local\Temp\opencode");
         File.WriteAllText(@"C:\Users\abner\AppData\Local\Temp\opencode\calibracion.txt", t.ToString());
 
-        if (Application.isBatchMode) EditorApplication.Exit(0);
+        if (Application.isBatchMode && !noSalir) EditorApplication.Exit(0);
     }
 
     static GameObject BuscarRoot(UnityEngine.SceneManagement.Scene scene, string nombre)

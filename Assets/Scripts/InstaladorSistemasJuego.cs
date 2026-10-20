@@ -113,6 +113,23 @@ public class InstaladorSistemasJuego : MonoBehaviour
         if (escala <= 0.01f) escala = 1f;
 
         var productos = Object.FindObjectsByType<CalibrarTamanoProducto>(FindObjectsInactive.Include);
+
+        // Red de seguridad: si a algun producto le falta el componente (porque se
+        // perdio al reserializar la escena), se le anade aqui. El componente
+        // normally viene heredado del prefab del producto, que es lo que no se
+        // puede perder.
+        var root = GameObject.Find("Productos");
+        if (root != null)
+        {
+            var grabs = root.GetComponentsInChildren<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>(true);
+            foreach (var g in grabs)
+            {
+                if (g.GetComponent<CalibrarTamanoProducto>() == null)
+                    g.gameObject.AddComponent<CalibrarTamanoProducto>();
+            }
+        }
+
+        productos = Object.FindObjectsByType<CalibrarTamanoProducto>(FindObjectsInactive.Include);
         foreach (var p in productos)
             p.escala = escala;
 
