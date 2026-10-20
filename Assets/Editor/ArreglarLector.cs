@@ -6,8 +6,8 @@ using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 /// <summary>
-/// Arregla el LECTOR DE BARRAS ("base") para que se agarre SIEMPRE por el mango (arriba)
-/// y no por cualquier sitio.
+/// Arregla el LECTOR DE BARRAS ("base") para que se pueda agarrar desde CUALQUIER
+/// sitio y que se quede en la mano de forma natural.
 ///
 /// QUE ESTA MAL
 /// ------------
@@ -23,21 +23,26 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 ///    no de los vertices del mesh (que estan en unas unidades absurdas). Asi el
 ///    collider va exactamente sobre la maquina.
 ///
-/// 2. Crea un "Punto de Agarre" en la parte de ARRIBA del lector (el mango), que es
-///    donde se coge en la vida real. Ese punto es el UNICO collider agarrable, asi
-///    que el rayo del mando solo pilla el mango.
+/// 2. Deja el lector agarrable desde cualquier punto: el collider de la maquina Y
+///    el punto del mango. Antes solo se podia coger por el mango, y si apuntabas
+///    a un lado no pasaba nada.
 ///
-/// 3. Mismos ajustes de agarre que los productos: el objeto viene a la mano, sin
+/// 3. Usa un punto de agarre DINAMICO (useDynamicAttach): el punto de agarre se
+///    crea en el sitio exacto donde has tocado, asi que la maquina se te queda
+///    en la mano como si la cogieras de verdad, sin deformar la mano ni saltar a
+///    una pose fija.
+///
+/// 4. Mismos ajustes de agarre que los productos: el objeto viene a la mano, sin
 ///    retardo de fisica.
 ///
-/// Uso: Tools/Minimarket/Agarrar/Arreglar Lector (mango siempre)
+/// Uso: Tools/Minimarket/Agarrar/Arreglar Lector (agarrable en cualquier sitio)
 /// </summary>
 public static class ArreglarLector
 {
     const string Escena = "Assets/Scenes/MinimarketXR_Full.unity";
     const string NombrePunto = "Punto de Agarre";
 
-    [MenuItem("Tools/Minimarket/Agarrar/Arreglar Lector (mango siempre)")]
+    [MenuItem("Tools/Minimarket/Agarrar/Arreglar Lector (agarrable en cualquier sitio)")]
     public static void Ejecutar()
     {
         var t = new System.Text.StringBuilder();
@@ -101,9 +106,13 @@ public static class ArreglarLector
                                 DividirPorEscala(new Vector3(0.09f, 0.09f, 0.09f), g.transform.lossyScale),
                                 out BoxCollider col);
 
+        // Se puede agarrar desde CUALQUIER sitio: el collider de la maquina y
+        // tambien el punto del mango. Asi que si apuntas a la parte de abajo o a
+        // un lado, tambien lo coges.
         g.colliders.Clear();
+        g.colliders.Add(box);
         g.colliders.Add(col);
-        g.attachTransform = punto.transform;
+        g.attachTransform = g.transform;
         t.AppendLine("  punto de agarre (mango) en mundo=" + centroMango);
 
         // ---- 3. Ajustes de agarre.
@@ -113,6 +122,15 @@ public static class ArreglarLector
         g.smoothRotation = false;
         g.trackPosition = true;
         g.trackRotation = true;
+
+        // Punto de agarre DINAMICO: se crea en el sitio exacto donde has
+        // tocado el lector. Asi la maquina se te queda en la mano como si la
+        // cogieras de verdad (con la palma apoyada en ella), en vez de saltar a
+        // una pose fija que te deforma la mano.
+        g.useDynamicAttach = true;
+        g.matchAttachPosition = true;
+        g.matchAttachRotation = true;
+        g.snapToColliderVolume = true;
 
         // El rigidbody: que no ruede solo, pero se pueda agarrar y mover.
         var rb = g.GetComponent<Rigidbody>();
