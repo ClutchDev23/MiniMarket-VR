@@ -64,6 +64,10 @@ public class AjustarLocomocion : MonoBehaviour
     [Tooltip("Aplica la velocidad guardada en el menu (ajuste 'Velocidad al caminar') a los proveedores de movimiento.")]
     public bool aplicarVelocidadAjustada = true;
 
+    [Header("Solo giro (para la escena del menu)")]
+    [Tooltip("Si lo activas, unicamente se ajusta el giro del joystick y no se toca ni el CharacterController ni la gravedad. Es lo que se usa en la escena Menu, donde el jugador no debe chocar con nada.")]
+    public bool soloGiro = false;
+
     void Start()
     {
         Aplicar();
@@ -71,6 +75,14 @@ public class AjustarLocomocion : MonoBehaviour
 
     void Aplicar()
     {
+        // En la escena del menu solo interesa el giro del joystick: el jugador va
+        // suelto por el cuarto y no debe chocar con las paredes ni caerse.
+        if (soloGiro)
+        {
+            AjustarGiro();
+            return;
+        }
+
         var origin = BuscarXROrigin();
         if (origin == null)
         {
@@ -141,25 +153,31 @@ public class AjustarLocomocion : MonoBehaviour
     void AjustarVelocidad()
     {
         // La velocidad sale del menu principal (mismo PlayerPrefs que usa MainMenu).
+        // Se aplica con AjustesAplicador, que es el mismo sitio que usa el menu de
+        // pausa: asi no se aplica el factor dos veces.
         float factor = PlayerPrefs.GetFloat("walkSpeed", 1f);
         if (factor <= 0.01f) factor = 1f;
 
-        var proveedores = new List<ContinuousMoveProvider>();
+        AjustesAplicador.AplicarVelocidad(factor);
+
+        int proveedores = 0;
         foreach (var p in FindObjectsByType<ContinuousMoveProvider>(FindObjectsInactive.Include))
-            proveedores.Add(p);
+            proveedores++;
 
-        foreach (var p in proveedores)
-        {
-            // El proveedor base ya trae el valor por defecto (1 m/s). Se escala
-            // proporcionalmente para no perder la configuracion del prefab.
-            p.moveSpeed = Mathf.Max(0.1f, p.moveSpeed * factor);
-        }
-
-        if (proveedores.Count > 0)
-            Debug.Log("[Locomocion] Velocidad al caminar x" + factor + " en " + proveedores.Count + " proveedor(es).");
+        if (proveedores > 0)
+            Debug.Log("[Locomocion] Velocidad al caminar x" + factor + " en " + proveedores + " proveedor(es).");
     }
 
     // ---------------------------------------------------------------- giro
+    /// <summary>
+    /// Aplica SOLO el ajuste del giro del joystick (izquierda mueve, derecha gira).
+    /// Se puede llamar a mano, sin depender del Start.
+    /// </summary>
+    public void AplicarGiro()
+    {
+        AjustarGiro();
+    }
+
     void AjustarGiro()
     {
         // El joystick izquierdo SOLO mueve. El giro se queda en el stick derecho.
