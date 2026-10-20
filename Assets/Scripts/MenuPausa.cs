@@ -39,7 +39,12 @@ public class MenuPausa : MonoBehaviour
     public Color colorTexto = new Color(0.95f, 0.95f, 1f, 1f);
     public Color colorAcento = new Color(1f, 0.25f, 0.60f, 1f);
     public float distanciaAlJugador = 1.05f;
-    public float alturaAlJugador = 1.25f;
+
+    [Tooltip("Altura FIJA del panel. Si es 0, el panel se coloca a la altura de la cabeza del jugador (ojos), que es lo que se usa normalmente.")]
+    public float alturaFija = 0f;
+
+    [Tooltip("Margen por debajo de la altura de los ojos del jugador. Un menu un poco mas bajo se mira mejor que uno a la altura de la cara.")]
+    public float margenBajoOjos = 0.22f;
 
     GameObject panel;
     CanvasGroup grupo;
@@ -51,6 +56,7 @@ public class MenuPausa : MonoBehaviour
     Slider sliderVolumen, sliderVelocidad, sliderTamano;
     Toggle toggleBrazos;
     Dropdown dropdownCalidad;
+    Text etiquetaCalibracion;
     AudioSource sfx;
     AudioClip cClick, cHover;
 
@@ -130,10 +136,38 @@ public class MenuPausa : MonoBehaviour
         fwd.Normalize();
 
         Vector3 pos = refTransform.position + fwd * distanciaAlJugador;
-        pos.y = alturaAlJugador;
+
+        // La altura sale de la ALTURA DE LA CABEZA del jugador (la de sus ojos),
+        // no de un valor fijo: asi el menu sale siempre a la vista, mida lo que
+        // mida la persona, y no hay que ajustarlo a mano.
+        pos.y = alturaFija > 0.01f ? alturaFija : AlturaDelPanel(cam);
 
         panel.transform.position = pos;
         panel.transform.rotation = Quaternion.LookRotation(-fwd, Vector3.up);
+    }
+
+    /// <summary>
+    /// La altura a la que se pone el panel: la altura de los ojos del jugador menos
+    /// un margen. Si no se puede saber la altura de la cabeza se usa la de por
+    /// defecto.
+    /// </summary>
+    float AlturaDelPanel(Camera cam)
+    {
+        // La altura de la cabeza calibrada (si la hay) manda, porque es la medida
+        // real de la persona.
+        float calibrada = PlayerPrefs.GetFloat("headHeight", 0f);
+
+        float alturaOjos = cam.transform.position.y;
+
+        // Si la camara esta dentro del XR Origin, su altura sobre el suelo es la
+        // altura de la cabeza.
+        var origin = cam.GetComponentInParent<Unity.XR.CoreUtils.XROrigin>();
+        if (origin != null)
+            alturaOjos = cam.transform.position.y - origin.transform.position.y;
+
+        if (calibrada > 0.5f) alturaOjos = Mathf.Max(alturaOjos, calibrada);
+
+        return Mathf.Max(0.9f, alturaOjos - margenBajoOjos);
     }
 
     // ------------------------------------------------------------------ botones
@@ -174,18 +208,23 @@ public class MenuPausa : MonoBehaviour
         AudioListener.volume = Mathf.Clamp01(v);
         PlayerPrefs.SetFloat("volume", AudioListener.volume);
         PlayerPrefs.Save();
+        AjustesAplicador.AplicarVolumen(v);
     }
 
     public void SetVelocidad(float s)
     {
         PlayerPrefs.SetFloat("walkSpeed", s);
         PlayerPrefs.Save();
+        // Se aplica YA: antes habia que reiniciar la escena para que cambiara.
+        AjustesAplicador.AplicarVelocidad(s);
     }
 
     public void SetCaminarConBrazos(bool on)
     {
         PlayerPrefs.SetInt("armSwing", on ? 1 : 0);
         PlayerPrefs.Save();
+        // Se aplica YA: antes habia que reiniciar la escena para que cambiara.
+        AjustesAplicador.AplicarCaminarConBrazos(on);
     }
 
     /// <summary>
@@ -198,8 +237,7 @@ public class MenuPausa : MonoBehaviour
         PlayerPrefs.Save();
 
         // Se aplica al momento a los productos que ya estan en la escena.
-        var productos = UnityEngine.Object.FindObjectsByType<CalibrarTamanoProducto>(FindObjectsInactive.Include);
-        foreach (var p in productos) p.escala = s;
+        AjustesAplicador.AplicarTamanoProductos(s);
     }
 
     /// <summary>
@@ -211,19 +249,25 @@ public class MenuPausa : MonoBehaviour
         if (CalibrarBrazos.CalibrarEstatico())
         {
             float longitud = PlayerPrefs.GetFloat("armLength", 0f);
-            Debug.Log("[Pausa] Brazos calibrados: " + longitud.ToString("0.00") + " m.");
+            float altura = PlayerPrefs.GetFloat("headHeight", 0f);
+            Debug.Log("[Pausa] Brazos calibrados: " + longitud.ToString("0.00") + " m, altura " + altura.ToString("0.00") + " m.");
+            if (etiquetaCalibracion != null)
+                etiquetaCalibracion.text = "Brazos: " + longitud.ToString("0.00") + " m  |  Altura: " + altura.ToString("0.00") + " m";
         }
         else
         {
             Debug.Log("[Pausa] No se pudo medir: estira los brazos hacia delante.");
+            if (etiquetaCalibracion != null)
+                etiquetaCalibracion.text = "Estira los brazos y vuelve a pulsar";
         }
     }
 
     public void SetCalidad(int index)
     {
-        QualitySettings.SetQualityLevel(index, true);
         PlayerPrefs.SetInt("quality", index);
         PlayerPrefs.Save();
+        // Se aplica YA (antes solo se guardaba).
+        AjustesAplicador.AplicarCalidad(index);
     }
 
     void PlayClic()
@@ -346,6 +390,19 @@ public class MenuPausa : MonoBehaviour
         dropdownCalidad = CrearDropdown("Calidad", colDer.transform, ref y2, SetCalidad);
 
         CrearBoton("Calibrar brazos", colDer.transform, ref y2, BotonCalibrarBrazos, false);
+
+        // Etiqueta con el resultado de la calibracion (se rellena al calibrar).
+        etiquetaCalibracion = CrearTexto("EtiquetaCalibracion", colDer.transform, "");
+        etiquetaCalibracion.fontSize = 15;
+        etiquetaCalibracion.alignment = TextAnchor.MiddleCenter;
+        etiquetaCalibracion.color = new Color(0.75f, 0.75f, 0.85f, 1f);
+        var rtCal = (RectTransform)etiquetaCalibracion.transform;
+        rtCal.anchorMin = new Vector2(0f, 1f); rtCal.anchorMax = new Vector2(1f, 1f);
+        rtCal.pivot = new Vector2(0.5f, 1f);
+        rtCal.anchoredPosition = new Vector2(0f, y2);
+        rtCal.sizeDelta = new Vector2(0f, 26f);
+        y2 -= 30f;
+
         CrearBoton("Cerrar", colDer.transform, ref y2, Cerrar, false);
 
         // ------------------------------------------------------------- EventSystem
