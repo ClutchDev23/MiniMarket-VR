@@ -18,6 +18,7 @@ public static class GameSettings
     public const string NightMinutes = "minutesUntilNight";
     public const string ProductScale = "productScale";
     public const string ArmLength = "armLength";
+    public const string HeadHeight = "headHeight";
 }
 
 /// <summary>
@@ -607,8 +608,10 @@ public class MainMenu : MonoBehaviour
         if (ok)
         {
             float longitud = PlayerPrefs.GetFloat(GameSettings.ArmLength, 0f);
+            float altura = PlayerPrefs.GetFloat(GameSettings.HeadHeight, 0f);
             if (calibrateArmsLabel)
-                calibrateArmsLabel.text = "Brazos calibrados: " + longitud.ToString("0.00") + " m";
+                calibrateArmsLabel.text = "Brazos calibrados: " + longitud.ToString("0.00") + " m"
+                                        + (altura > 0.5f ? "  |  Altura: " + altura.ToString("0.00") + " m" : "");
             PlaySfx(cChime, 1.1f);
             Haptic(0.5f, 0.08f);
         }

@@ -34,12 +34,29 @@ public class CalibrarBrazos : MonoBehaviour
     [Tooltip("Distancia maxima (m) para considerar que un brazo esta estirado.")]
     public float distanciaMaxima = 0.95f;
 
+    [Header("Altura de la cabeza")]
+    [Tooltip("El umbral de 'brazo estirado' se ajusta a la estatura de la persona, que se mide con la altura de la cabeza (ojos) sobre el suelo.")]
+    public bool usarAlturaCabeza = true;
+
+    [Tooltip("Altura de cabeza (m) que se considera baja (el umbral de estirado es mas corto).")]
+    public float alturaCabezaBaja = 1.45f;
+
+    [Tooltip("Altura de cabeza (m) que se considera alta (el umbral de estirado es mas largo).")]
+    public float alturaCabezaAlta = 1.95f;
+
+    [Tooltip("Parte de la longitud del brazo que se considera 'estirado' en una persona baja.")]
+    [Range(0.5f, 0.95f)] public float factorEstiradoBajo = 0.72f;
+
+    [Tooltip("Parte de la longitud del brazo que se considera 'estirado' en una persona alta.")]
+    [Range(0.5f, 0.95f)] public float factorEstiradoAlto = 0.84f;
+
     [Tooltip("Medir solo con las manos (no con los mandos).")]
     public bool usarSoloManos = true;
 
     [Header("Estado")]
     [SerializeField] float longitudMedida = 0f;
     [SerializeField] bool tieneMedida;
+    [SerializeField] float alturaCabezaMedida;
 
     static readonly List<XRHandSubsystem> subs = new List<XRHandSubsystem>();
     XRHandSubsystem handSub;
@@ -112,6 +129,12 @@ public class CalibrarBrazos : MonoBehaviour
         longitudMedida = mejor;
         tieneMedida = true;
 
+        // Ademas de la longitud del brazo, se guarda la ALTURA DE LA CABEZA: con
+        // los dos datos se sabe el tamano de la persona y el umbral de "brazo
+        // estirado" se puede ajustar a su estatura.
+        alturaCabezaMedida = MedirAlturaCabeza();
+        PlayerPrefs.SetFloat("headHeight", alturaCabezaMedida);
+
         PlayerPrefs.SetFloat("armLength", longitudMedida);
         PlayerPrefs.Save();
 
@@ -142,9 +165,29 @@ public class CalibrarBrazos : MonoBehaviour
 
         longitudMedida = d;
         tieneMedida = true;
+        alturaCabezaMedida = MedirAlturaCabeza();
+        PlayerPrefs.SetFloat("headHeight", alturaCabezaMedida);
         PlayerPrefs.SetFloat("armLength", longitudMedida);
         PlayerPrefs.Save();
         Aplicar();
+    }
+
+    /// <summary>
+    /// Mide la altura de la cabeza (los ojos) sobre el suelo, en metros.
+    ///
+    /// Se mide respecto al XR Origin (que es el suelo), no respecto al origen de
+    /// Unity, para que la cuenta sea correcta aunque la escena este inclinada o
+    /// el jugador este en otro punto.
+    /// </summary>
+    float MedirAlturaCabeza()
+    {
+        if (head == null) return AlturaCabezaPorDefecto;
+
+        var origin = head.GetComponentInParent<Unity.XR.CoreUtils.XROrigin>();
+        if (origin != null)
+            return Mathf.Max(0.5f, head.position.y - origin.transform.position.y);
+
+        return Mathf.Max(0.5f, head.position.y);
     }
 
     void Aplicar()
@@ -152,8 +195,18 @@ public class CalibrarBrazos : MonoBehaviour
         if (armSwing == null) return;
 
         // El umbral de "brazo estirado" se calcula a partir de la medida real:
-        // entre el 70% y el 95% de la longitud del brazo.
-        float umbral = longitudMedida * 0.78f;
+        // entre el 70% y el 95% de la longitud del brazo. Y se ajusta a la
+        // estatura (altura de la cabeza): una persona alta tiene los brazos mas
+        // largos, asi que su brazo se estira mas y el umbral tiene que subir.
+        float factor = 0.78f;
+
+        if (usarAlturaCabeza && alturaCabezaMedida > 0.1f)
+        {
+            float estatura = Mathf.InverseLerp(alturaCabezaBaja, alturaCabezaAlta, alturaCabezaMedida);
+            factor = Mathf.Lerp(factorEstiradoBajo, factorEstiradoAlto, estatura);
+        }
+
+        float umbral = longitudMedida * factor;
         umbral = Mathf.Clamp(umbral, distanciaMinima, distanciaMaxima);
         armSwing.extendedDistance = umbral;
     }
@@ -163,6 +216,12 @@ public class CalibrarBrazos : MonoBehaviour
     /// </summary>
     public void CargarMedidaGuardada()
     {
+        // La altura de la cabeza se guarda aparte y tambien se carga: aunque no se
+        // haya calibrado el brazo, sirve para colocar los menus a la altura del
+        // jugador.
+        if (PlayerPrefs.HasKey("headHeight"))
+            alturaCabezaMedida = PlayerPrefs.GetFloat("headHeight", AlturaCabezaPorDefecto);
+
         if (!PlayerPrefs.HasKey("armLength")) return;
 
         longitudMedida = PlayerPrefs.GetFloat("armLength", 0f);
@@ -201,6 +260,17 @@ public class CalibrarBrazos : MonoBehaviour
 
     public bool tieneCalibracion => tieneMedida;
     public float longitud => longitudMedida;
+
+    /// <summary>
+    /// Altura de la cabeza (ojos) sobre el suelo, en metros. Se mide al calibrar y
+    /// se guarda, asi que sirve para saber el tamano de la persona.
+    /// </summary>
+    public float alturaCabeza => alturaCabezaMedida;
+
+    /// <summary>
+    /// Altura de cabeza que se supone si no se ha calibrado nunca.
+    /// </summary>
+    public const float AlturaCabezaPorDefecto = 1.70f;
 
     float DistanciaAPalma(XRHand mano)
     {
