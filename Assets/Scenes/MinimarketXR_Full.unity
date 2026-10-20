@@ -156843,6 +156843,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1593984117}
+    - targetCorrespondingSourceObject: {fileID: 8774952405676418118, guid: 87e8db2856e1ca5409db5e98d7f417bc,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1593984119}
   m_SourcePrefab: {fileID: 100100000, guid: 87e8db2856e1ca5409db5e98d7f417bc, type: 3}
 --- !u!4 &1593984115 stripped
 Transform:
@@ -157013,6 +157017,18 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 84
   m_CollisionDetection: 2
+--- !u!114 &1593984119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1593984116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1511ccae7919cfc46b603b9b337fdc94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.BaseInput
 --- !u!1 &1594202118
 GameObject:
   m_ObjectHideFlags: 0
