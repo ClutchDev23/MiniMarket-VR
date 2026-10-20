@@ -25,6 +25,12 @@ public class ArmSwingLocomotion : MonoBehaviour
     public float speedMultiplier = 1.5f;
     public float minHandSpeed = 0.3f;
     public float maxSpeed = 3f;
+
+    [Header("Valores base (se guardan solos la primera vez)")]
+    [Tooltip("Velocidad base, antes de aplicar el factor de los ajustes. Se guarda sola la primera vez para que el factor no se aplique encadenado.")]
+    public float velocidadBase = 0f;
+    [Tooltip("Velocidad maxima base, antes de aplicar el factor de los ajustes.")]
+    public float velocidadMaximaBase = 0f;
     public float ignoreSpikesAbove = 10f;
 
     class Side
@@ -100,6 +106,15 @@ public class ArmSwingLocomotion : MonoBehaviour
         s.lastPos = pos;
         float speed = d.magnitude / Mathf.Max(Time.deltaTime, 0.0001f);
         return speed > ignoreSpikesAbove ? 0f : speed;
+    }
+
+    void Awake()
+    {
+        // Se guardan los valores base la primera vez, para que el factor de
+        // velocidad de los ajustes se pueda aplicar varias veces (al entrar en la
+        // escena y al mover el slider) sin que se vaya encadenando.
+        if (velocidadBase <= 0f) velocidadBase = speedMultiplier;
+        if (velocidadMaximaBase <= 0f) velocidadMaximaBase = maxSpeed;
     }
 
     void Update()
