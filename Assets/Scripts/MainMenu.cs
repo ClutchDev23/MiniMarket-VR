@@ -16,6 +16,8 @@ public static class GameSettings
     public const string ArmSwing = "armSwing";
     public const string Quality = "quality";
     public const string NightMinutes = "minutesUntilNight";
+    public const string ProductScale = "productScale";
+    public const string ArmLength = "armLength";
 }
 
 /// <summary>
@@ -114,6 +116,15 @@ public class MainMenu : MonoBehaviour
     [Header("Ajustes: minutos hasta la noche (opcional)")]
     public Slider nightMinutesSlider;
     public TMP_Text nightMinutesLabel;
+
+    [Header("Ajustes: calibracion")]
+    [Tooltip("Slider del tamano de los productos (0.5 a 2).")]
+    public Slider productScaleSlider;
+    public TMP_Text productScaleLabel;
+
+    [Tooltip("Boton para calibrar la longitud de los brazos (caminar con balanceo).")]
+    public Button calibrateArmsButton;
+    public TMP_Text calibrateArmsLabel;
 
     [Header("Pestanas de Controles")]
     public Image tabControllers;
@@ -397,6 +408,7 @@ public class MainMenu : MonoBehaviour
         bool swing = PlayerPrefs.GetInt(GameSettings.ArmSwing, 1) == 1;
         float mins = PlayerPrefs.GetFloat(GameSettings.NightMinutes, 10f);
         int quality = PlayerPrefs.GetInt(GameSettings.Quality, QualitySettings.GetQualityLevel());
+        float escala = PlayerPrefs.GetFloat(GameSettings.ProductScale, 1f);
 
         AudioListener.volume = vol;
         QualitySettings.SetQualityLevel(quality, true);
@@ -434,6 +446,17 @@ public class MainMenu : MonoBehaviour
             nightMinutesSlider.SetValueWithoutNotify(mins);
             nightMinutesSlider.onValueChanged.RemoveAllListeners();
             nightMinutesSlider.onValueChanged.AddListener(SetNightMinutes);
+        }
+        if (productScaleSlider)
+        {
+            productScaleSlider.SetValueWithoutNotify(escala);
+            productScaleSlider.onValueChanged.RemoveAllListeners();
+            productScaleSlider.onValueChanged.AddListener(SetProductScale);
+        }
+        if (calibrateArmsButton)
+        {
+            calibrateArmsButton.onClick.RemoveAllListeners();
+            calibrateArmsButton.onClick.AddListener(CalibrateArms);
         }
         RefreshLabels();
     }
@@ -559,6 +582,44 @@ public class MainMenu : MonoBehaviour
         Tick(1f);
     }
 
+    /// <summary>
+    /// Tamano de los productos al agarrarlos (0.5 a 2).
+    /// </summary>
+    public void SetProductScale(float s)
+    {
+        s = Mathf.Clamp(s, 0.5f, 2f);
+        PlayerPrefs.SetFloat(GameSettings.ProductScale, s);
+        PlayerPrefs.Save();
+        RefreshLabels();
+        Tick(0.9f + s * 0.3f);
+    }
+
+    /// <summary>
+    /// Calibra la longitud de los brazos para poder caminar moviendo los brazos.
+    /// El jugador debe tener los brazos estirados hacia delante.
+    /// </summary>
+    public void CalibrateArms()
+    {
+        // Se mide con el componente de la escena si esta; si no, se mide igualmente
+        // (la medida se guarda y la usa la escena de juego al cargar).
+        bool ok = CalibrarBrazos.CalibrarEstatico();
+
+        if (ok)
+        {
+            float longitud = PlayerPrefs.GetFloat(GameSettings.ArmLength, 0f);
+            if (calibrateArmsLabel)
+                calibrateArmsLabel.text = "Brazos calibrados: " + longitud.ToString("0.00") + " m";
+            PlaySfx(cChime, 1.1f);
+            Haptic(0.5f, 0.08f);
+        }
+        else
+        {
+            if (calibrateArmsLabel)
+                calibrateArmsLabel.text = "Estira los brazos y vuelve a pulsar";
+            PlaySfx(cTick, 0.7f);
+        }
+    }
+
     void Tick(float pitch)
     {
         if (Time.unscaledTime - lastTick < 0.05f) return;
@@ -575,6 +636,13 @@ public class MainMenu : MonoBehaviour
             walkSpeedLabel.text = "Velocidad al caminar: x" + PlayerPrefs.GetFloat(GameSettings.WalkSpeed, 1f).ToString("0.0");
         if (nightMinutesLabel)
             nightMinutesLabel.text = "Anochece en: " + Mathf.RoundToInt(PlayerPrefs.GetFloat(GameSettings.NightMinutes, 10f)) + " min";
+        if (productScaleLabel)
+        {
+            float e = PlayerPrefs.GetFloat(GameSettings.ProductScale, 1f);
+            productScaleLabel.text = "Tamano de los productos: " + Mathf.RoundToInt(e * 100f) + "%";
+        }
+        if (calibrateArmsLabel && calibrateArmsLabel.text == null)
+            calibrateArmsLabel.text = "Calibrar brazos";
     }
 
     void ApplyControlsMode()

@@ -973,6 +973,17 @@ public static class MenuBuilder
         Image pill; RectTransform knob;
         var toggle = MakeSwitch(cMove.transform, "Caminar con brazos", out pill, out knob);
 
+        // ----- Calibracion -----
+        var cCal = MakeCard(colL.transform, "Tarjeta Calibracion", AccentPink);
+        var scaleLabel = MakeRow(cCal.transform, "ruler", "Tamano de los productos: 100%", 30, 44, TextSoft, false, 36f);
+        var scaleSlider = MakeSlider(cCal.transform, "Slider Tamano", 0.5f, 2f, 1f, AccentPink);
+
+        var cCal2 = MakeCard(colR.transform, "Tarjeta Brazos", AccentAmber);
+        var calLabel = MakeRow(cCal2.transform, "walk", "Calibrar brazos", 30, 44, TextSoft, false, 36f);
+        var calButton = MakeButton(cCal2.transform, "check", "Calibrar brazos", menu.CalibrateArms, AccentAmber);
+        MakeSpacer(cCal2.transform, 4);
+        MakeLabel(cCal2.transform, "Estira los brazos hacia delante\ny pulsa el boton.", 22, 56, TextDim);
+
         var cNote = MakeCard(colR.transform, "Tarjeta Nota", AccentPink);
         MakeLabel(cNote.transform, "Tus cambios se guardan solos\ny se aplican en el juego.", 24, 72, TextDim);
 
@@ -1052,6 +1063,10 @@ public static class MenuBuilder
         menu.armSwingPill = pill;
         menu.armSwingKnob = knob;
         menu.qualityDropdown = dd;
+        menu.productScaleSlider = scaleSlider;
+        menu.productScaleLabel = scaleLabel;
+        menu.calibrateArmsButton = calButton;
+        menu.calibrateArmsLabel = calLabel;
 
         settings.SetActive(false);
         controls.SetActive(false);
