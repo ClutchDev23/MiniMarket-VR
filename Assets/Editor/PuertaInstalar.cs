@@ -13,6 +13,7 @@ public static class PuertaInstalar
     const string GlassPath = "Assets/SuperMarket/Materials/Glass_Mat_01.mat";
     const string Raiz = "PuertaAutomatica";
     const string Trigger = "DoorTrig_01";
+    const string PuertaEstatica = "Pref_Market_EntDoor_Ani";
 
     const float AnchoPanel = 1.5f;
     const float AltoPanel = 2.2f;
@@ -65,6 +66,18 @@ public static class PuertaInstalar
         }
         Debug.Log("[PuertaInst] trigger en " + trig.position.ToString("F3"));
 
+        var estaticas = new System.Collections.Generic.List<Transform>();
+        foreach (var root in scene.GetRootGameObjects())
+            foreach (var t in root.GetComponentsInChildren<Transform>(true))
+                if (t != null && t.name.StartsWith(PuertaEstatica))
+                    estaticas.Add(t);
+        foreach (var t in estaticas)
+        {
+            if (t == null) continue;
+            Debug.Log("[PuertaInst] quitando puerta estatica " + t.name);
+            Object.DestroyImmediate(t.gameObject);
+        }
+
         foreach (var root in scene.GetRootGameObjects())
             if (root.name == Raiz)
                 Object.DestroyImmediate(root.gameObject);
@@ -72,8 +85,9 @@ public static class PuertaInstalar
         var glass = AssetDatabase.LoadAssetAtPath<Material>(GlassPath);
         if (glass == null) Debug.LogWarning("[PuertaInst] falta material glass: " + GlassPath);
 
+        trig.position = new Vector3(trig.position.x, trig.position.y, 0f);
         var raiz = new GameObject(Raiz);
-        raiz.transform.position = new Vector3(trig.position.x, 0f, trig.position.z);
+        raiz.transform.position = new Vector3(0f, 0f, 0f);
 
         float mitad = AnchoPanel * 0.5f;
         var izq = CrearPanel("PanelIzq", new Vector3(-mitad, AltoPanel * 0.5f, 0f), glass, raiz.transform);

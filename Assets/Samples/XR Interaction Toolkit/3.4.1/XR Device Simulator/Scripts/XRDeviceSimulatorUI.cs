@@ -507,8 +507,10 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.DeviceSimulator
 
             var ctrlsBinding1 = m_Simulator.axis2DAction.action.controls;
             var ctrlsBinding2 = m_Simulator.keyboardYTranslateAction.action.controls;
-            m_HeadsetMoveValueText.text = $"{ctrlsBinding1[0].displayName},{ctrlsBinding1[1].displayName},{ctrlsBinding1[2].displayName},{ctrlsBinding1[3].displayName} + " +
-                $"{ctrlsBinding2[0].displayName},{ctrlsBinding2[1].displayName}";
+            m_HeadsetMoveValueText.text = ctrlsBinding1.Count >= 4 && ctrlsBinding2.Count >= 2
+                ? $"{ctrlsBinding1[0].displayName},{ctrlsBinding1[1].displayName},{ctrlsBinding1[2].displayName},{ctrlsBinding1[3].displayName} + " +
+                    $"{ctrlsBinding2[0].displayName},{ctrlsBinding2[1].displayName}"
+                : "W,A,S,D";
 
             m_CursorLockValueText.text = m_Simulator.toggleCursorLockAction.action.controls[0].displayName;
             m_CursorLockButton.color = Cursor.lockState == CursorLockMode.Locked ? selectedColor : buttonColor;
