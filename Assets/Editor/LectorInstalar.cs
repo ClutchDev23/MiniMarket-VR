@@ -125,14 +125,18 @@ public static class LectorInstalar
 
     static void Configurar(GameObject lector)
     {
+        // El collider SIEMPRE se recalcula. Antes solo se creaba si no existia, y como
+        // el FBX trae un cubo de 1 cm pegado al origen (lejos de la maquina), el
+        // lector se agarrava en el aire y la zona de lectura no coincidia con el mesh.
+        var lb = MallaLocalBounds(lector);
         var box = lector.GetComponent<BoxCollider>();
         if (box == null)
         {
-            var lb = MallaLocalBounds(lector);
             box = lector.AddComponent<BoxCollider>();
-            box.center = lb.center;
-            box.size = lb.size;
         }
+        box.center = lb.center;
+        box.size = lb.size;
+        box.isTrigger = false;
 
         var rb = lector.GetComponent<Rigidbody>();
         if (rb == null)
@@ -150,12 +154,41 @@ public static class LectorInstalar
         if (grab == null)
         {
             grab = lector.AddComponent<XRGrabInteractable>();
-            grab.movementType = XRBaseInteractable.MovementType.Kinematic;
-            grab.throwOnDetach = false;
-            grab.smoothPosition = true;
-            grab.smoothRotation = true;
-            grab.useDynamicAttach = false;
         }
+        grab.movementType = XRBaseInteractable.MovementType.Kinematic;
+        grab.throwOnDetach = false;
+        grab.smoothPosition = false;
+        grab.smoothRotation = false;
+        grab.trackPosition = true;
+        grab.trackRotation = true;
+        grab.useDynamicAttach = false;
+
+        // Punto de agarre: se agarra por el cuerpo de la maquina, no por el origen.
+        // Se crea como hijo con un collider propio, y ese es el UNICO collider
+        // agarrable (asi el rayo del mando no pilla el collider grande de la base).
+        var punto = lector.transform.Find("Punto de Agarre");
+        if (punto == null)
+        {
+            var go = new GameObject("Punto de Agarre");
+            go.transform.SetParent(lector.transform, false);
+            go.transform.localPosition = lb.center + new Vector3(0f, -lb.size.y * 0.15f, 0f);
+            go.transform.localRotation = Quaternion.identity;
+            go.transform.localScale = Vector3.one;
+            punto = go.transform;
+        }
+
+        var colPunto = punto.GetComponent<BoxCollider>();
+        if (colPunto == null) colPunto = punto.gameObject.AddComponent<BoxCollider>();
+        colPunto.size = new Vector3(
+            Mathf.Max(0.02f, lb.size.x * 1.1f),
+            Mathf.Max(0.02f, lb.size.y * 0.8f),
+            Mathf.Max(0.02f, lb.size.z * 1.1f));
+        colPunto.center = Vector3.zero;
+        colPunto.isTrigger = false;
+
+        grab.colliders.Clear();
+        grab.colliders.Add(colPunto);
+        grab.attachTransform = punto;
 
         var audio = lector.GetComponent<AudioSource>();
         if (audio == null)
