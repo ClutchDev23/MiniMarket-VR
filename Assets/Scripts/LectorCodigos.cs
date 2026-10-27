@@ -15,6 +15,13 @@ public class LectorCodigos : MonoBehaviour
 
     public UnityEvent<string> OnProductoEscaneado;
 
+    /// <summary>
+    /// Se dispara con el objeto escaneado y su ficha de la base de datos
+    /// (la ficha es null si el producto no tiene precio registrado).
+    /// La CajaRegistradora escucha este evento.
+    /// </summary>
+    public event System.Action<GameObject, Producto> ProductoEscaneado;
+
     Collider[] productos;
     float ultimaBip;
 
@@ -43,13 +50,27 @@ public class LectorCodigos : MonoBehaviour
         if (detectado == null) return;
 
         ultimaBip = Time.time;
-        Debug.Log("[Lector] BIP producto: " + detectado.name);
+
+        // El collider puede estar en un hijo: el producto es el objeto agarrable.
+        var grabProducto = detectado.GetComponentInParent<XRGrabInteractable>();
+        var objProducto = grabProducto != null ? grabProducto.gameObject : detectado.gameObject;
+
+        var info = BaseDatosProductos.Buscar(objProducto.name);
+        Debug.Log("[Lector] BIP " + objProducto.name + (info != null
+            ? " -> " + info.nombre + " " + BaseDatosProductos.Formatear(info.precio)
+            : " (SIN PRECIO en la base de datos)"));
+
         if (audioLector != null && clipBip != null)
             audioLector.PlayOneShot(clipBip);
 
         if (OnProductoEscaneado != null)
-            OnProductoEscaneado.Invoke(detectado.name);
+            OnProductoEscaneado.Invoke(objProducto.name);
+
+        ProductoEscaneado?.Invoke(objProducto, info);
     }
+
+    /// <summary>Vuelve a buscar productos (los clientes dejan productos nuevos en la caja).</summary>
+    public void ActualizarProductos() { RecolectarProductos(); }
 
     void RecolectarProductos()
     {
@@ -79,14 +100,21 @@ public class LectorCodigos : MonoBehaviour
         Bounds bLector = lectorCollider != null ? lectorCollider.bounds : BoundsDeRenderers();
         float limite2 = distanciaLectura * distanciaLectura;
 
+        // Devuelve el producto MAS CERCANO (antes era el primero de la lista, y con
+        // varios productos juntos en el mostrador podia leer el equivocado).
+        Collider mejor = null;
+        float mejorD = float.MaxValue;
+        Vector3 centro = bLector.center;
         for (int i = 0; i < productos.Length; i++)
         {
             var c = productos[i];
-            if (c == null) continue;
-            if (Distancia2(bLector, c.bounds) <= limite2)
-                return c;
+            if (c == null || !c.enabled || !c.gameObject.activeInHierarchy) continue;
+            if (Distancia2(bLector, c.bounds) > limite2) continue;
+
+            float d = (c.bounds.center - centro).sqrMagnitude;
+            if (d < mejorD) { mejorD = d; mejor = c; }
         }
-        return null;
+        return mejor;
     }
 
     Bounds BoundsDeRenderers()
