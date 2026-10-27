@@ -23,6 +23,8 @@ public class InstaladorSistemasJuego : MonoBehaviour
     public bool instalarLocomocion = true;
     public bool instalarMenuPausa = true;
     public bool instalarCorreccionSockets = true;
+    [Tooltip("Caja registradora: precios de la base de datos, pantalla y total de la venta.")]
+    public bool instalarCaja = true;
 
     [Header("Menu de pausa")]
     [Tooltip("Boton A del mando (PrimaryAction): el boton de menu en Quest.")]
@@ -77,6 +79,10 @@ public class InstaladorSistemasJuego : MonoBehaviour
             var sockets = GetComponent<CorregirConflictoSockets>();
             if (sockets == null) sockets = gameObject.AddComponent<CorregirConflictoSockets>();
         }
+
+        // ------------------------------------------------------------- caja registradora
+        if (instalarCaja && Object.FindAnyObjectByType<CajaRegistradora>() == null)
+            gameObject.AddComponent<CajaRegistradora>();
 
         // ------------------------------------------------------------- calibraciones
         // El tamano de los productos y la longitud de los brazos vienen del menu.
