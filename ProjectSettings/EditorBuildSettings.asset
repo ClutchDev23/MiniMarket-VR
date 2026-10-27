@@ -11,7 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MinimarketXR_Full.unity
     guid: 19d5cde615962544da6345f45fde3d92
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/MinimarketXR_Night.unity
     guid: ccda5f93e754476468e00baa6e5882a0
   m_configObjects:
