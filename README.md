@@ -79,3 +79,34 @@ La tienda pasa del día a la noche; la **venta en curso y el turno se conservan*
 </td>
 </tr>
 </table>
+
+
+<br>
+
+## 🧾 Cómo se cobra
+
+Arriba de la pantalla de la caja siempre dice **en qué paso estás**. El orden es este:
+
+```mermaid
+flowchart LR
+    A["🔫 1. Escanear<br/>productos"] --> B{"💬 2. ¿Cómo paga<br/>el cliente?"}
+    B -- "💵 Efectivo" --> C["3. Marcar lo que<br/>te dio el cliente"]
+    C --> D["4. Devolver el<br/>vuelto exacto"]
+    B -- "💳 Tarjeta" --> E["3. Enviar al POS<br/>y esperar APROBADO"]
+    D --> F(["✅ Venta completada"])
+    E --> F
+    F --> G["Siguiente cliente"]
+```
+
+| Paso | Qué haces | Botones |
+|:---:|---|---|
+| **1** | Acerca la pistola a cada producto y aprieta el **gatillo**. Cada bip suma 1 unidad. | **−1 · +1 · Quitar · Cancelar venta** para corregir. Luego **COBRAR ›** |
+| **2** | Mira la burbuja del cliente: *"Con tarjeta, por favor"* o *"En efectivo. Aquí tienes S/ 50"*. | **EFECTIVO** o **TARJETA** |
+| **3** 💵 | Marca los billetes y monedas que te dio. | **S/ 200 … S/ 0.10 · Exacto · Borrar** → **CONFIRMAR ›** |
+| **4** 💵 | Marca el vuelto que le devuelves. La caja revisa que sea **exacto**. | Billetes y monedas · **Ayuda** · **Borrar** → **ENTREGAR VUELTO** |
+| **3** 💳 | El cliente acerca la tarjeta: *Procesando… → APROBADO*. | **ENVIAR AL POS** |
+| ✅ | El cliente se despide (o reclama si algo salió mal). | **Siguiente cliente** |
+
+> [!TIP]
+> Si no sabes cómo armar el vuelto, el botón **Ayuda** te sugiere qué billetes y monedas dar.<br>
+> Ejemplo: vuelto de **S/ 23.60** → 1 × S/ 20 · 1 × S/ 2 · 1 × S/ 1 · 1 × S/ 0.50 · 1 × S/ 0.10.
