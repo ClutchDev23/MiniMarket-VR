@@ -134,3 +134,17 @@ flowchart LR
 <td align="center"><sub><b>Pasillos llenos</b> · productos de tamaño real</sub></td>
 </tr>
 </table>
+
+
+<br>
+
+## 🎮 Controles
+
+| Acción | 🎮 Controladores | 🤲 Manos |
+|---|---|---|
+| **Agarrar** | Tocar el objeto y apretar **Grip** | Tocar el objeto y cerrar la mano |
+| **Escanear** | Con la pistola en la mano, apretar el **gatillo** | Pellizcar con la pistola en la mano |
+| **Pulsar la pantalla** | Apuntar con el rayo y apretar el **gatillo** | Apuntar y pellizcar |
+| **Caminar** | Joystick izquierdo | Estirar los brazos y moverlos |
+| **Girar** | Joystick derecho | Girar el cuerpo |
+| **Pausa** | Botón **A / B** o **Menú** | — |
