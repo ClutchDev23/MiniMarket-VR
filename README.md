@@ -199,3 +199,73 @@ MiniMarket-VR/
 | `ArmSwingLocomotion` | Caminar moviendo los brazos |
 
 </details>
+
+
+<br>
+
+## 🚀 Instalación
+
+> [!IMPORTANT]
+> El repositorio usa **Git LFS** para modelos, texturas y audio. Instálalo antes de clonar: <https://git-lfs.com>
+
+```bash
+git lfs install
+git clone https://github.com/ClutchDev23/MiniMarket-VR.git
+```
+
+1. Abre la carpeta con **Unity 6000.4.9f1** desde Unity Hub (*Add › Add project from disk*).
+2. Espera la primera importación ☕ (tarda un rato).
+3. Abre **`Menu`** y dale ▶️ Play para el flujo completo, o **`MinimarketXR_Full`** para ir directo a la tienda.
+
+### 📦 Build
+
+| Plataforma | Cómo |
+|---|---|
+| 🥽 **Meta Quest** | **Tools › Minimarket › Build Quest APK** (IL2CPP + ARM64) |
+| 🖥️ **PC** | **File › Build Profiles › Windows › Build** |
+
+> [!NOTE]
+> En *Build Profiles* el orden de escenas es **Menu**, **MinimarketXR_Full** y **MinimarketXR_Night**.
+
+## 🧰 Herramientas del editor
+
+Todo vive en el menú **Tools › Minimarket**:
+
+| Menú | Herramienta | Para qué |
+|---|---|---|
+| **Productos** | Llenar tienda | Llena los estantes con productos de tamaño real, todos agarrables |
+| | Verificar Precios | Avisa si a algún producto le falta precio |
+| | Abrir Base de Datos | Abre `BaseDatosProductos.json` para editar precios |
+| **Clientes** | 1 · Configurar personajes | Prepara los `.fbx` de Mixamo (rig, texturas, animaciones) |
+| | 2 · Hornear camino | Rehace el camino de los clientes si mueves estantes |
+| | 3 · 4 · 5 · Pruebas | Traer un cliente o simular al cajero sin visor |
+| **Caja** | Pruebas | Escanear y cobrar de prueba en Play |
+
+<details>
+<summary><b>💲 Cambiar precios o agregar productos</b></summary>
+<br>
+
+Edita `Assets/Resources/BaseDatosProductos.json`. El campo `clave` debe ser el **nombre del objeto en la escena** (por ejemplo `chips 3`); las copias `chips 3 (1)`, `chips 3 (2)`… usan el mismo precio.
+
+```json
+{
+  "codigo": "7750000000014",
+  "clave": "alcohol 1",
+  "nombre": "Vino Tinto 750 ml",
+  "categoria": "Licores",
+  "precio": 32.9,
+  "stock": 32
+}
+```
+
+</details>
+
+<details>
+<summary><b>🧍 Ajustar a los clientes</b></summary>
+<br>
+
+En `Assets/Resources/ConfigClientes.asset` puedes cambiar cuántos clientes entran a la vez, cada cuánto llegan, cuántos productos llevan, la probabilidad de que paguen con tarjeta, su altura (1.72 m) y su velocidad.
+
+> En Quest conviene **no pasar de 3–4 clientes** a la vez.
+
+</details>
