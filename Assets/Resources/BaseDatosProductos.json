@@ -1,0 +1,725 @@
+{
+  "moneda": "S/",
+  "productos": [
+    {
+      "codigo": "7750000000014",
+      "clave": "alcohol 1",
+      "nombre": "Vino Tinto 750 ml",
+      "categoria": "Licores",
+      "precio": 32.9,
+      "stock": 32
+    },
+    {
+      "codigo": "7750000000021",
+      "clave": "alcohol 2",
+      "nombre": "Pisco Quebranta 700 ml",
+      "categoria": "Licores",
+      "precio": 45.9,
+      "stock": 21
+    },
+    {
+      "codigo": "7750000000038",
+      "clave": "alcohol 3",
+      "nombre": "Ron Añejo 750 ml",
+      "categoria": "Licores",
+      "precio": 39.9,
+      "stock": 37
+    },
+    {
+      "codigo": "7750000000045",
+      "clave": "alcohol 4",
+      "nombre": "Whisky 750 ml",
+      "categoria": "Licores",
+      "precio": 79.9,
+      "stock": 53
+    },
+    {
+      "codigo": "7750000000052",
+      "clave": "alcohol 5",
+      "nombre": "Vodka 750 ml",
+      "categoria": "Licores",
+      "precio": 35.9,
+      "stock": 15
+    },
+    {
+      "codigo": "7750000000069",
+      "clave": "alcohol 6",
+      "nombre": "Vino Blanco 750 ml",
+      "categoria": "Licores",
+      "precio": 29.9,
+      "stock": 16
+    },
+    {
+      "codigo": "7750000000076",
+      "clave": "beer can 1",
+      "nombre": "Cerveza Rubia Lata 355 ml",
+      "categoria": "Cervezas",
+      "precio": 4.5,
+      "stock": 46
+    },
+    {
+      "codigo": "7750000000083",
+      "clave": "beer can 2",
+      "nombre": "Cerveza Negra Lata 355 ml",
+      "categoria": "Cervezas",
+      "precio": 5.0,
+      "stock": 18
+    },
+    {
+      "codigo": "7750000000090",
+      "clave": "beer can 3",
+      "nombre": "Cerveza Light Lata 355 ml",
+      "categoria": "Cervezas",
+      "precio": 4.8,
+      "stock": 35
+    },
+    {
+      "codigo": "7750000000106",
+      "clave": "beer can 4",
+      "nombre": "Cerveza Premium Lata 355 ml",
+      "categoria": "Cervezas",
+      "precio": 5.9,
+      "stock": 49
+    },
+    {
+      "codigo": "7750000000113",
+      "clave": "biscuits box 1",
+      "nombre": "Galletas de Vainilla 6 un.",
+      "categoria": "Galletas",
+      "precio": 3.5,
+      "stock": 15
+    },
+    {
+      "codigo": "7750000000120",
+      "clave": "biscuits box 2",
+      "nombre": "Galletas de Chocolate 6 un.",
+      "categoria": "Galletas",
+      "precio": 3.8,
+      "stock": 44
+    },
+    {
+      "codigo": "7750000000137",
+      "clave": "biscuits box 3",
+      "nombre": "Galletas de Soda 6 un.",
+      "categoria": "Galletas",
+      "precio": 2.9,
+      "stock": 25
+    },
+    {
+      "codigo": "7750000000144",
+      "clave": "biscuits box 4",
+      "nombre": "Galletas Rellenas Fresa 6 un.",
+      "categoria": "Galletas",
+      "precio": 4.2,
+      "stock": 14
+    },
+    {
+      "codigo": "7750000000151",
+      "clave": "biscuits box 5",
+      "nombre": "Galletas Integrales 6 un.",
+      "categoria": "Galletas",
+      "precio": 5.5,
+      "stock": 17
+    },
+    {
+      "codigo": "7750000000168",
+      "clave": "oreo biscuit",
+      "nombre": "Galletas Oreo Paquete",
+      "categoria": "Galletas",
+      "precio": 4.5,
+      "stock": 39
+    },
+    {
+      "codigo": "7750000000175",
+      "clave": "candy 1",
+      "nombre": "Caramelos de Fresa Bolsa",
+      "categoria": "Golosinas",
+      "precio": 2.5,
+      "stock": 38
+    },
+    {
+      "codigo": "7750000000182",
+      "clave": "candy 2",
+      "nombre": "Chicles de Menta",
+      "categoria": "Golosinas",
+      "precio": 1.0,
+      "stock": 16
+    },
+    {
+      "codigo": "7750000000199",
+      "clave": "candy 3",
+      "nombre": "Gomitas Frutales Bolsa",
+      "categoria": "Golosinas",
+      "precio": 2.8,
+      "stock": 27
+    },
+    {
+      "codigo": "7750000000205",
+      "clave": "candy 4",
+      "nombre": "Chupetín",
+      "categoria": "Golosinas",
+      "precio": 0.5,
+      "stock": 17
+    },
+    {
+      "codigo": "7750000000212",
+      "clave": "candy 5",
+      "nombre": "Caramelos de Limón Bolsa",
+      "categoria": "Golosinas",
+      "precio": 2.5,
+      "stock": 47
+    },
+    {
+      "codigo": "7750000000229",
+      "clave": "candy 6",
+      "nombre": "Gomitas Ácidas Bolsa",
+      "categoria": "Golosinas",
+      "precio": 3.0,
+      "stock": 39
+    },
+    {
+      "codigo": "7750000000236",
+      "clave": "candy 7",
+      "nombre": "Malvaviscos Bolsa",
+      "categoria": "Golosinas",
+      "precio": 3.5,
+      "stock": 15
+    },
+    {
+      "codigo": "7750000000243",
+      "clave": "candy 8",
+      "nombre": "Caramelos de Leche Bolsa",
+      "categoria": "Golosinas",
+      "precio": 2.9,
+      "stock": 48
+    },
+    {
+      "codigo": "7750000000250",
+      "clave": "candy 9",
+      "nombre": "Pastillas de Menta",
+      "categoria": "Golosinas",
+      "precio": 1.5,
+      "stock": 19
+    },
+    {
+      "codigo": "7750000000267",
+      "clave": "candy 10",
+      "nombre": "Caramelos Surtidos Bolsa",
+      "categoria": "Golosinas",
+      "precio": 3.2,
+      "stock": 26
+    },
+    {
+      "codigo": "7750000000274",
+      "clave": "chips 1",
+      "nombre": "Papas Clásicas 45 g",
+      "categoria": "Snacks",
+      "precio": 1.8,
+      "stock": 52
+    },
+    {
+      "codigo": "7750000000281",
+      "clave": "chips 2",
+      "nombre": "Papas Onduladas 45 g",
+      "categoria": "Snacks",
+      "precio": 2.0,
+      "stock": 52
+    },
+    {
+      "codigo": "7750000000298",
+      "clave": "chips 3",
+      "nombre": "Papas Picantes 45 g",
+      "categoria": "Snacks",
+      "precio": 2.0,
+      "stock": 49
+    },
+    {
+      "codigo": "7750000000304",
+      "clave": "chips 4",
+      "nombre": "Papas Queso 45 g",
+      "categoria": "Snacks",
+      "precio": 2.0,
+      "stock": 15
+    },
+    {
+      "codigo": "7750000000311",
+      "clave": "chips 5",
+      "nombre": "Papas Limón 45 g",
+      "categoria": "Snacks",
+      "precio": 2.0,
+      "stock": 48
+    },
+    {
+      "codigo": "7750000000328",
+      "clave": "chips 6",
+      "nombre": "Chifles 50 g",
+      "categoria": "Snacks",
+      "precio": 1.8,
+      "stock": 49
+    },
+    {
+      "codigo": "7750000000335",
+      "clave": "chips 7",
+      "nombre": "Camote Frito 50 g",
+      "categoria": "Snacks",
+      "precio": 2.2,
+      "stock": 37
+    },
+    {
+      "codigo": "7750000000342",
+      "clave": "chips 8",
+      "nombre": "Papas Clásicas 150 g",
+      "categoria": "Snacks",
+      "precio": 5.5,
+      "stock": 15
+    },
+    {
+      "codigo": "7750000000359",
+      "clave": "chips 9",
+      "nombre": "Papas BBQ 150 g",
+      "categoria": "Snacks",
+      "precio": 5.9,
+      "stock": 26
+    },
+    {
+      "codigo": "7750000000366",
+      "clave": "chips 10",
+      "nombre": "Nachos 150 g",
+      "categoria": "Snacks",
+      "precio": 5.9,
+      "stock": 14
+    },
+    {
+      "codigo": "7750000000373",
+      "clave": "chips 11",
+      "nombre": "Maíz Tostado 100 g",
+      "categoria": "Snacks",
+      "precio": 2.5,
+      "stock": 47
+    },
+    {
+      "codigo": "7750000000380",
+      "clave": "chips 12",
+      "nombre": "Papas Familiares 250 g",
+      "categoria": "Snacks",
+      "precio": 8.9,
+      "stock": 20
+    },
+    {
+      "codigo": "7750000000397",
+      "clave": "chocolate 1",
+      "nombre": "Chocolate con Leche 30 g",
+      "categoria": "Chocolates",
+      "precio": 2.5,
+      "stock": 30
+    },
+    {
+      "codigo": "7750000000403",
+      "clave": "chocolate 2",
+      "nombre": "Chocolate Bitter 70% 100 g",
+      "categoria": "Chocolates",
+      "precio": 6.9,
+      "stock": 38
+    },
+    {
+      "codigo": "7750000000410",
+      "clave": "chocolate 3",
+      "nombre": "Chocolate con Maní 40 g",
+      "categoria": "Chocolates",
+      "precio": 3.0,
+      "stock": 21
+    },
+    {
+      "codigo": "7750000000427",
+      "clave": "chocolate 4",
+      "nombre": "Chocolate Blanco 30 g",
+      "categoria": "Chocolates",
+      "precio": 2.5,
+      "stock": 46
+    },
+    {
+      "codigo": "7750000000434",
+      "clave": "chocolate 5",
+      "nombre": "Chocolate Relleno 50 g",
+      "categoria": "Chocolates",
+      "precio": 3.5,
+      "stock": 19
+    },
+    {
+      "codigo": "7750000000441",
+      "clave": "nutella",
+      "nombre": "Nutella 350 g",
+      "categoria": "Chocolates",
+      "precio": 21.9,
+      "stock": 48
+    },
+    {
+      "codigo": "7750000000458",
+      "clave": "Cereal 1",
+      "nombre": "Cereal de Maíz 300 g",
+      "categoria": "Desayuno",
+      "precio": 12.9,
+      "stock": 31
+    },
+    {
+      "codigo": "7750000000465",
+      "clave": "Cereal 2",
+      "nombre": "Cereal de Chocolate 300 g",
+      "categoria": "Desayuno",
+      "precio": 14.5,
+      "stock": 47
+    },
+    {
+      "codigo": "7750000000472",
+      "clave": "Cereal 3",
+      "nombre": "Avena con Frutas 400 g",
+      "categoria": "Desayuno",
+      "precio": 11.9,
+      "stock": 55
+    },
+    {
+      "codigo": "7750000000489",
+      "clave": "Cereal 4",
+      "nombre": "Granola 400 g",
+      "categoria": "Desayuno",
+      "precio": 17.9,
+      "stock": 23
+    },
+    {
+      "codigo": "7750000000496",
+      "clave": "milk box",
+      "nombre": "Leche Entera Caja 1 L",
+      "categoria": "Lácteos",
+      "precio": 5.2,
+      "stock": 18
+    },
+    {
+      "codigo": "7750000000502",
+      "clave": "juice box 1",
+      "nombre": "Jugo de Naranja 1 L",
+      "categoria": "Bebidas",
+      "precio": 5.9,
+      "stock": 49
+    },
+    {
+      "codigo": "7750000000519",
+      "clave": "juice box 2",
+      "nombre": "Jugo de Durazno 1 L",
+      "categoria": "Bebidas",
+      "precio": 5.9,
+      "stock": 48
+    },
+    {
+      "codigo": "7750000000526",
+      "clave": "juice box 3",
+      "nombre": "Jugo de Manzana 1 L",
+      "categoria": "Bebidas",
+      "precio": 5.9,
+      "stock": 52
+    },
+    {
+      "codigo": "7750000000533",
+      "clave": "fanta bottle",
+      "nombre": "Gaseosa Naranja 500 ml",
+      "categoria": "Bebidas",
+      "precio": 3.0,
+      "stock": 24
+    },
+    {
+      "codigo": "7750000000540",
+      "clave": "soda can 1",
+      "nombre": "Gaseosa Cola Lata 355 ml",
+      "categoria": "Bebidas",
+      "precio": 2.8,
+      "stock": 35
+    },
+    {
+      "codigo": "7750000000557",
+      "clave": "soda can 2",
+      "nombre": "Gaseosa Limón Lata 355 ml",
+      "categoria": "Bebidas",
+      "precio": 2.5,
+      "stock": 18
+    },
+    {
+      "codigo": "7750000000564",
+      "clave": "soda can 3",
+      "nombre": "Gaseosa Naranja Lata 355 ml",
+      "categoria": "Bebidas",
+      "precio": 2.5,
+      "stock": 47
+    },
+    {
+      "codigo": "7750000000571",
+      "clave": "soda can 4",
+      "nombre": "Gaseosa Cola Zero Lata 355 ml",
+      "categoria": "Bebidas",
+      "precio": 2.8,
+      "stock": 57
+    },
+    {
+      "codigo": "7750000000588",
+      "clave": "soda can 5",
+      "nombre": "Bebida Energizante Lata 250 ml",
+      "categoria": "Bebidas",
+      "precio": 5.5,
+      "stock": 16
+    },
+    {
+      "codigo": "7750000000595",
+      "clave": "soda can 6",
+      "nombre": "Gaseosa Uva Lata 355 ml",
+      "categoria": "Bebidas",
+      "precio": 2.5,
+      "stock": 48
+    },
+    {
+      "codigo": "7750000000601",
+      "clave": "soda can 7",
+      "nombre": "Agua Tónica Lata 355 ml",
+      "categoria": "Bebidas",
+      "precio": 3.2,
+      "stock": 15
+    },
+    {
+      "codigo": "7750000000618",
+      "clave": "soda can 8",
+      "nombre": "Té Helado Lata 355 ml",
+      "categoria": "Bebidas",
+      "precio": 3.5,
+      "stock": 51
+    },
+    {
+      "codigo": "7750000000625",
+      "clave": "soda can 9",
+      "nombre": "Gaseosa Piña Lata 355 ml",
+      "categoria": "Bebidas",
+      "precio": 2.5,
+      "stock": 25
+    },
+    {
+      "codigo": "7750000000632",
+      "clave": "water bottle",
+      "nombre": "Agua sin Gas 625 ml",
+      "categoria": "Bebidas",
+      "precio": 1.5,
+      "stock": 43
+    },
+    {
+      "codigo": "7750000000649",
+      "clave": "water bottle 2",
+      "nombre": "Agua con Gas 625 ml",
+      "categoria": "Bebidas",
+      "precio": 2.0,
+      "stock": 55
+    },
+    {
+      "codigo": "7750000000656",
+      "clave": "jam 1",
+      "nombre": "Mermelada de Fresa 320 g",
+      "categoria": "Abarrotes",
+      "precio": 8.9,
+      "stock": 46
+    },
+    {
+      "codigo": "7750000000663",
+      "clave": "katchup",
+      "nombre": "Kétchup 400 g",
+      "categoria": "Abarrotes",
+      "precio": 6.5,
+      "stock": 39
+    },
+    {
+      "codigo": "7750000000670",
+      "clave": "mayo",
+      "nombre": "Mayonesa 400 g",
+      "categoria": "Abarrotes",
+      "precio": 9.9,
+      "stock": 32
+    },
+    {
+      "codigo": "7750000000687",
+      "clave": "musturd",
+      "nombre": "Mostaza 200 g",
+      "categoria": "Abarrotes",
+      "precio": 4.9,
+      "stock": 41
+    },
+    {
+      "codigo": "7750000000694",
+      "clave": "oil 1",
+      "nombre": "Aceite Vegetal 1 L",
+      "categoria": "Abarrotes",
+      "precio": 10.9,
+      "stock": 49
+    },
+    {
+      "codigo": "7750000000700",
+      "clave": "oil 2",
+      "nombre": "Aceite de Oliva 500 ml",
+      "categoria": "Abarrotes",
+      "precio": 24.9,
+      "stock": 41
+    },
+    {
+      "codigo": "7750000000717",
+      "clave": "pringles 1",
+      "nombre": "Pringles Original 124 g",
+      "categoria": "Snacks",
+      "precio": 9.9,
+      "stock": 35
+    },
+    {
+      "codigo": "7750000000724",
+      "clave": "pringles 2",
+      "nombre": "Pringles Crema y Cebolla 124 g",
+      "categoria": "Snacks",
+      "precio": 10.5,
+      "stock": 31
+    },
+    {
+      "codigo": "7750000000731",
+      "clave": "pringles 3",
+      "nombre": "Pringles Queso 124 g",
+      "categoria": "Snacks",
+      "precio": 10.5,
+      "stock": 27
+    },
+    {
+      "codigo": "7750000000748",
+      "clave": "pringles 4",
+      "nombre": "Pringles BBQ 124 g",
+      "categoria": "Snacks",
+      "precio": 10.5,
+      "stock": 23
+    },
+    {
+      "codigo": "7750000000755",
+      "clave": "pringles 5",
+      "nombre": "Pringles Picante 124 g",
+      "categoria": "Snacks",
+      "precio": 10.5,
+      "stock": 56
+    },
+    {
+      "codigo": "7750000000762",
+      "clave": "pringles 6",
+      "nombre": "Pringles Pizza 124 g",
+      "categoria": "Snacks",
+      "precio": 10.9,
+      "stock": 27
+    },
+    {
+      "codigo": "7750000000779",
+      "clave": "tea box 1",
+      "nombre": "Té Verde 25 bolsitas",
+      "categoria": "Infusiones",
+      "precio": 4.5,
+      "stock": 17
+    },
+    {
+      "codigo": "7750000000786",
+      "clave": "tea box 2",
+      "nombre": "Manzanilla 25 bolsitas",
+      "categoria": "Infusiones",
+      "precio": 3.5,
+      "stock": 48
+    },
+    {
+      "codigo": "7750000000793",
+      "clave": "tea box 3",
+      "nombre": "Anís 25 bolsitas",
+      "categoria": "Infusiones",
+      "precio": 3.5,
+      "stock": 31
+    },
+    {
+      "codigo": "7750000000809",
+      "clave": "tea box 4",
+      "nombre": "Té Negro 25 bolsitas",
+      "categoria": "Infusiones",
+      "precio": 3.9,
+      "stock": 45
+    },
+    {
+      "codigo": "7750000000816",
+      "clave": "tea box 5",
+      "nombre": "Hierba Luisa 25 bolsitas",
+      "categoria": "Infusiones",
+      "precio": 3.5,
+      "stock": 43
+    },
+    {
+      "codigo": "7750000000823",
+      "clave": "tea box 6",
+      "nombre": "Té Rojo 20 bolsitas",
+      "categoria": "Infusiones",
+      "precio": 6.9,
+      "stock": 33
+    },
+    {
+      "codigo": "7750000000830",
+      "clave": "tea box 7",
+      "nombre": "Menta 25 bolsitas",
+      "categoria": "Infusiones",
+      "precio": 3.5,
+      "stock": 58
+    },
+    {
+      "codigo": "7750000000847",
+      "clave": "tea box 8",
+      "nombre": "Té Chai 20 bolsitas",
+      "categoria": "Infusiones",
+      "precio": 9.9,
+      "stock": 40
+    },
+    {
+      "codigo": "7750000000854",
+      "clave": "tea box 9",
+      "nombre": "Cedrón 25 bolsitas",
+      "categoria": "Infusiones",
+      "precio": 3.5,
+      "stock": 30
+    },
+    {
+      "codigo": "7750000000861",
+      "clave": "tea box 10",
+      "nombre": "Té de Frutos Rojos 20 bolsitas",
+      "categoria": "Infusiones",
+      "precio": 7.5,
+      "stock": 50
+    },
+    {
+      "codigo": "7750000000878",
+      "clave": "tea box 11",
+      "nombre": "Té Earl Grey 20 bolsitas",
+      "categoria": "Infusiones",
+      "precio": 11.9,
+      "stock": 16
+    },
+    {
+      "codigo": "7750000000885",
+      "clave": "tea box 12",
+      "nombre": "Muña 25 bolsitas",
+      "categoria": "Infusiones",
+      "precio": 3.9,
+      "stock": 19
+    },
+    {
+      "codigo": "7750000000892",
+      "clave": "tea box 13",
+      "nombre": "Té de Jengibre 20 bolsitas",
+      "categoria": "Infusiones",
+      "precio": 8.5,
+      "stock": 44
+    },
+    {
+      "codigo": "7750000000908",
+      "clave": "tea box 14",
+      "nombre": "Té Matcha 10 sobres",
+      "categoria": "Infusiones",
+      "precio": 14.9,
+      "stock": 38
+    }
+  ]
+}
