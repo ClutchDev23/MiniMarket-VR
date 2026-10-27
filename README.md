@@ -148,3 +148,54 @@ flowchart LR
 | **Caminar** | Joystick izquierdo | Estirar los brazos y moverlos |
 | **Girar** | Joystick derecho | Girar el cuerpo |
 | **Pausa** | Botón **A / B** o **Menú** | — |
+
+
+<br>
+
+## 🛠️ Tecnologías
+
+| | Tecnología | Versión | Para qué |
+|:---:|---|---|---|
+| 🟦 | **Unity** | `6000.4.9f1` | Motor del juego |
+| 🟩 | **URP** | `17.4.0` | Render optimizado para Quest |
+| 🥽 | **XR Interaction Toolkit** | `3.4.1` | Agarrar, rayos, UI en VR |
+| 🌐 | **OpenXR** | `1.16.1` | Soporte para Meta Quest |
+| 🤲 | **XR Hands** | `1.7.3` | Seguimiento de manos |
+| 🎮 | **Input System** | `1.19.0` | Entrada de mandos y teclado |
+| 🧍 | **Mixamo** | — | Personajes y animaciones de los clientes |
+
+## 🗂️ Estructura
+
+```text
+MiniMarket-VR/
+├─ Assets/
+│  ├─ Scenes/          Menu · MinimarketXR_Full (día) · MinimarketXR_Night (noche)
+│  ├─ Scripts/         Caja, clientes, base de datos, lector, menú, locomoción…
+│  ├─ Editor/          Herramientas de Tools › Minimarket
+│  ├─ Resources/       BaseDatosProductos.json · ConfigClientes.asset
+│  ├─ Clientes/        Personajes, animaciones, Animator y camino horneado
+│  ├─ Productos/       Modelos y texturas de los productos
+│  └─ SuperMarket/     Edificio, estantes y mobiliario
+├─ docs/img/           Capturas del README
+├─ Packages/           Dependencias
+└─ ProjectSettings/    Ajustes del proyecto
+```
+
+<details>
+<summary><b>🧩 Scripts principales</b></summary>
+<br>
+
+| Script | Qué hace |
+|---|---|
+| `CajaRegistradora` | Pantalla de la caja: escaneo, efectivo, vuelto, POS y ventas del turno |
+| `BaseDatosProductos` | Lee el JSON de productos y busca el precio por nombre |
+| `LectorCodigos` | La pistola: lee el producto más cercano al apretar el gatillo |
+| `GestorClientes` | Hace entrar clientes, maneja la fila y carga el camino |
+| `Cliente` | Compra, hace fila, paga y revisa que le cobres bien |
+| `ProductoEstante` | Producto quieto en el estante hasta que lo agarras |
+| `BloqueProductos` | Dibuja miles de productos en pocas llamadas |
+| `AlternarDiaNoche` | Cambia entre la escena de día y la de noche |
+| `MainMenu` · `MenuPausa` | Menú principal y menú de pausa en VR |
+| `ArmSwingLocomotion` | Caminar moviendo los brazos |
+
+</details>
