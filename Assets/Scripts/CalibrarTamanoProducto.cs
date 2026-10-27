@@ -33,6 +33,18 @@ public class CalibrarTamanoProducto : MonoBehaviour
     void Awake()
     {
         grab = GetComponent<XRGrabInteractable>();
+        // Solo trabaja mientras el producto esta en la mano: con miles de productos en
+        // la tienda, tenerlos todos activos cada frame gasta CPU en el Quest.
+        if (grab != null)
+        {
+            grab.selectEntered.AddListener(_ => enabled = true);
+            grab.selectExited.AddListener(_ => enabled = false);
+        }
+    }
+
+    void Start()
+    {
+        enabled = grab != null && grab.isSelected;
     }
 
     void Update()
