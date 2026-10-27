@@ -61,8 +61,12 @@ public class AlternarDiaNoche : MonoBehaviour
         idx = SceneManager.GetActiveScene().name == Escenas[1] ? 1 : 0;
 
         // El ajuste del menu manda (si esta a 0, se usa el valor del script).
-        float delMenu = PlayerPrefs.GetFloat(GameSettings.NightMinutes, 0f);
+        // Por defecto 10 min, igual que el menu. Antes era 0 y, si nunca se habia
+        // pasado por el menu (Play directo en la escena), cambiaba de escena en
+        // CADA frame: dia -> noche -> dia sin parar.
+        float delMenu = PlayerPrefs.GetFloat(GameSettings.NightMinutes, 10f);
         if (delMenu > 0.01f) minutos = delMenu;
+        if (minutos < 0.5f) minutos = 10f;
 
         Debug.Log("[Noche] alternador activo, cada " + minutos + " min (escena actual: " + Escenas[idx] + ")");
     }
