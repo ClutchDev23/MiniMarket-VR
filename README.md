@@ -110,3 +110,27 @@ flowchart LR
 > [!TIP]
 > Si no sabes cómo armar el vuelto, el botón **Ayuda** te sugiere qué billetes y monedas dar.<br>
 > Ejemplo: vuelto de **S/ 23.60** → 1 × S/ 20 · 1 × S/ 2 · 1 × S/ 1 · 1 × S/ 0.50 · 1 × S/ 0.10.
+
+
+<br>
+
+## 📸 Capturas
+
+<table>
+<tr>
+<td width="50%"><img src="docs/img/pantalla.jpg" alt="Pantalla de la caja con la venta completada"></td>
+<td width="50%"><img src="docs/img/caja.jpg" alt="Cliente esperando en la caja con sus productos en la banda"></td>
+</tr>
+<tr>
+<td align="center"><sub><b>Pantalla de la caja</b> · venta completada y vuelto entregado</sub></td>
+<td align="center"><sub><b>Vista del cajero</b> · el cliente deja sus productos en la banda</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/img/burbuja.jpg" alt="Cliente saludando con una burbuja de diálogo"></td>
+<td width="50%"><img src="docs/img/cliente.jpg" alt="Cliente caminando por el pasillo"></td>
+</tr>
+<tr>
+<td align="center"><sub><b>Clientes que hablan</b> · saludan, dicen cómo pagan y reclaman</sub></td>
+<td align="center"><sub><b>Pasillos llenos</b> · productos de tamaño real</sub></td>
+</tr>
+</table>
