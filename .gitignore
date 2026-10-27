@@ -116,3 +116,8 @@ InitTestScene*.unity*
 # Plastic SCM workspace metadata (no usar con Git)
 .plastic/
 UpgradeLog*.htm
+
+
+# Respaldos locales de escenas y scripts de ayuda
+/Respaldo_Escenas/
+/*.bat
