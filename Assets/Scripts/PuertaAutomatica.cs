@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class PuertaAutomatica : MonoBehaviour
 {
+    /// <summary>Otros que tambien abren la puerta (los clientes se registran aqui).</summary>
+    public static readonly System.Collections.Generic.List<Transform> Extras = new System.Collections.Generic.List<Transform>();
+
     public Transform panelIzq;
     public Transform panelDer;
 
@@ -56,6 +59,9 @@ public class PuertaAutomatica : MonoBehaviour
         if (!cerca && carritos != null)
             foreach (var c in carritos)
                 if (Cerca(c)) { cerca = true; break; }
+        if (!cerca)
+            foreach (var e in Extras)
+                if (Cerca(e)) { cerca = true; break; }
 
         if (panelIzq != null)
             panelIzq.localPosition = Vector3.MoveTowards(
