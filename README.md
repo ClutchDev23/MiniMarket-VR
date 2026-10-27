@@ -269,3 +269,60 @@ En `Assets/Resources/ConfigClientes.asset` puedes cambiar cuántos clientes entr
 > En Quest conviene **no pasar de 3–4 clientes** a la vez.
 
 </details>
+
+
+<br>
+
+## 🗺️ Roadmap
+
+**✅ Listo**
+
+- [x] Menú VR y cuarto del menú
+- [x] Locomoción con joystick y moviendo los brazos
+- [x] Ciclo de día y noche
+- [x] Base de datos de productos con precios
+- [x] Lector de códigos y caja registradora
+- [x] Cobro en efectivo con vuelto verificado y con tarjeta (POS)
+- [x] Clientes que compran, hacen fila y pagan
+- [x] Tienda llena con productos de tamaño real
+
+**🔧 Pendiente**
+
+- [ ] **Corregir la lógica de venta**
+- [ ] Llenar los cubículos rosados y las refrigeradoras
+- [ ] Evaluación al final del turno (aciertos, tiempo y errores)
+- [ ] Supervisor que guía la capacitación
+- [ ] Optimizar más para Quest
+
+<br>
+
+## 👥 Autores
+
+<table>
+<tr>
+<td align="center" width="50%">
+<b>Abner Gonzales</b><br>
+<sub>Desarrollo</sub>
+</td>
+<td align="center" width="50%">
+<b>Hubert Hilario</b><br>
+<sub>Desarrollo</sub>
+</td>
+</tr>
+</table>
+
+## 🙏 Créditos
+
+- Modelos 3D de la tienda: *Supermarket Props 3D Models Collection*
+- Personajes y animaciones: [Mixamo](https://www.mixamo.com)
+- Unity 6 · OpenXR · XR Interaction Toolkit
+
+<br>
+
+<div align="center">
+
+Distribuido bajo la **licencia MIT**.
+
+<sub>Hecho con ☕ y mucho VR · <b>Cajero XR © 2026</b></sub>
+
+</div>
