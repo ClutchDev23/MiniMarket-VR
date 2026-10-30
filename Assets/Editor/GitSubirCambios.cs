@@ -71,6 +71,24 @@ public static class GitSubirCambios
         Escribir(raiz, log);
     }
 
+    /// <summary>Vuelve a intentar el push (guardando antes en LFS las imagenes/audios nuevos).</summary>
+    [MenuItem("Tools/Minimarket/Git/Reintentar push")]
+    public static void ReintentarPush()
+    {
+        string raiz = Directory.GetCurrentDirectory();
+        var log = new StringBuilder();
+        foreach (var f in Salida(raiz, "diff --name-only origin/main HEAD").Split('\n'))
+        {
+            string ruta = f.Trim();
+            if (ruta.Length == 0 || !File.Exists(Path.Combine(raiz, ruta))) continue;
+            if (!Salida(raiz, "check-attr filter -- \"" + ruta + "\"").Contains("filter: lfs")) continue;
+            GuardarEnLfs(raiz, log, ruta);
+        }
+        Git(raiz, log, "push origin main");
+        Git(raiz, log, "status -sb");
+        Escribir(raiz, log);
+    }
+
     /// <summary>
     /// Lo que se genero en ESTA PC (escenas, audios grabados, .meta) se sube en commits
     /// pequenos definidos en Logs/commits_pc.txt, una linea por commit:
