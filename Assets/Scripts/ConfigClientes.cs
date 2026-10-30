@@ -34,6 +34,8 @@ public class ConfigClientes : ScriptableObject
 
     [Tooltip("Probabilidad de que pague con tarjeta (POS) en vez de efectivo.")]
     [Range(0f, 1f)] public float probTarjeta = 0.35f;
+    [Tooltip("Probabilidad de que tome un carrito al entrar (si hay uno libre cerca).")]
+    [Range(0f, 1f)] public float probCarrito = 0.7f;
 
     [Header("Cuerpo y movimiento")]
     [Tooltip("Todos los clientes se escalan a esta altura (metros).")]
