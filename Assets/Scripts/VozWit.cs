@@ -74,7 +74,9 @@ public class VozWit : MonoBehaviour
         foreach (var dev in InputSystem.devices)
         {
             if (!(dev is UnityEngine.InputSystem.XR.XRController)) continue;
-            if (!dev.usages.Contains(UnityEngine.InputSystem.CommonUsages.LeftHand)) continue;
+            bool izquierdo = false;
+            foreach (var u in dev.usages) if (u == UnityEngine.InputSystem.CommonUsages.LeftHand) izquierdo = true;
+            if (!izquierdo) continue;
             foreach (var n in new[] { "thumbstickClicked", "primary2DAxisClick", "joystickClicked" })
                 if (dev.TryGetChildControl(n) is ButtonControl b && b.isPressed) return true;
         }
