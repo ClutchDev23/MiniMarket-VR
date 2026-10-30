@@ -212,7 +212,8 @@ public class GestorClientes : MonoBehaviour
     public Vector3 PuntoFila(int i)
     {
         if (i <= 0) return PuntoCaja;
-        return Muestrear(PuntoCaja + DireccionFila * (Config.separacionFila * i), 1.2f, PuntoCaja);
+        // +0.8 m: espacio para el carrito que deja estacionado el que esta pagando.
+        return Muestrear(PuntoCaja + DireccionFila * (Config.separacionFila * i + 0.8f), 1.2f, PuntoCaja);
     }
 
     public void RegistrarResultado(bool bien, bool molesto)
