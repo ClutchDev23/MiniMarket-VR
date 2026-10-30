@@ -121,3 +121,7 @@ UpgradeLog*.htm
 # Respaldos locales de escenas y scripts de ayuda
 /Respaldo_Escenas/
 /*.bat
+
+# Token de Wit.ai (privado: cada uno pone el suyo)
+/[Aa]ssets/[Rr]esources/wit_token.txt
+/[Aa]ssets/[Rr]esources/wit_token.txt.meta
