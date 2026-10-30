@@ -37,6 +37,7 @@ public class CarritoCliente : MonoBehaviour
 
     Rigidbody rb;
     bool rbKinematic;
+    RigidbodyInterpolation rbInterp;
     readonly List<Collider> colliders = new List<Collider>();
     readonly List<Behaviour> apagados = new List<Behaviour>();
     readonly List<GameObject> visibles = new List<GameObject>();
@@ -71,7 +72,9 @@ public class CarritoCliente : MonoBehaviour
 
         // Fuera la fisica y el agarre mientras lo empuja el cliente.
         rb = carrito.GetComponentInChildren<Rigidbody>();
-        if (rb != null) { rbKinematic = rb.isKinematic; rb.isKinematic = true; }
+        // OJO: con "Interpolate" el Rigidbody vuelve a poner el carrito en su sitio cada
+        // frame y el cliente "empujaba" un carrito que no se movia. Se apaga mientras lo usa.
+        if (rb != null) { rbKinematic = rb.isKinematic; rbInterp = rb.interpolation; rb.isKinematic = true; rb.interpolation = RigidbodyInterpolation.None; }
         foreach (var c in carrito.GetComponentsInChildren<Collider>()) if (c.enabled) { c.enabled = false; colliders.Add(c); }
         foreach (var b in carrito.GetComponentsInChildren<MonoBehaviour>())
             if (b.enabled && (b is CarritoEnElSuelo || b is XRGrabInteractable)) { b.enabled = false; apagados.Add(b); }
@@ -173,7 +176,7 @@ public class CarritoCliente : MonoBehaviour
         Carrito.rotation = rotOriginal;
         foreach (var c in colliders) if (c != null) c.enabled = true;
         foreach (var b in apagados) if (b != null) b.enabled = true;
-        if (rb != null) { rb.isKinematic = rbKinematic; rb.linearVelocity = Vector3.zero; rb.angularVelocity = Vector3.zero; }
+        if (rb != null) { rb.interpolation = rbInterp; rb.isKinematic = rbKinematic; rb.linearVelocity = Vector3.zero; rb.angularVelocity = Vector3.zero; }
         colliders.Clear(); apagados.Clear();
         enUso.Remove(Carrito);
         Carrito = null;
