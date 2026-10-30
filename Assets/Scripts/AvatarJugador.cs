@@ -187,10 +187,10 @@ public class AvatarJugador : MonoBehaviour
             var p = anim.GetBoneTransform(pierna);
             var f = anim.GetBoneTransform(pie);
             if (p == null || f == null) continue;
-            p.localScale = new Vector3(1.22f, 1f, 1.22f);
+            p.localScale = new Vector3(1.3f, 1f, 1.3f);
             var rodilla = anim.GetBoneTransform(pierna == HumanBodyBones.LeftUpperLeg ? HumanBodyBones.LeftLowerLeg : HumanBodyBones.RightLowerLeg);   // el baggy cae ancho
-            float total = 1.22f;
-            if (rodilla != null && rodilla != f) { rodilla.localScale = new Vector3(1.35f, 1f, 1.35f); total *= 1.35f; }
+            float total = 1.3f;
+            if (rodilla != null && rodilla != f) { rodilla.localScale = new Vector3(1.6f, 1f, 1.6f); total *= 1.6f; }
             f.localScale = new Vector3(1f / total, 1f, 1f / total);
         }
     }
@@ -272,7 +272,10 @@ public class AvatarJugador : MonoBehaviour
             float suelo = raiz.position.y;
             float hCuello = (cuello.position.y - suelo) / Mathf.Max(0.01f, escala);
             float quiero = cam.transform.position.y - suelo - 0.13f;
-            if (hCuello > 0.5f && quiero > 0.8f) escala = Mathf.Clamp(quiero / hCuello, 0.65f, 1.2f);
+            // El modelo no viene en metros (Remy mide ~3.5 al importar): la escala sale de
+            // comparar alturas. Tu cuello se toma entre 1.1 y 1.6 m (sentado / muy alto).
+            quiero = Mathf.Clamp(quiero, 1.1f, 1.6f);
+            if (hCuello > 0.1f) escala = quiero / hCuello;
             calibrado = true;
             raiz.localScale = Vector3.one * escala;
             Debug.Log("[Cuerpo] Escala " + escala.ToString("0.00") + " (tu cuello a " + quiero.ToString("0.00") + " m, cuello del personaje a " + hCuello.ToString("0.00") + " m, raiz " + raiz.lossyScale.y.ToString("0.00") + ")");
@@ -369,13 +372,27 @@ public class AvatarJugador : MonoBehaviour
     readonly HashSet<Renderer> tintadas = new HashSet<Renderer>();
     void TintarManosVR()
     {
-        foreach (var e in FindObjectsByType<XRHandTrackingEvents>(FindObjectsSortMode.None))
-            foreach (var r in e.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+        if (origen == null) return;
+        // Todas las manos del rig (Hand Visualizer, manos de Quest...), aunque esten apagadas.
+        foreach (var r in origen.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+        {
+            if (!tintadas.Add(r)) continue;
+            if (r.name.ToLowerInvariant().Contains("pinch")) continue;   // el puntero de pinza no es piel
+            var m = r.material;
+            var sh = m.shader;
+            var props = new System.Text.StringBuilder();
+            for (int i = 0; i < sh.GetPropertyCount(); i++)
             {
-                if (!tintadas.Add(r)) continue;
-                var m = r.material;
-                foreach (var p in new[] { "_BaseColor", "_Color", "_MainColor", "_HandColor" })
-                    if (m.HasProperty(p)) m.SetColor(p, Piel);
+                if (sh.GetPropertyType(i) != UnityEngine.Rendering.ShaderPropertyType.Color) continue;
+                string n = sh.GetPropertyName(i);
+                props.Append(n).Append(' ');
+                string l = n.ToLowerInvariant();
+                if (l.Contains("emis") || l.Contains("fresnel") || l.Contains("outline") || l.Contains("rim") || l.Contains("spec")) continue;
+                if (l == "_color" || l.Contains("base") || l.Contains("main") || l.Contains("albedo") || l.Contains("tint") || l.Contains("hand") || l.Contains("skin"))
+                    m.SetColor(n, Piel);
             }
+            if (m.HasProperty("_BaseMap")) m.SetTexture("_BaseMap", null);
+            Debug.Log("[Cuerpo] Mano VR: " + r.name + " shader=" + sh.name + " colores: " + props);
+        }
     }
 }
