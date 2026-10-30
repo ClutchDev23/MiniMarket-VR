@@ -158,6 +158,20 @@ public static class ClientesFoto
         Debug.Log("[Foto] Tutorial: Logs/foto_tutorial.png");
     }
 
+    /// <summary>Fotos del cuerpo del jugador: en primera persona (mirando abajo) y desde adelante (en Play).</summary>
+    [MenuItem("Tools/Minimarket/Cuerpo/Foto del cuerpo")]
+    public static void FotoCuerpo()
+    {
+        var cam = Camera.main;
+        if (cam == null || !Application.isPlaying) { Debug.LogWarning("[Foto] Dale Play primero."); return; }
+        var c = cam.transform.position;
+        var f = cam.transform.forward; f.y = 0f; f.Normalize();
+        Sacar("foto_cuerpo_yo.png", c, c + f * 0.6f + Vector3.down * 1.1f, 90f);
+        Sacar("foto_cuerpo_frente.png", c + f * 2.6f + Vector3.down * 0.4f, c + Vector3.down * 0.7f, 62f);
+        Sacar("foto_cuerpo_lado.png", c + Vector3.Cross(Vector3.up, f) * 2.4f + Vector3.down * 0.4f, c + Vector3.down * 0.7f, 62f);
+        Debug.Log("[Foto] Cuerpo: Logs/foto_cuerpo_*.png");
+    }
+
     [MenuItem("Tools/Minimarket/Tutorial/Siguiente paso (Play)")]
     public static void SiguientePaso() { Tutorial.Saltar(); }
 
