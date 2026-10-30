@@ -362,7 +362,7 @@ public static class ProductosLlenarTienda
             {
                 if (!Physics.Raycast(new Vector3(x, y, z), Vector3.down, out var hit, y - b.min.y + 0.05f, ~0, QueryTriggerInteraction.Ignore)) break;
                 if (propios.Contains(hit.collider) && hit.normal.y > 0.8f &&
-                    hit.point.y > pisoY + 0.03f && hit.point.y < pisoY + AlturaMaxima)
+                    hit.point.y > pisoY + 0.006f && hit.point.y < pisoY + AlturaMaxima)
                     puntos.Add(hit.point);
                 y = hit.point.y - 0.02f;
             }
