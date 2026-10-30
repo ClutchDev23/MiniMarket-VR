@@ -83,7 +83,8 @@ public class DisparadorMenuPausa : MonoBehaviour
 
     void Start()
     {
-        if (mostrarAyuda) CrearAyuda();
+        // Si esta el tutorial, el ya explica la pausa.
+        if (mostrarAyuda && !Tutorial.Activo) CrearAyuda();
     }
 
     void CrearAyuda()
