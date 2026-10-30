@@ -28,19 +28,32 @@ using UnityEngine;
 /// </summary>
 public static class PonerLetrero
 {
-    const string Escena = "Assets/Scenes/MinimarketXR_Full.unity";
-    const string Textura = "Assets/SuperMarket/Textures/LetreroMinimarketChill.png";
-    const string Nombre = "Letrero Minimarket Chill";
-    const string NombreMaterial = "LetreroMinimarketChill_Mat";
+    static string Escena = "Assets/Scenes/MinimarketXR_Full.unity";
+    const string Textura = "Assets/SuperMarket/Textures/LetreroCajeroXR.png";
+    const string Nombre = "Letrero Cajero XR";
+    const string NombreMaterial = "LetreroCajeroXR_Mat";
 
     /// <summary>Si es true, no cierra Unity al terminar (para encadenar herramientas).</summary>
     public static bool noSalir = false;
 
-    [MenuItem("Tools/Minimarket/Agarrar/Poner letrero Minimarket Chill (fuera)")]
+    /// <summary>Pone el letrero "Cajero XR" en la escena de dia y en la de noche.</summary>
+    [MenuItem("Tools/Minimarket/Letrero/Poner letrero Cajero XR (dia y noche)")]
+    public static void PonerEnTodas()
+    {
+        bool antes = noSalir;
+        noSalir = true;
+        foreach (var e in new[] { "Assets/Scenes/MinimarketXR_Night.unity", "Assets/Scenes/MinimarketXR_Full.unity" })
+        {
+            Escena = e;
+            Ejecutar();
+        }
+        noSalir = antes;
+    }
+
     public static void Ejecutar()
     {
         var t = new System.Text.StringBuilder();
-        t.AppendLine("=== Letrero de fuera: minimarket chill ===");
+        t.AppendLine("=== Letrero de fuera: Cajero XR (" + Escena + ") ===");
 
         // ------------------------------------------------ 1. donde estan las letras
         var prefab360 = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/SuperMarket/Prefabs/Pref_360_Sm.prefab");
@@ -93,7 +106,7 @@ public static class PonerLetrero
         // Se borra el cartel anterior, si lo hubiera.
         var previos = new List<GameObject>();
         foreach (var go in Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include))
-            if (go.name == Nombre) previos.Add(go);
+            if (go.name == Nombre || go.name == "Letrero Minimarket Chill") previos.Add(go);
         for (int i = 0; i < previos.Count; i++) Object.DestroyImmediate(previos[i]);
 
         // El ancla: el objeto 360 de la escena.
@@ -278,7 +291,6 @@ public static class PonerLetrero
 
     static void Escribir(System.Text.StringBuilder t)
     {
-        Directory.CreateDirectory(@"C:\Users\abner\AppData\Local\Temp\opencode");
-        File.WriteAllText(@"C:\Users\abner\AppData\Local\Temp\opencode\letrero_fix.txt", t.ToString());
+        File.AppendAllText(Path.Combine(Directory.GetCurrentDirectory(), "Logs", "letrero.txt"), t.ToString());
     }
 }
