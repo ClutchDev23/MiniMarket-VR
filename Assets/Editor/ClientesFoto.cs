@@ -146,6 +146,28 @@ public static class ClientesFoto
         Debug.Log("[Foto] Billetes y monedas: Logs/foto_soles.png");
     }
 
+    /// <summary>Foto del panel del tutorial tal como lo ve el jugador (en Play).</summary>
+    [MenuItem("Tools/Minimarket/Tutorial/Foto del tutorial")]
+    public static void FotoTutorial()
+    {
+        var t = GameObject.Find("Tutorial (panel)");
+        if (t == null) { Debug.LogWarning("[Foto] No hay tutorial en pantalla."); return; }
+        var p = t.transform;
+        Sacar("foto_tutorial.png", p.position - p.forward * 1.25f + Vector3.up * 0.2f, p.position + Vector3.up * 0.05f, 62f);
+        Sacar("foto_tutorial_lado.png", p.position - p.forward * 0.9f + p.right * 0.7f + Vector3.up * 0.15f, p.position, 62f);
+        Debug.Log("[Foto] Tutorial: Logs/foto_tutorial.png");
+    }
+
+    [MenuItem("Tools/Minimarket/Tutorial/Siguiente paso (Play)")]
+    public static void SiguientePaso() { Tutorial.Saltar(); }
+
+    [MenuItem("Tools/Minimarket/Tutorial/Empezar de nuevo (Play)")]
+    public static void EmpezarTutorial()
+    {
+        if (Application.isPlaying) Tutorial.Empezar();
+        else { PlayerPrefs.DeleteKey("tutorial_visto"); Debug.Log("[Tutorial] Saldra al darle Play."); }
+    }
+
     static void Sacar(string archivo, Vector3 desde, Vector3 hacia, float fov)
     {
         var go = new GameObject("FotoCam");
