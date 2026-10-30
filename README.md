@@ -42,7 +42,7 @@ y atiende a clientes que hacen fila, pagan y se quejan si te equivocas.
 <td width="33%" valign="top">
 
 ### 🏪 Tienda llena
-Más de **5 000 productos** con su **tamaño real**, todos se pueden agarrar y escanear. Se dibujan por bloques para que el Quest aguante.
+Más de **6 000 productos** con su **tamaño real**, refrigeradoras y cubículos incluidos, todos se pueden agarrar y escanear. Se dibujan por bloques para que el Quest aguante.
 
 </td>
 <td width="33%" valign="top">
