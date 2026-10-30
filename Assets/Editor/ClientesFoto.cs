@@ -45,6 +45,13 @@ public static class ClientesFoto
         Sacar("foto_tienda.png", new Vector3(0f, 2.3f, -2.0f), new Vector3(0f, 1.2f, -14f), 75f);
         Sacar("foto_pasillo.png", new Vector3(4.1f, 2.2f, -9.5f), new Vector3(4.1f, 1.3f, -16f), 70f);
         Sacar("foto_pared.png", new Vector3(10f, 2.1f, -2.5f), new Vector3(10.5f, 1.4f, 0f), 70f);
+        // De cerca: bandeja, POS e impresora.
+        var bandeja = BandejaDinero.I;
+        if (bandeja != null)
+            Sacar("foto_bandeja.png", bandeja.transform.position + Vector3.up * 0.55f + (bandeja.transform.position - (g != null ? g.PuntoCaja : Vector3.zero)).normalized * 0.35f, bandeja.transform.position, 60f);
+        var imp = ImpresoraBoletas.I;
+        if (imp != null)
+            Sacar("foto_impresora.png", imp.transform.position + Vector3.up * 0.5f + imp.transform.forward * 0.45f, imp.transform.position, 60f);
         // El letrero de fuera.
         var letrero = GameObject.Find("Letrero Cajero XR");
         if (letrero != null)

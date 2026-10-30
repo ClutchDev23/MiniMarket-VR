@@ -262,6 +262,7 @@ public class BandejaDinero : MonoBehaviour
         foreach (var d in CajaRegistradora.DesgloseLista(falta))
             if (vuelto.Count < 14) vuelto.Add(Crear(d, vuelto.Count, false));
         vueltoMostrado = entregado;
+        Debug.Log("[Bandeja] Vuelto en la bandeja: " + ObjetosCaja.Soles(entregado) + " (" + vuelto.Count + " piezas) en " + transform.position);
     }
 
     void Limpiar(List<GameObject> l)
