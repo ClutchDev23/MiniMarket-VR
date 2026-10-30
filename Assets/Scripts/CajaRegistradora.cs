@@ -1158,7 +1158,7 @@ public class CajaRegistradora : MonoBehaviour
 
     void CrearResumen(RectTransform raiz)
     {
-        var rt = Img(raiz, "Resumen", CFondo, 0, 60, W, H - 60);
+        var rt = Img(raiz, "Resumen", new Color(CFondo.r, CFondo.g, CFondo.b, 1f), 0, 60, W, H - 60);
         // Tapa los botones de debajo mientras esta abierto.
         rt.GetComponent<Image>().raycastTarget = true;
         pResumen = rt.gameObject;
