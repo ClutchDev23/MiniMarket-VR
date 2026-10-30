@@ -55,7 +55,7 @@ public class Tutorial : MonoBehaviour
     }
 
     /// <summary>Da por hecho el paso actual (para probar sin visor).</summary>
-    public static void Saltar() { if (I != null && !I.fin && I.hechoHasta == 0f && I.indice >= 0) I.Hecho(); }
+    public static void Saltar() { if (I == null) return; if (I.fin) { I.listoDesde = -10f; Destroy(I.gameObject); return; } if (I.hechoHasta == 0f && I.indice >= 0) I.Hecho(); }
 
     /// <summary>Para verlo otra vez la proxima vez que se cargue la tienda.</summary>
     public static void VerOtraVezAlCargar() { pedido = true; }
@@ -84,6 +84,8 @@ public class Tutorial : MonoBehaviour
     bool pausaAbierta;
     string fraseInicial = "";
     bool escaneado;
+    int toquesInicio;
+    float listoDesde;
     LectorCodigos lectorSuscrito;
 
     // --------------------------------------------------------------- visual
@@ -132,10 +134,8 @@ public class Tutorial : MonoBehaviour
                 false, true, Parte.Gatillo, "apretar", 70f);
         Agregar("MENÚ DE PAUSA", "Aprieta el botón <b>☰</b> del mando izquierdo (o <b>B</b>) para abrir la pausa.\nLuego apriétalo otra vez para cerrarla.",
                 true, true, Parte.Menu, "apretar", 0f);
-        Agregar("HABLAR CON LOS CLIENTES", windows
-                ? "Cuando un cliente esté cerca, dile <b>\"hola\"</b> o <b>\"¿cómo va a pagar?\"</b>.\nTe va a responder con su voz."
-                : "Mantén apretado el <b>STICK IZQUIERDO</b> y dile <b>\"hola\"</b> a un cliente.\nTe va a responder con su voz.",
-                !windows, false, windows ? Parte.Ninguna : Parte.Stick, "apretar", 0f);
+        Agregar("TOCAR LA PANTALLA", "Mantén apretado el <b>GATILLO</b>: tu mano pone el <b>DEDO ÍNDICE</b>.\nToca con ese dedo un botón de la pantalla de la caja (así cobras).",
+                false, true, Parte.Gatillo, "apretar", 70f);
 
         CrearPanel();
         mandoIzq = CrearMando(-1f);
@@ -182,6 +182,7 @@ public class Tutorial : MonoBehaviour
         pausaAbierta = false;
         fraseInicial = VozJugador.I != null ? VozJugador.I.UltimaFrase : "";
         escaneado = false;
+        toquesInicio = AvatarJugador.Toques;
         if (p.titulo == "ESCANEAR" && lectorSuscrito == null)
         {
             lectorSuscrito = FindAnyObjectByType<LectorCodigos>();
@@ -208,19 +209,32 @@ public class Tutorial : MonoBehaviour
         PlayerPrefs.Save();
         tPaso.text = "TUTORIAL COMPLETO";
         tTitulo.text = "¡LISTO PARA ATENDER!";
-        tTexto.text = "Escanea los productos, cobra con la pantalla y entrega el vuelto.\nPuedes repetir el tutorial desde el menú de pausa.";
-        tPie.text = "";
+        tTexto.text = "Los clientes entran cuando tú digas.\nAprieta el <b>GATILLO</b> para <b>COMENZAR EL TURNO</b>.";
+        tPie.text = "Tip: a los clientes les puedes hablar (\"hola\", \"¿cómo va a pagar?\").  Espacio: comenzar (PC)";
+        listoDesde = Time.unscaledTime;
         barra.fillAmount = 1f;
         mandoIzq.gameObject.SetActive(false);
         mandoDer.gameObject.SetActive(false);
         if (flecha != null) flecha.gameObject.SetActive(false);
-        Debug.Log("[Tutorial] Completo.");
-        Destroy(gameObject, 6f);
+        Debug.Log("[Tutorial] Completo: esperando que comience el turno.");
     }
 
     void Update()
     {
-        if (fin) { Colocar(false); return; }
+        if (fin)
+        {
+            Colocar(false);
+            // Recien al apretar el gatillo empieza el turno (y entran los clientes).
+            if (Time.unscaledTime - listoDesde > 0.8f && (GatilloApretado() ||
+                (Keyboard.current != null && (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.nKey.wasPressedThisFrame))))
+            {
+                audioFuente.PlayOneShot(SonidosProcedurales.Logro(), 0.7f);
+                Debug.Log("[Tutorial] Turno iniciado.");
+                Destroy(gameObject, 0.3f);
+                fin = false; indice = pasos.Count + 1; enabled = false;
+            }
+            return;
+        }
         float t = Time.unscaledTime;
         barra.fillAmount = (indice + (hechoHasta > 0f ? 1f : 0f)) / (float)pasos.Count;
 
@@ -270,8 +284,8 @@ public class Tutorial : MonoBehaviour
                 if (menu == null) return true;
                 if (menu.estaAbierto) pausaAbierta = true;
                 return pausaAbierta && !menu.estaAbierto;
-            case "HABLAR CON LOS CLIENTES":
-                return VozJugador.I != null && VozJugador.I.UltimaFrase != fraseInicial;
+            case "TOCAR LA PANTALLA":
+                return AvatarJugador.Toques > toquesInicio;
         }
         return false;
     }
