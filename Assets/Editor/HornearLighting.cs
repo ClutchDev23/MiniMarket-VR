@@ -33,7 +33,9 @@ public static class HornearLighting
                     nombre.Contains("Directional Light") ||
                     nombre.Contains("Area Light") ||
                     nombre.Contains("Camera") ||
-                    nombre.Contains("Volume"))
+                    nombre.Contains("Volume") ||
+                    t.GetComponentInParent<Rigidbody>() != null ||   // lo que se mueve (carritos) no puede ser static
+                    nombre.Contains("Trolley"))
                     continue;
 
                 // No marcar luces, audio, ni volúmenes
