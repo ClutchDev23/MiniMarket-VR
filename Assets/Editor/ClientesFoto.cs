@@ -113,6 +113,39 @@ public static class ClientesFoto
         Debug.Log("[Foto] Muebles guardados en Logs/");
     }
 
+    /// <summary>Pone un billete de cada valor (y dos al reves) y todas las monedas, y les toma una foto de cerca (en Play).</summary>
+    [MenuItem("Tools/Minimarket/Caja/5 - Foto de billetes y monedas")]
+    public static void FotoSoles()
+    {
+        if (!Application.isPlaying) { Debug.LogWarning("[Foto] Dale Play primero."); return; }
+        var o = new Vector3(0f, 40f, 0f);
+        var hechos = new System.Collections.Generic.List<GameObject>();
+        int[] billetes = { 1000, 2000, 5000, 10000, 20000 };
+        for (int i = 0; i < billetes.Length; i++)
+        {
+            var b = BandejaDinero.Billete3D(billetes[i]);
+            b.transform.SetPositionAndRotation(o + new Vector3(-0.32f + 0.16f * i, 0f, 0.05f), Quaternion.identity);
+            hechos.Add(b);
+            if (i < 2)
+            {
+                var r = BandejaDinero.Billete3D(billetes[i + 3]);
+                r.transform.SetPositionAndRotation(o + new Vector3(-0.24f + 0.16f * i * 2, 0f, -0.04f), Quaternion.Euler(0f, 0f, 180f));
+                hechos.Add(r);
+            }
+        }
+        int[] monedas = { 10, 20, 50, 100, 200, 500 };
+        for (int i = 0; i < monedas.Length; i++)
+        {
+            var m = BandejaDinero.Moneda3D(monedas[i]);
+            m.transform.SetPositionAndRotation(o + new Vector3(-0.15f + 0.06f * i, 0f, -0.11f), Quaternion.identity);
+            hechos.Add(m);
+        }
+        Sacar("foto_soles.png", o + new Vector3(0f, 0.42f, -0.22f), o + new Vector3(0f, 0f, -0.02f), 50f);
+        Sacar("foto_soles_cerca.png", o + new Vector3(0f, 0.16f, -0.2f), o + new Vector3(0f, 0f, -0.1f), 40f);
+        foreach (var h in hechos) Object.Destroy(h);
+        Debug.Log("[Foto] Billetes y monedas: Logs/foto_soles.png");
+    }
+
     static void Sacar(string archivo, Vector3 desde, Vector3 hacia, float fov)
     {
         var go = new GameObject("FotoCam");
