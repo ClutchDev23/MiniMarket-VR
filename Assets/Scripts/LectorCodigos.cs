@@ -50,6 +50,7 @@ public class LectorCodigos : MonoBehaviour
         if (detectado == null) return;
 
         ultimaBip = Time.time;
+        Haptica.Pulso(args.interactorObject, 0.35f, 0.05f);   // se siente el bip en la mano
 
         // El collider puede estar en un hijo: el producto es el objeto agarrable.
         var grabProducto = detectado.GetComponentInParent<XRGrabInteractable>();
