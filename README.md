@@ -244,6 +244,7 @@ MiniMarket-VR/
 | `MainMenu` · `MenuPausa` | Menú principal y menú de pausa en VR |
 | `ObjetosCaja` | Bandeja de dinero, POS y impresora de boletas en 3D |
 | `CarritoCliente` | El carrito que empuja cada cliente |
+| `AvatarJugador` | Tu cuerpo en primera persona: polo blanco, baggy negro, zapatillas blancas, reloj, piel trigueña; brazos con IK hacia tus manos y piernas que caminan |
 | `Tutorial` | Tutorial interactivo: mandos 3D animados que muestran cada botón y pasos que se cumplen jugando |
 | `VocesClientes` · `VozJugador` · `VozWit` | Voces de los clientes y reconocimiento de voz del jugador (Windows o Wit.ai en el Quest) |
 | `Haptica` · `SonidosProcedurales` | Vibración de los mandos y sonidos hechos por código |
