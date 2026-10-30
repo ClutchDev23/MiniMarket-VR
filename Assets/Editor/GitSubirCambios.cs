@@ -174,8 +174,11 @@ public static class GitSubirCambios
         if (sinLfs) psi.EnvironmentVariables["GIT_LFS_SKIP_SMUDGE"] = "1";
         using (var p = Process.Start(psi))
         {
+            // Se leen las dos salidas a la vez: si no, con mucho texto en una el proceso
+            // se queda esperando y Unity se congela.
+            var tErr = p.StandardError.ReadToEndAsync();
             string o = p.StandardOutput.ReadToEnd();
-            string e = p.StandardError.ReadToEnd();
+            string e = tErr.Result;
             p.WaitForExit(180000);
             log.Append(o).Append(e);
             log.AppendLine("(salida " + p.ExitCode + ")");
