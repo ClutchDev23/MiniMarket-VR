@@ -52,6 +52,11 @@ public class Cliente : MonoBehaviour
     float hablarHasta;
     float altura = 1.8f;
 
+    // voz
+    AudioSource voz;
+    bool esMujer;
+    int totalAlDecir;
+
     // ================================================================== inicio
 
     public void Iniciar(GestorClientes gestor, Vector3 inicio)
@@ -94,6 +99,7 @@ public class Cliente : MonoBehaviour
             altura = g.Config.alturaClientes;
         }
         CrearBurbuja();
+        CrearVoz();
         if (agente.isOnNavMesh) agente.Warp(inicio);
         else GestorClientes.Log(name + ": no quedo sobre el camino en " + inicio);
 
@@ -178,13 +184,12 @@ public class Cliente : MonoBehaviour
 
         // 4. en la caja
         EnCaja = true;
+        var caja = g.Caja;
+        if (caja != null) caja.VentaCobrada += AlCobrar;   // antes de nada: asi no se pierde un cobro rapido
         PonerProductos();
         GestorClientes.Log(name + " llego a la caja y dejo " + copias.Count + " producto(s) en " + g.ZonaProductos);
-        Decir(Saludo(), 4f);
+        Decir(Saludo(out var claveSaludo), 4f, claveSaludo);
         yield return new WaitForSeconds(1.5f);
-
-        var caja = g.Caja;
-        if (caja != null) caja.VentaCobrada += AlCobrar;
 
         // 5. esperar a que escanees todo
         float t0 = Time.time, ultimoCambio = Time.time;
@@ -204,8 +209,10 @@ public class Cliente : MonoBehaviour
             }
             if (Time.time - t0 > g.Config.paciencia)
             {
-                Decir("Ya me cansé de esperar... me voy.", 4f);
+                Decir("Ya me cansé de esperar... me voy.", 4f, "cansado");
                 g.RegistrarResultado(false, true);
+                if (g.Caja != null) g.Caja.ClienteSeFue();
+                var bj = BandejaDinero.I; if (bj != null) bj.RetirarPago();
                 yield return new WaitForSeconds(2.5f);
                 yield return Irse();
                 yield break;
@@ -216,7 +223,7 @@ public class Cliente : MonoBehaviour
         // 6. pagar
         if (ventaCobrada == null)
         {
-            Decir("¿Cuánto es?", 2f);
+            Decir("¿Cuánto es?", 2f, "cuanto");
             yield return new WaitForSeconds(2f);
             caja = g.Caja;
             int total = caja != null ? caja.TotalCent : totalEsperadoCent;
@@ -225,16 +232,17 @@ public class Cliente : MonoBehaviour
                 if (QuiereTarjeta)
                 {
                     PagoCent = total;
-                    Decir("Con tarjeta, por favor.", 9999f);
+                    Decir("Con tarjeta, por favor.", 9999f, "tarjeta");
                     GestorClientes.Log(name + " paga con TARJETA (total en caja " + CajaRegistradora.Dinero(total) + ")");
                 }
                 else
                 {
                     PagoCent = ElegirPago(total);
-                    Decir("En efectivo.\nAquí tienes: " + CajaRegistradora.Dinero(PagoCent), 9999f);
+                    DecirPago(total);
                     GestorClientes.Log(name + " paga en EFECTIVO con " + CajaRegistradora.Dinero(PagoCent) + " (total en caja " + CajaRegistradora.Dinero(total) + ")");
                 }
                 YaDijoComoPaga = true;
+                totalAlDecir = total;
             }
         }
 
@@ -242,10 +250,31 @@ public class Cliente : MonoBehaviour
         t0 = Time.time;
         while (ventaCobrada == null)
         {
+            // El cajero siguio escaneando (o quito algo) DESPUES de que dije con cuanto
+            // pago: si ahora no me alcanza, saco otro billete. Antes la venta se trababa.
+            caja = g.Caja;
+            if (caja != null && YaDijoComoPaga && caja.TotalCent > 0 && caja.TotalCent != totalAlDecir &&
+                (caja.PasoActual == CajaRegistradora.Paso.Escaneando || caja.PasoActual == CajaRegistradora.Paso.Metodo ||
+                 (caja.PasoActual == CajaRegistradora.Paso.RecibirEfectivo && caja.RecibidoCent == 0)))
+            {
+                int nuevo = caja.TotalCent;
+                totalAlDecir = nuevo;
+                if (QuiereTarjeta) PagoCent = nuevo;
+                else if (PagoCent < nuevo)
+                {
+                    PagoCent = ElegirPago(nuevo);
+                    Decir("Ah, ¿" + CajaRegistradora.Dinero(nuevo) + "?\nEntonces toma " + CajaRegistradora.Dinero(PagoCent) + ".", 9999f, "otro_billete");
+                    GestorClientes.Log(name + " cambia su pago a " + CajaRegistradora.Dinero(PagoCent) + " (total nuevo " + CajaRegistradora.Dinero(nuevo) + ")");
+                    var bandeja = BandejaDinero.I;
+                    if (bandeja != null) bandeja.ClienteDeja(PagoCent);
+                }
+            }
             if (Time.time - t0 > g.Config.paciencia)
             {
-                Decir("¿Hola? Ya me voy...", 4f);
+                Decir("¿Hola? Ya me voy...", 4f, "me_voy");
                 g.RegistrarResultado(false, true);
+                if (g.Caja != null) g.Caja.ClienteSeFue();
+                var bj = BandejaDinero.I; if (bj != null) bj.RetirarPago();
                 yield return new WaitForSeconds(2.5f);
                 yield return Irse();
                 yield break;
@@ -255,25 +284,30 @@ public class Cliente : MonoBehaviour
 
         // 8. revisar
         var v = ventaCobrada;
-        string msg; bool bien = false;
+        string msg, clave; bool bien = false, queja = true;
         if (QuiereTarjeta && v.metodo != MetodoPago.Tarjeta)
-            msg = "¡Pero yo te dije\nque pagaba con tarjeta!";
+        { msg = "¡Pero yo te dije\nque pagaba con tarjeta!"; clave = "queja_tarjeta"; }
         else if (!QuiereTarjeta && v.metodo == MetodoPago.Tarjeta)
-            msg = "¿Tarjeta? Yo te pagué\nen efectivo...";
+        { msg = "¿Tarjeta? Yo te pagué\nen efectivo..."; clave = "queja_efectivo"; }
         else if (v.metodo == MetodoPago.Efectivo && v.recibidoCent != PagoCent)
-            msg = "¡Oye! Te di " + CajaRegistradora.Dinero(PagoCent) + ",\nno " + CajaRegistradora.Dinero(v.recibidoCent) + ".";
+        { msg = "¡Oye! Te di " + CajaRegistradora.Dinero(PagoCent) + ",\nno " + CajaRegistradora.Dinero(v.recibidoCent) + "."; clave = "queja_recibido"; }
         else if (v.totalCent > totalEsperadoCent)
-            msg = "Mmm... me cobraste " + CajaRegistradora.Dinero(v.totalCent - totalEsperadoCent) + " de más.";
+        { msg = "Mmm... me cobraste " + CajaRegistradora.Dinero(v.totalCent - totalEsperadoCent) + " de más."; clave = "queja_demas"; }
         else if (v.totalCent < totalEsperadoCent)
-            msg = "Creo que no me cobraste todo...\n(" + CajaRegistradora.Dinero(totalEsperadoCent - v.totalCent) + " menos)";
+        { msg = "Creo que no me cobraste todo...\n(" + CajaRegistradora.Dinero(totalEsperadoCent - v.totalCent) + " menos)"; clave = "queja_menos"; }
+        else if (!MismosProductos(v))
+        { msg = "El total esta bien, pero eso\nno es lo que llevo..."; clave = "queja_productos"; }
         else
         {
+            queja = false;
             bien = v.erroresVuelto == 0;
-            if (v.metodo == MetodoPago.Tarjeta) msg = "¡Gracias! ¡Hasta luego!";
-            else if (v.erroresVuelto > 0) msg = "Gracias... aunque te costó\nel vuelto. ¡Hasta luego!";
-            else msg = v.vueltoCent > 0 ? "¡Gracias! Vuelto " + CajaRegistradora.Dinero(v.vueltoCent) + ".\n¡Hasta luego!" : "¡Gracias! ¡Hasta luego!";
+            if (v.metodo == MetodoPago.Tarjeta) { msg = "¡Gracias! ¡Hasta luego!"; clave = "gracias"; }
+            else if (v.erroresVuelto > 0) { msg = "Gracias... aunque te costó\nel vuelto. ¡Hasta luego!"; clave = "gracias_costo"; }
+            else if (v.vueltoCent > 0) { msg = "¡Gracias! Vuelto " + CajaRegistradora.Dinero(v.vueltoCent) + ".\n¡Hasta luego!"; clave = "gracias_vuelto"; }
+            else { msg = "¡Gracias! ¡Hasta luego!"; clave = "gracias"; }
         }
-        Decir(msg, 4f);
+        Decir(msg, 4f, clave);
+        if (g.Caja != null) g.Caja.RegistrarOpinion(v, !queja, msg.Replace("\n", " "));
         g.RegistrarResultado(bien, false);
         GestorClientes.Log(name + ": " + msg.Replace("\n", " ") + " (esperado " + CajaRegistradora.Dinero(totalEsperadoCent) + ")");
 
@@ -295,6 +329,12 @@ public class Cliente : MonoBehaviour
 
     IEnumerator Irse()
     {
+        if (EnCaja && ventaCobrada != null)
+        {
+            // Se lleva su vuelto y su boleta.
+            var b = BandejaDinero.I; if (b != null) b.ClienteRecoge();
+            var imp = ImpresoraBoletas.I; if (imp != null) imp.ClienteSeLlevaBoleta();
+        }
         EnCaja = false;
         var caja = g.Caja;
         if (caja != null) caja.VentaCobrada -= AlCobrar;
@@ -371,6 +411,30 @@ public class Cliente : MonoBehaviour
         return true;
     }
 
+    /// <summary>¿Le cobraron exactamente lo que lleva? (mismo total pero otro producto = error)</summary>
+    bool MismosProductos(CajaRegistradora.Venta v)
+    {
+        var esperado = new Dictionary<Producto, int>();
+        foreach (var p in lista) esperado[p] = esperado.TryGetValue(p, out var n) ? n + 1 : 1;
+        int lineas = 0;
+        foreach (var l in v.lineas)
+        {
+            lineas++;
+            if (!esperado.TryGetValue(l.producto, out var n) || n != l.cantidad) return false;
+        }
+        return lineas == esperado.Count;
+    }
+
+    void DecirPago(int total)
+    {
+        string monto = CajaRegistradora.Dinero(PagoCent);
+        string clave = PagoCent == total ? "efectivo_exacto" : "efectivo_" + (PagoCent / 100);
+        Decir("En efectivo.\nAquí tienes: " + monto, 9999f, clave);
+        GestorClientes.Log(name + " paga en EFECTIVO con " + monto + " (total en caja " + CajaRegistradora.Dinero(total) + ")");
+        var bandeja = BandejaDinero.I;
+        if (bandeja != null) bandeja.ClienteDeja(PagoCent);
+    }
+
     int ElegirPago(int total)
     {
         if (total <= 0) return 0;
@@ -384,11 +448,14 @@ public class Cliente : MonoBehaviour
         return billetes[i];
     }
 
-    string Saludo()
+    string Saludo(out string clave)
     {
         bool noche = gameObject.scene.name.Contains("Night");
         int h = DateTime.Now.Hour;
-        string s = noche || h >= 19 ? "¡Buenas noches!" : (h < 12 ? "¡Buenos días!" : "¡Buenas tardes!");
+        string s;
+        if (noche || h >= 19) { s = "¡Buenas noches!"; clave = "saludo_noche"; }
+        else if (h < 12) { s = "¡Buenos días!"; clave = "saludo_dia"; }
+        else { s = "¡Buenas tardes!"; clave = "saludo_tarde"; }
         return s + "\nSolo esto, por favor.";
     }
 
@@ -461,6 +528,14 @@ public class Cliente : MonoBehaviour
             anim.CrossFadeInFixedTime(quiero, 0.25f);
             animActual = quiero;
         }
+        // Mientras habla quieto, mira al jugador (como una persona de verdad).
+        if (hablando && vel < 0.1f && Camera.main != null && agente != null && !agente.hasPath)
+        {
+            var d = Camera.main.transform.position - transform.position; d.y = 0f;
+            if (d.sqrMagnitude > 0.01f && d.sqrMagnitude < 16f)
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(d.normalized), Time.deltaTime * 3f);
+        }
+
         // La animacion avanza al ritmo real del paso (si no, los pies "patinan").
         anim.speed = quiero == "Walking" ? Mathf.Clamp(vel / g.Config.velocidadAnimacion, 0.6f, 1.4f) : 1f;
     }
@@ -484,15 +559,47 @@ public class Cliente : MonoBehaviour
     /// <summary>El cliente acerca su tarjeta al POS.</summary>
     public void AcercarTarjeta()
     {
-        Decir("*acerca la tarjeta*", 3f);
+        Decir("Aquí está mi tarjeta.", 3f, "acerca_tarjeta");
+        var pos = POS3D.I;
+        if (pos != null) pos.AnimarTarjeta(transform.position + Vector3.up * (altura * 0.6f) + transform.forward * 0.35f);
     }
 
-    public void Decir(string texto, float segundos)
+    public void Decir(string texto, float segundos) { Decir(texto, segundos, null); }
+
+    /// <summary>Muestra la burbuja y, si hay audio grabado para esa frase, la dice en voz alta.</summary>
+    public void Decir(string texto, float segundos, string claveVoz)
     {
         if (txtBurbuja == null) return;
         txtBurbuja.text = texto;
         burbujaHasta = Time.time + segundos;
-        hablarHasta = Time.time + Mathf.Min(segundos, 2.5f);   // gesticula solo al decirlo
+        float habla = 2.5f;
+        var clip = VocesClientes.Clip(claveVoz);
+        if (clip != null && voz != null)
+        {
+            voz.Stop();
+            voz.clip = clip;
+            voz.Play();
+            habla = clip.length / Mathf.Max(0.5f, voz.pitch);
+        }
+        hablarHasta = Time.time + Mathf.Min(segundos, habla);   // gesticula mientras habla
+    }
+
+    void CrearVoz()
+    {
+        string n = name.ToLowerInvariant();
+        esMujer = n.Contains("sophie") || n.Contains("suzie") || n.Contains("girl") || n.Contains("woman");
+        var go = new GameObject("Voz");
+        go.transform.SetParent(transform, false);
+        go.transform.position = transform.position + Vector3.up * (altura * 0.92f);
+        voz = go.AddComponent<AudioSource>();
+        voz.playOnAwake = false;
+        voz.spatialBlend = 1f;                 // sale de la boca del cliente
+        voz.rolloffMode = AudioRolloffMode.Linear;
+        voz.minDistance = 1.2f;
+        voz.maxDistance = 14f;
+        voz.volume = 0.95f;
+        // Las voces del sistema suelen ser de mujer: a los hombres se les baja el tono.
+        voz.pitch = esMujer ? Random.Range(1.0f, 1.08f) : (VocesClientes.VozEsDeMujer ? Random.Range(0.78f, 0.84f) : Random.Range(0.95f, 1.03f));
     }
 
     void CrearBurbuja()
