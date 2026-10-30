@@ -25,7 +25,7 @@ MonoBehaviour:
   productosPorCliente: {x: 1, y: 5}
   probPagoExacto: 0.25
   paciencia: 240
-  probTarjeta: 0.35
+  probTarjeta: 0.5
   alturaClientes: 1.72
   velocidad: 1.2
   velocidadAnimacion: 1.3

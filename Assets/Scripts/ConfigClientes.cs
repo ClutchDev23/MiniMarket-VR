@@ -33,7 +33,7 @@ public class ConfigClientes : ScriptableObject
     public float paciencia = 240f;
 
     [Tooltip("Probabilidad de que pague con tarjeta (POS) en vez de efectivo.")]
-    [Range(0f, 1f)] public float probTarjeta = 0.35f;
+    [Range(0f, 1f)] public float probTarjeta = 0.5f;
     [Tooltip("Probabilidad de que tome un carrito al entrar (si hay uno libre cerca).")]
     [Range(0f, 1f)] public float probCarrito = 0.7f;
 
