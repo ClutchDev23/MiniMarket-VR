@@ -78,6 +78,46 @@ La tienda pasa del día a la noche; la **venta en curso y el turno se conservan*
 
 </td>
 </tr>
+<tr>
+<td valign="top">
+
+### 💵 Dinero, POS y boleta en 3D
+El cliente deja sus **billetes y monedas** en la bandeja, acerca su **tarjeta al POS** y al final sale una **boleta impresa** que se puede agarrar.
+
+</td>
+<td valign="top">
+
+### 🗣️ Clientes que hablan
+Saludan, dicen cómo pagan y reclaman **con voz** (sonido 3D). Y tú les puedes **hablar**: *"¿cómo va a pagar?"*, *"¿algo más?"*, *"gracias"*.
+
+</td>
+<td valign="top">
+
+### 🛒 Carritos
+Los clientes toman un **carrito**, lo empujan por los pasillos con sus productos dentro y en la caja los **sacan uno por uno**.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### 📊 Evaluación del turno
+Resumen con ventas, tiempo promedio, errores de vuelto, quejas y clientes perdidos, con una **nota de 0 a 20**.
+
+</td>
+<td valign="top">
+
+### 📳 Vibración y sonidos
+El mando **vibra** al escanear y agarrar. Suenan las **monedas**, el **cajón**, la **impresora** y los productos al caer.
+
+</td>
+<td valign="top">
+
+### 🏷️ Letrero Cajero XR
+La fachada y el **menú principal** tienen ahora la misma identidad que la tienda: naranja, blanco y gris.
+
+</td>
+</tr>
 </table>
 
 
