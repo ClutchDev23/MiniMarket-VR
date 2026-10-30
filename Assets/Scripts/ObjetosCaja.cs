@@ -287,18 +287,28 @@ public class BandejaDinero : MonoBehaviour
         return go;
     }
 
+    // Colores parecidos a los soles de verdad: S/10 verde, S/20 naranja, S/50 rosado,
+    // S/100 azul, S/200 morado. Monedas: S/5 y S/2 bimetalicas (centro dorado, aro
+    // plateado), S/1 plateada y los centimos dorados.
     static Color ColorDe(int c)
     {
         switch (c)
         {
-            case 20000: return new Color(0.62f, 0.42f, 0.70f);   // morado
-            case 10000: return new Color(0.30f, 0.55f, 0.85f);   // azul
-            case 5000: return new Color(0.85f, 0.45f, 0.30f);    // naranja
-            case 2000: return new Color(0.85f, 0.60f, 0.35f);    // marron claro
+            case 20000: return new Color(0.66f, 0.45f, 0.72f);   // morado
+            case 10000: return new Color(0.30f, 0.52f, 0.85f);   // azul
+            case 5000: return new Color(0.88f, 0.45f, 0.55f);    // rosado
+            case 2000: return new Color(0.90f, 0.58f, 0.30f);    // naranja
             case 1000: return new Color(0.35f, 0.70f, 0.45f);    // verde
-            case 500: case 200: return new Color(0.82f, 0.68f, 0.30f);   // dorada
-            default: return new Color(0.78f, 0.78f, 0.80f);      // plateada
+            case 500: case 200: case 100: return new Color(0.80f, 0.80f, 0.82f);   // plateada (aro)
+            default: return new Color(0.84f, 0.68f, 0.32f);      // dorada (centimos)
         }
+    }
+
+    static Material dorado;
+    static Material Dorado()
+    {
+        if (dorado == null) dorado = ObjetosCaja.Mat(new Color(0.86f, 0.70f, 0.30f), 0.85f);
+        return dorado;
     }
 
     static Material MatDe(int c)
@@ -308,10 +318,20 @@ public class BandejaDinero : MonoBehaviour
         return m;
     }
 
+    static Material MatFranja(int c)
+    {
+        if (!mats.TryGetValue(-c, out var m) || m == null)
+            mats[-c] = m = ObjetosCaja.Mat(Color.Lerp(ColorDe(c), Color.white, 0.65f), 0.15f);
+        return m;
+    }
+
     public static GameObject Billete3D(int centimos)
     {
         var go = new GameObject("Billete S/ " + centimos / 100);
         var cuerpo = ObjetosCaja.Caja("Papel", go.transform, new Vector3(0.14f, 0.0015f, 0.066f), MatDe(centimos), false);
+        // Franja clara a un lado (como la zona de la marca de agua de un billete real).
+        ObjetosCaja.Caja("Franja", go.transform, new Vector3(0.032f, 0.0016f, 0.062f), MatFranja(centimos), false)
+            .transform.localPosition = new Vector3(-0.05f, 0f, 0f);
         var col = go.AddComponent<BoxCollider>();
         col.size = new Vector3(0.14f, 0.012f, 0.066f);   // un poco mas grueso: facil de agarrar
         // Cara de arriba: valor grande + marca.
@@ -324,7 +344,9 @@ public class BandejaDinero : MonoBehaviour
     public static GameObject Moneda3D(int centimos)
     {
         var go = new GameObject("Moneda " + ObjetosCaja.Soles(centimos));
-        float d = centimos >= 500 ? 0.0245f : centimos >= 100 ? 0.0255f : centimos >= 50 ? 0.022f : 0.0205f;
+        // Diametros reales: S/5 24.4 mm, S/2 22.3 mm, S/1 25.5 mm, 50c 22 mm, 20c 21 mm, 10c 20.5 mm.
+        float d = centimos >= 500 ? 0.0244f : centimos >= 200 ? 0.0223f : centimos >= 100 ? 0.0255f
+                : centimos >= 50 ? 0.022f : centimos >= 20 ? 0.021f : 0.0205f;
         var disco = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         Object.Destroy(disco.GetComponent<Collider>());
         disco.transform.SetParent(go.transform, false);
@@ -332,6 +354,17 @@ public class BandejaDinero : MonoBehaviour
         var r = disco.GetComponent<MeshRenderer>();
         r.sharedMaterial = MatDe(centimos);
         r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        if (centimos == 500 || centimos == 200)
+        {
+            // Bimetalica: centro dorado un poquito mas alto que el aro.
+            var centro = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            Object.Destroy(centro.GetComponent<Collider>());
+            centro.transform.SetParent(go.transform, false);
+            centro.transform.localScale = new Vector3(d * 0.68f, 0.00105f, d * 0.68f);
+            var rc = centro.GetComponent<MeshRenderer>();
+            rc.sharedMaterial = Dorado();
+            rc.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        }
         var col = go.AddComponent<BoxCollider>();
         col.size = new Vector3(0.04f, 0.01f, 0.04f);     // mas grande que la moneda: se agarra facil
         string v = centimos >= 100 ? (centimos / 100).ToString() : (centimos / 100f).ToString("0.00", CultureInfo.InvariantCulture);
