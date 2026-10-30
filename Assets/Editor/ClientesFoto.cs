@@ -31,6 +31,12 @@ public static class ClientesFoto
             Sacar("foto_arriba.png", g.PuntoCaja + new Vector3(0f, 9f, -4f), g.PuntoCaja + new Vector3(0, 0, -4f), 80f);
             var pantalla = GameObject.Find("Pantalla Caja");
             if (pantalla != null) Sacar("foto_pantalla.png", cajero, pantalla.transform.position, 60f);
+            // El mostrador desde arriba: bandeja de dinero, POS e impresora.
+            var centroM = m.position + Vector3.up * 0.95f;
+            Sacar("foto_mostrador.png", centroM + m.right * 0.2f + Vector3.up * 1.4f - m.forward * 0.6f, centroM + m.right * 0.2f, 60f);
+            Sacar("foto_mostrador2.png", cajero, centroM + m.right * 0.35f, 55f);
+            var resumen = GameObject.Find("Resumen");
+            if (resumen != null && resumen.activeInHierarchy && pantalla != null) Sacar("foto_resumen.png", cajero, pantalla.transform.position, 60f);
             var enCaja = g.ClienteEnCaja;
             if (enCaja != null)
                 Sacar("foto_burbuja.png", cajero, enCaja.transform.position + Vector3.up * 1.7f, 60f);
@@ -39,6 +45,10 @@ public static class ClientesFoto
         Sacar("foto_tienda.png", new Vector3(0f, 2.3f, -2.0f), new Vector3(0f, 1.2f, -14f), 75f);
         Sacar("foto_pasillo.png", new Vector3(4.1f, 2.2f, -9.5f), new Vector3(4.1f, 1.3f, -16f), 70f);
         Sacar("foto_pared.png", new Vector3(10f, 2.1f, -2.5f), new Vector3(10.5f, 1.4f, 0f), 70f);
+        // El letrero de fuera.
+        var letrero = GameObject.Find("Letrero Cajero XR");
+        if (letrero != null)
+            Sacar("foto_letrero.png", letrero.transform.position + letrero.transform.forward * -9f + Vector3.down * 3.5f, letrero.transform.position + Vector3.down * 1.5f, 55f);
         Debug.Log("[Foto] Guardadas en Logs/");
     }
 
