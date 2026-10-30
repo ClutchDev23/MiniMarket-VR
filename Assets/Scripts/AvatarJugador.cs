@@ -109,6 +109,8 @@ public class AvatarJugador : MonoBehaviour
         codoD = anim.GetBoneTransform(HumanBodyBones.RightLowerArm);
         manoD = anim.GetBoneTransform(HumanBodyBones.RightHand);
 
+        izquierda = PrepararMano(true);
+        derecha = PrepararMano(false);
         Vestir(go);
         Holgado();
         Reloj();
@@ -289,8 +291,6 @@ public class AvatarJugador : MonoBehaviour
 
         // No dibujar la cabeza ni las manos del personaje (las manos son las de VR).
         if (cabeza != null) cabeza.localScale = Vector3.one * 0.001f;
-        if (manoI != null) manoI.localScale = Vector3.one * 0.001f;
-        if (manoD != null) manoD.localScale = Vector3.one * 0.001f;
 
         // Brazos hacia las manos de VR.
         Transform objI, objD;
@@ -310,8 +310,11 @@ public class AvatarJugador : MonoBehaviour
                 Debug.Log(sb.ToString());
             }
         }
-        if (objI != null) Brazo(hombroI, codoI, manoI, objI.position, -1f);
-        if (objD != null) Brazo(hombroD, codoD, manoD, objD.position, 1f);
+        if (objI != null) { Brazo(hombroI, codoI, manoI, objI.position, -1f); Mano(izquierda, objI, -1f); }
+        if (objD != null) { Brazo(hombroD, codoD, manoD, objD.position, 1f); Mano(derecha, objD, 1f); }
+        // Las manos que se ven son las del personaje (brazo y mano de una sola pieza):
+        // las manos de VR se esconden (siguen funcionando para agarrar).
+        foreach (var r in manosVR) if (r != null && r.enabled) r.enabled = false;
 
         if (Time.time > tintarManosEn) { TintarManosVR(); tintarManosEn = Time.time + 3f; }
     }
@@ -368,31 +371,152 @@ public class AvatarJugador : MonoBehaviour
         }
     }
 
-    /// <summary>Las manos de VR del mismo color de piel.</summary>
-    readonly HashSet<Renderer> tintadas = new HashSet<Renderer>();
+    readonly List<Renderer> manosVR = new List<Renderer>();
+    readonly HashSet<Renderer> vistas = new HashSet<Renderer>();
+    /// <summary>Junta las mallas de las manos de VR del rig (para esconderlas).</summary>
     void TintarManosVR()
     {
         if (origen == null) return;
-        // Todas las manos del rig (Hand Visualizer, manos de Quest...), aunque esten apagadas.
         foreach (var r in origen.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            if (vistas.Add(r)) manosVR.Add(r);
+    }
+
+    // ================================================================== manos
+    /// <summary>Cuantas veces se toco un boton con el dedo (lo usa el tutorial).</summary>
+    public static int Toques { get; private set; }
+
+    class Mano_
+    {
+        public bool izq;
+        public Transform mano;
+        public Vector3 dedosLocal, palmaLocal;
+        public Transform[][] dedos;          // [pulgar, indice, medio, anular, menique][prox, inter, distal]
+        public float cierre, indice;         // 0 abierta .. 1 cerrada (suave)
+        public float proximoToque;
+        public Transform punta;
+    }
+    Mano_ izquierda, derecha;
+    readonly List<UnityEngine.UI.Button> botones = new List<UnityEngine.UI.Button>();
+    float buscarBotonesEn;
+
+    Mano_ PrepararMano(bool izq)
+    {
+        var h = new Mano_ { izq = izq, mano = izq ? manoI : manoD };
+        if (h.mano == null) return null;
+        HumanBodyBones B(string n) => (HumanBodyBones)System.Enum.Parse(typeof(HumanBodyBones), (izq ? "Left" : "Right") + n);
+        string[] nombres = { "Thumb", "Index", "Middle", "Ring", "Little" };
+        string[] partes = { "Proximal", "Intermediate", "Distal" };
+        h.dedos = new Transform[5][];
+        for (int d = 0; d < 5; d++)
         {
-            if (!tintadas.Add(r)) continue;
-            if (r.name.ToLowerInvariant().Contains("pinch")) continue;   // el puntero de pinza no es piel
-            var m = r.material;
-            var sh = m.shader;
-            var props = new System.Text.StringBuilder();
-            for (int i = 0; i < sh.GetPropertyCount(); i++)
+            h.dedos[d] = new Transform[3];
+            for (int k = 0; k < 3; k++) h.dedos[d][k] = anim.GetBoneTransform(B(nombres[d] + partes[k]));
+        }
+        var medio = h.dedos[2][0]; var pulgar = h.dedos[0][0];
+        if (medio == null || pulgar == null) return h;
+        // En la pose de inicio: hacia donde apuntan los dedos y hacia donde mira la palma.
+        var f = (medio.position - h.mano.position).normalized;
+        var t = (pulgar.position - h.mano.position).normalized;
+        var palma = Vector3.Cross(f, t).normalized * (izq ? -1f : 1f);
+        h.dedosLocal = Quaternion.Inverse(h.mano.rotation) * f;
+        h.palmaLocal = Quaternion.Inverse(h.mano.rotation) * palma;
+        // Punta del indice (un poco mas alla del ultimo hueso).
+        var d1 = h.dedos[1][2]; var d0 = h.dedos[1][1];
+        if (d1 != null && d0 != null)
+        {
+            h.punta = new GameObject("Punta indice").transform;
+            h.punta.SetParent(d1, false);
+            h.punta.position = d1.position + (d1.position - d0.position) * 0.9f;
+        }
+        return h;
+    }
+
+    static float Eje(bool izq, string nombre)
+    {
+        foreach (var dev in UnityEngine.InputSystem.InputSystem.devices)
+        {
+            if (!(dev is UnityEngine.InputSystem.XR.XRController)) continue;
+            bool es = false;
+            foreach (var u in dev.usages) if (u == (izq ? UnityEngine.InputSystem.CommonUsages.LeftHand : UnityEngine.InputSystem.CommonUsages.RightHand)) es = true;
+            if (!es) continue;
+            if (dev.TryGetChildControl(nombre) is UnityEngine.InputSystem.Controls.AxisControl a) return a.ReadValue();
+        }
+        return 0f;
+    }
+
+    /// <summary>
+    /// Gira la mano del personaje como tu mano/mando y mueve los dedos:
+    ///   GRIP = puño (agarrar) · GATILLO (R2) = dedo indice estirado para tocar pantallas.
+    /// Con el indice estirado, tocar un boton de un panel (la caja) lo aprieta.
+    /// </summary>
+    void Mano(Mano_ h, Transform objetivo, float lado)
+    {
+        if (h == null || h.mano == null || h.dedos == null) return;
+        bool deVR = objetivo.GetComponentInParent<XRHandTrackingEvents>() != null;
+        // Mano de VR (XR Hands): dedos a +Z, palma a -Y. Mando: dedos adelante, palma hacia adentro.
+        var fD = objetivo.forward;
+        var pD = deVR ? -objetivo.up : (lado > 0 ? -objetivo.right : objetivo.right);
+        if (h.dedosLocal.sqrMagnitude > 0.5f)
+            h.mano.rotation = Quaternion.LookRotation(fD, -pD) * Quaternion.Inverse(Quaternion.LookRotation(h.dedosLocal, -h.palmaLocal));
+
+        float grip = Eje(h.izq, "grip"), gatillo = Eje(h.izq, "trigger");
+        bool apuntar = gatillo > 0.5f && grip < 0.5f;
+        float k = 1f - Mathf.Exp(-14f * Time.deltaTime);
+        float cierreQuiero = Mathf.Max(grip, apuntar ? 1f : 0.15f);
+        float indiceQuiero = apuntar ? 0f : Mathf.Max(grip, 0.15f + 0.4f * gatillo);
+        h.cierre = Mathf.Lerp(h.cierre, cierreQuiero, k);
+        h.indice = Mathf.Lerp(h.indice, indiceQuiero, k);
+
+        var manoF = h.mano.rotation * h.dedosLocal;
+        var manoP = h.mano.rotation * h.palmaLocal;
+        var eje = Vector3.Cross(manoF, manoP).normalized;
+        float[] grados = { 70f, 95f, 65f };
+        for (int d = 0; d < 5; d++)
+        {
+            float c = d == 1 ? h.indice : h.cierre;
+            float factor = d == 0 ? 0.45f : 1f;
+            for (int j = 0; j < 3; j++)
             {
-                if (sh.GetPropertyType(i) != UnityEngine.Rendering.ShaderPropertyType.Color) continue;
-                string n = sh.GetPropertyName(i);
-                props.Append(n).Append(' ');
-                string l = n.ToLowerInvariant();
-                if (l.Contains("emis") || l.Contains("fresnel") || l.Contains("outline") || l.Contains("rim") || l.Contains("spec")) continue;
-                if (l == "_color" || l.Contains("base") || l.Contains("main") || l.Contains("albedo") || l.Contains("tint") || l.Contains("hand") || l.Contains("skin"))
-                    m.SetColor(n, Piel);
+                var b = h.dedos[d][j];
+                if (b == null) continue;
+                b.rotation = Quaternion.AngleAxis(grados[j] * c * factor, eje) * b.rotation;
             }
-            if (m.HasProperty("_BaseMap")) m.SetTexture("_BaseMap", null);
-            Debug.Log("[Cuerpo] Mano VR: " + r.name + " shader=" + sh.name + " colores: " + props);
+        }
+
+        if (apuntar && h.punta != null) Tocar(h);
+    }
+
+    void Tocar(Mano_ h)
+    {
+        if (Time.time < h.proximoToque) return;
+        if (Time.time > buscarBotonesEn)
+        {
+            botones.Clear();
+            foreach (var b in FindObjectsByType<UnityEngine.UI.Button>(FindObjectsSortMode.None))
+            {
+                var cv = b.GetComponentInParent<Canvas>();
+                if (cv != null && cv.renderMode == RenderMode.WorldSpace) botones.Add(b);
+            }
+            buscarBotonesEn = Time.time + 1f;
+        }
+        var p = h.punta.position;
+        var esquinas = new Vector3[4];
+        foreach (var b in botones)
+        {
+            if (b == null || !b.isActiveAndEnabled || !b.interactable) continue;
+            var rt = (RectTransform)b.transform;
+            rt.GetWorldCorners(esquinas);
+            var plano = new Plane(esquinas[0], esquinas[1], esquinas[2]);
+            if (Mathf.Abs(plano.GetDistanceToPoint(p)) > 0.025f) continue;
+            var local = rt.InverseTransformPoint(p);
+            if (!rt.rect.Contains(new Vector2(local.x, local.y))) continue;
+            b.onClick.Invoke();
+            Toques++;
+            h.proximoToque = Time.time + 0.6f;
+            Haptica.Ambos(0.35f, 0.05f);
+            Debug.Log("[Cuerpo] Dedo toco: " + b.name);
+            return;
         }
     }
+
 }
