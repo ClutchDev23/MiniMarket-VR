@@ -134,7 +134,7 @@ public class Tutorial : MonoBehaviour
                 false, true, Parte.Gatillo, "apretar", 70f);
         Agregar("MENÚ DE PAUSA", "Aprieta el botón <b>☰</b> del mando izquierdo (o <b>B</b>) para abrir la pausa.\nLuego apriétalo otra vez para cerrarla.",
                 true, true, Parte.Menu, "apretar", 0f);
-        Agregar("TOCAR LA PANTALLA", "Mantén apretado el <b>GATILLO</b>: tu mano pone el <b>DEDO ÍNDICE</b>.\nToca con ese dedo un botón de la pantalla de la caja (así cobras).",
+        Agregar("TOCAR LA PANTALLA", "Mantén apretado el <b>GATILLO</b> (R2).\nToca con ese dedo un botón de la pantalla de la caja (así cobras).",
                 false, true, Parte.Gatillo, "apretar", 70f);
 
         CrearPanel();
@@ -182,7 +182,7 @@ public class Tutorial : MonoBehaviour
         pausaAbierta = false;
         fraseInicial = VozJugador.I != null ? VozJugador.I.UltimaFrase : "";
         escaneado = false;
-        toquesInicio = AvatarJugador.Toques;
+        toquesInicio = DedoTocar.Toques;
         if (p.titulo == "ESCANEAR" && lectorSuscrito == null)
         {
             lectorSuscrito = FindAnyObjectByType<LectorCodigos>();
@@ -285,7 +285,7 @@ public class Tutorial : MonoBehaviour
                 if (menu.estaAbierto) pausaAbierta = true;
                 return pausaAbierta && !menu.estaAbierto;
             case "TOCAR LA PANTALLA":
-                return AvatarJugador.Toques > toquesInicio;
+                return DedoTocar.Toques > toquesInicio;
         }
         return false;
     }
