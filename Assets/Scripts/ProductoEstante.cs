@@ -49,7 +49,26 @@ public class ProductoEstante : MonoBehaviour
         grab.selectExited.RemoveListener(AlSoltar);
     }
 
-    void AlAgarrar(SelectEnterEventArgs args) => Liberar();
+    void AlAgarrar(SelectEnterEventArgs args)
+    {
+        Liberar();
+        Haptica.Pulso(args.interactorObject, 0.18f, 0.03f);
+    }
+
+    // ------------------------------------------------------------------ golpe al caer
+    static float ultimoGolpeGlobal;
+    float ultimoGolpe;
+
+    void OnCollisionEnter(Collision c)
+    {
+        if (!Liberado || (grab != null && grab.isSelected)) return;
+        float v = c.relativeVelocity.magnitude;
+        if (v < 0.9f) return;
+        if (Time.time - ultimoGolpe < 0.25f || Time.time - ultimoGolpeGlobal < 0.04f) return;
+        ultimoGolpe = ultimoGolpeGlobal = Time.time;
+        float vol = Mathf.Clamp01((v - 0.9f) / 3f) * 0.8f + 0.15f;
+        AudioSource.PlayClipAtPoint(SonidosProcedurales.Golpe(), c.GetContact(0).point, vol);
+    }
 
     void AlSoltar(SelectExitEventArgs args)
     {
