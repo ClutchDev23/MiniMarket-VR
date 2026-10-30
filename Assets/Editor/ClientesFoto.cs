@@ -52,6 +52,27 @@ public static class ClientesFoto
         Debug.Log("[Foto] Guardadas en Logs/");
     }
 
+    /// <summary>Fotos de un mueble de cada tipo (para revisar como quedan llenos).</summary>
+    [MenuItem("Tools/Minimarket/Productos/Foto de muebles")]
+    public static void FotoMuebles()
+    {
+        foreach (var tipo in new[] { "Pref_Freezer01", "Pref_IceCreamM", "Pref_WallRack01", "Pref_WallRack02", "Pref_WallRack03", "Pref_CrateStand01" })
+        {
+            Transform t = null;
+            foreach (var x in Object.FindObjectsByType<Transform>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+                if (x.name.StartsWith(tipo) && (x.parent == null || !x.parent.name.StartsWith(tipo))) { t = x; break; }
+            if (t == null) continue;
+            var rs = t.GetComponentsInChildren<Renderer>();
+            if (rs.Length == 0) continue;
+            var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
+            var f = t.forward; f.y = 0; f.Normalize();
+            float d = Mathf.Max(b.size.x, b.size.z) * 0.9f + 1.2f;
+            Sacar("mueble_" + tipo + "_a.png", b.center + f * d + Vector3.up * 0.5f, b.center, 60f);
+            Sacar("mueble_" + tipo + "_b.png", b.center - f * d + Vector3.up * 0.5f, b.center, 60f);
+        }
+        Debug.Log("[Foto] Muebles guardados en Logs/");
+    }
+
     static void Sacar(string archivo, Vector3 desde, Vector3 hacia, float fov)
     {
         var go = new GameObject("FotoCam");
