@@ -183,6 +183,8 @@ flowchart LR
 
 ## 🎮 Controles
 
+> La primera vez que entras a la tienda aparece un **tutorial interactivo**: los dos mandos en 3D muestran qué botón usar (se ilumina y se mueve) y cada paso se completa haciéndolo. Se puede repetir desde el menú de pausa → **Tutorial**.
+
 | Acción | 🎮 Controladores | 🤲 Manos |
 |---|---|---|
 | **Agarrar** | Tocar el objeto y apretar **Grip** | Tocar el objeto y cerrar la mano |
@@ -242,6 +244,7 @@ MiniMarket-VR/
 | `MainMenu` · `MenuPausa` | Menú principal y menú de pausa en VR |
 | `ObjetosCaja` | Bandeja de dinero, POS y impresora de boletas en 3D |
 | `CarritoCliente` | El carrito que empuja cada cliente |
+| `Tutorial` | Tutorial interactivo: mandos 3D animados que muestran cada botón y pasos que se cumplen jugando |
 | `VocesClientes` · `VozJugador` · `VozWit` | Voces de los clientes y reconocimiento de voz del jugador (Windows o Wit.ai en el Quest) |
 | `Haptica` · `SonidosProcedurales` | Vibración de los mandos y sonidos hechos por código |
 | `ArmSwingLocomotion` | Caminar moviendo los brazos |
@@ -291,6 +294,7 @@ Todo vive en el menú **Tools › Minimarket**:
 | **Caja** | 1 · 2 · 3 · Pruebas | Escanear y cobrar de prueba en Play |
 | | 4 · Prueba completa con fotos | Hace una venta entera y guarda fotos en `Logs/` |
 | | 5 · Foto de billetes y monedas | Pone todos los billetes y monedas y les toma una foto |
+| **Tutorial** | Empezar de nuevo · Siguiente paso · Foto | Para probar el tutorial sin visor |
 | **Voz** | Configurar Wit.ai | Guarda el token de Wit.ai para hablar con los clientes en el Quest |
 | **Letrero** | Poner letrero Cajero XR | Pone el letrero nuevo en la fachada (día y noche) |
 | **Menu** | Rehacer menú con estilo de la tienda | Rehace el cuarto y el menú principal con los colores de la tienda |
