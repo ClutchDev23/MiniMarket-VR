@@ -114,4 +114,17 @@ public static class SonidosProcedurales
             return (Mathf.Sin(2f * Mathf.PI * f * t) + 0.25f * Mathf.Sin(2f * Mathf.PI * 2f * f * t)) * env;
         });
     }
+
+    /// <summary>Tres notas que suben (Do-Mi-Sol): paso del tutorial cumplido.</summary>
+    public static AudioClip Logro()
+    {
+        return Crear("logro", 0.55f, (i, t) =>
+        {
+            int n = Mathf.Min(2, (int)(t / 0.11f));
+            float f = n == 0 ? 1047f : n == 1 ? 1319f : 1568f;
+            float tl = t - n * 0.11f;
+            float env = Mathf.Clamp01(tl * 400f) * Mathf.Exp(-tl * (n == 2 ? 5f : 12f));
+            return (Mathf.Sin(2f * Mathf.PI * f * t) + 0.3f * Mathf.Sin(2f * Mathf.PI * 2f * f * t)) * env * 0.8f;
+        });
+    }
 }
