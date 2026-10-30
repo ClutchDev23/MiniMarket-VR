@@ -363,6 +363,7 @@ public class MenuPausa : MonoBehaviour
         CrearBoton("Reanudar", colIzq.transform, ref y, Reanudar, true);
         CrearBoton("Reiniciar", colIzq.transform, ref y, Reiniciar, false);
         CrearBoton("Salir", colIzq.transform, ref y, Salir, false);
+        CrearBoton("Tutorial", colIzq.transform, ref y, () => { Cerrar(); Tutorial.Empezar(); }, false);
 
         var ayuda = CrearTexto("Ayuda", colIzq.transform, "Boton ☰ o B del mando para cerrar");
         ayuda.fontSize = 21;
