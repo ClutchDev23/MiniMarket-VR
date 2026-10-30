@@ -289,6 +289,14 @@ public class MenuPausa : MonoBehaviour
         cClick = GenerarTono("clic", 520f, 760f, 0.11f, 0.5f);
         cHover = GenerarTono("hover", 900f, 1250f, 0.07f, 0.3f);
 
+        // Colores de la tienda (naranja Cajero XR sobre gris oscuro), iguales al
+        // menu principal y a la caja. Se ponen aqui porque la escena guardaba los rosados.
+        colorFondo = new Color(0.06f, 0.07f, 0.09f, 0.95f);
+        colorBoton = new Color(0.18f, 0.20f, 0.25f, 1f);
+        colorBotonHover = new Color(0.98f, 0.62f, 0.25f, 1f);
+        colorTexto = new Color(0.96f, 0.96f, 0.97f, 1f);
+        colorAcento = new Color(0.95f, 0.55f, 0.16f, 1f);
+
         // ------------------------------------------------------------- canvas
         panel = new GameObject("MenuPausa_Canvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         panel.transform.SetParent(transform, false);
@@ -347,14 +355,16 @@ public class MenuPausa : MonoBehaviour
         ci.anchorMin = new Vector2(0f, 1f); ci.anchorMax = new Vector2(0.5f, 1f);
         ci.pivot = new Vector2(0f, 1f);
         ci.anchoredPosition = new Vector2(0f, -100f);
-        ci.sizeDelta = new Vector2(330f, 620f);
+        // Con anclas estiradas (0..0.5) sizeDelta SUMA al ancho: -30 = media columna menos
+        // un margen. Con 330 cada columna media 690 y se montaban una encima de otra.
+        ci.sizeDelta = new Vector2(-30f, 620f);
 
         float y = 0f;
         CrearBoton("Reanudar", colIzq.transform, ref y, Reanudar, true);
         CrearBoton("Reiniciar", colIzq.transform, ref y, Reiniciar, false);
         CrearBoton("Salir", colIzq.transform, ref y, Salir, false);
 
-        var ayuda = CrearTexto("Ayuda", colIzq.transform, "Boton Menu del mando para cerrar");
+        var ayuda = CrearTexto("Ayuda", colIzq.transform, "Boton ☰ o B del mando para cerrar");
         ayuda.fontSize = 21;
         ayuda.color = new Color(1f, 1f, 1f, 0.5f);
         ayuda.alignment = TextAnchor.UpperCenter;
@@ -370,7 +380,7 @@ public class MenuPausa : MonoBehaviour
         cd.anchorMin = new Vector2(0.5f, 1f); cd.anchorMax = new Vector2(1f, 1f);
         cd.pivot = new Vector2(0f, 1f);
         cd.anchoredPosition = new Vector2(20f, -100f);
-        cd.sizeDelta = new Vector2(330f, 620f);
+        cd.sizeDelta = new Vector2(-30f, 620f);
 
         float y2 = 0f;
 
