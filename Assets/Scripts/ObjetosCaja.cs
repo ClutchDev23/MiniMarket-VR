@@ -402,6 +402,7 @@ public class BandejaDinero : MonoBehaviour
         if (img != null)
         {
             r.sharedMaterial = img;
+            disco.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);   // la imagen queda derecha
             var c3 = go.AddComponent<BoxCollider>();
             c3.size = new Vector3(0.04f, 0.01f, 0.04f);
             ObjetosCaja.Agarrable(go, 0.008f);
