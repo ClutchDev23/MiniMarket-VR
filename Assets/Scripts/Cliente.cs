@@ -564,6 +564,35 @@ public class Cliente : MonoBehaviour
         if (pos != null) pos.AnimarTarjeta(transform.position + Vector3.up * (altura * 0.6f) + transform.forward * 0.35f);
     }
 
+    /// <summary>El jugador le hablo (VozJugador): responde algo corto con su voz.</summary>
+    public void Responder(VozJugador.Intencion i)
+    {
+        string clave;
+        switch (i)
+        {
+            case VozJugador.Intencion.Saludo: clave = "hola"; break;
+            case VozJugador.Intencion.ComoPaga: clave = QuiereTarjeta ? "pago_tarjeta" : "pago_efectivo"; break;
+            case VozJugador.Intencion.AlgoMas: clave = "eso_es_todo"; break;
+            case VozJugador.Intencion.Sencillo: clave = "sin_sencillo"; break;
+            case VozJugador.Intencion.Bolsa: clave = "si_bolsa"; break;
+            case VozJugador.Intencion.Boleta: clave = "boleta"; break;
+            case VozJugador.Intencion.Gracias: clave = "a_ti"; break;
+            case VozJugador.Intencion.Despedida: clave = "igualmente"; break;
+            case VozJugador.Intencion.Espere: clave = "espera"; break;
+            default: clave = "no_entendi"; break;
+        }
+        // Si ya habia dicho con cuanto paga, lo vuelve a mostrar despues de responder.
+        string antes = txtBurbuja != null && burbujaHasta > Time.time + 60f ? txtBurbuja.text : null;
+        Decir(VocesClientes.Frases.TryGetValue(clave, out var t) ? t : "...", 3f, clave);
+        if (antes != null) StartCoroutine(VolverADecir(antes, 3f));
+    }
+
+    IEnumerator VolverADecir(string texto, float espera)
+    {
+        yield return new WaitForSeconds(espera);
+        if (ventaCobrada == null && txtBurbuja != null) { txtBurbuja.text = texto; burbujaHasta = Time.time + 9999f; }
+    }
+
     public void Decir(string texto, float segundos) { Decir(texto, segundos, null); }
 
     /// <summary>Muestra la burbuja y, si hay audio grabado para esa frase, la dice en voz alta.</summary>
