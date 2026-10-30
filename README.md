@@ -287,7 +287,12 @@ Todo vive en el menú **Tools › Minimarket**:
 | **Clientes** | 1 · Configurar personajes | Prepara los `.fbx` de Mixamo (rig, texturas, animaciones) |
 | | 2 · Hornear camino | Rehace el camino de los clientes si mueves estantes |
 | | 3 · 4 · 5 · Pruebas | Traer un cliente o simular al cajero sin visor |
-| **Caja** | Pruebas | Escanear y cobrar de prueba en Play |
+| | 6 · Grabar voces | Graba las frases de los clientes con la voz en español de Windows |
+| **Caja** | 1 · 2 · 3 · Pruebas | Escanear y cobrar de prueba en Play |
+| | 4 · Prueba completa con fotos | Hace una venta entera y guarda fotos en `Logs/` |
+| **Letrero** | Poner letrero Cajero XR | Pone el letrero nuevo en la fachada (día y noche) |
+| **Menu** | Rehacer menú con estilo de la tienda | Rehace el cuarto y el menú principal con los colores de la tienda |
+| **Git** | Subir cambios a main | Trae los commits preparados en `Logs/cambios.bundle` y los sube |
 
 <details>
 <summary><b>💲 Cambiar precios o agregar productos</b></summary>
