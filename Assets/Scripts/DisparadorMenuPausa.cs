@@ -65,7 +65,8 @@ public class DisparadorMenuPausa : MonoBehaviour
     };
     static readonly string[] NombresMenu =
     {
-        "menuButton", "startButton", "optionsButton", "guideButton", "viewButton",
+        // "menu" es el boton ☰ del mando IZQUIERDO del Quest con OpenXR (no se llama menuButton).
+        "menu", "menuButton", "startButton", "optionsButton", "guideButton", "viewButton",
     };
 
     void Awake()
@@ -73,10 +74,77 @@ public class DisparadorMenuPausa : MonoBehaviour
         if (menuPausa == null) menuPausa = GetComponent<MenuPausa>();
     }
 
+    [Header("Ayuda al empezar")]
+    [Tooltip("Muestra unos segundos delante del jugador con que boton se abre la pausa.")]
+    public bool mostrarAyuda = true;
+    public float segundosAyuda = 9f;
+    Transform ayuda;
+    float ayudaHasta;
+
+    void Start()
+    {
+        if (mostrarAyuda) CrearAyuda();
+    }
+
+    void CrearAyuda()
+    {
+        var go = new GameObject("Ayuda Pausa", typeof(RectTransform), typeof(Canvas), typeof(UnityEngine.UI.CanvasScaler));
+        var c = go.GetComponent<Canvas>();
+        c.renderMode = RenderMode.WorldSpace;
+        var rt = (RectTransform)go.transform;
+        rt.sizeDelta = new Vector2(700, 110);
+        rt.localScale = Vector3.one * 0.0011f;
+        go.GetComponent<UnityEngine.UI.CanvasScaler>().dynamicPixelsPerUnit = 4f;
+        var fondo = new GameObject("Fondo", typeof(RectTransform), typeof(UnityEngine.UI.Image));
+        fondo.transform.SetParent(go.transform, false);
+        var img = fondo.GetComponent<UnityEngine.UI.Image>();
+        img.color = new Color(0.07f, 0.08f, 0.11f, 0.88f);
+        img.raycastTarget = false;
+        var frt = (RectTransform)fondo.transform; frt.anchorMin = Vector2.zero; frt.anchorMax = Vector2.one; frt.offsetMin = frt.offsetMax = Vector2.zero;
+        var tgo = new GameObject("Texto", typeof(RectTransform), typeof(UnityEngine.UI.Text));
+        tgo.transform.SetParent(go.transform, false);
+        var t = tgo.GetComponent<UnityEngine.UI.Text>();
+        t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        t.text = "<color=#F28C28>MENU DE PAUSA</color>\nBoton ☰ del mando izquierdo  ·  boton B  ·  Escape en PC";
+        t.fontSize = 30; t.fontStyle = FontStyle.Bold; t.alignment = TextAnchor.MiddleCenter; t.color = Color.white;
+        t.supportRichText = true; t.raycastTarget = false;
+        var trt = t.rectTransform; trt.anchorMin = Vector2.zero; trt.anchorMax = Vector2.one; trt.offsetMin = trt.offsetMax = Vector2.zero;
+        ayuda = go.transform;
+        ayudaHasta = Time.time + segundosAyuda;
+    }
+
+    void LateUpdate()
+    {
+        if (ayuda == null) return;
+        var cam = Camera.main;
+        if (Time.time > ayudaHasta || (menuPausa != null && menuPausa.estaAbierto)) { Destroy(ayuda.gameObject); ayuda = null; return; }
+        if (cam == null) return;
+        var f = cam.transform.forward; f.y = 0f;
+        if (f.sqrMagnitude < 0.01f) f = Vector3.forward;
+        f.Normalize();
+        var objetivo = cam.transform.position + f * 1.3f + Vector3.down * 0.35f;
+        ayuda.position = Vector3.Lerp(ayuda.position == Vector3.zero ? objetivo : ayuda.position, objetivo, Time.deltaTime * 4f);
+        ayuda.rotation = Quaternion.LookRotation(f, Vector3.up);
+    }
+
     void Update()
     {
         if (menuPausa == null) return;
-        if (menuPausa.estaAbierto) return;
+        if (menuPausa.estaAbierto)
+        {
+            // Con el menu abierto, el mismo boton (☰ o B) lo cierra.
+            foreach (var dev in InputSystem.devices)
+            {
+                if (dev is not InputDevice d || !d.added) continue;
+                if ((usarBotonSecundario && Pulsado(d, NombresSecundario, CommonUsages.SecondaryAction)) ||
+                    (usarBotonMenu && Pulsado(d, NombresMenu, CommonUsages.Menu)))
+                {
+                    menuPausa.Cerrar();
+                    break;
+                }
+            }
+            return;
+        }
 
         bool abrir = false;
 
