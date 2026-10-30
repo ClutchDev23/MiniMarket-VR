@@ -37,6 +37,10 @@ public static class ObjetosCaja
         b.transform.SetParent(raiz, false);
         b.Iniciar(caja, mostrador);
 
+        var cj = new GameObject("Cajon de dinero").AddComponent<CajonDinero>();
+        cj.transform.SetParent(raiz, false);
+        cj.Iniciar(caja, mostrador);
+
         var p = new GameObject("POS").AddComponent<POS3D>();
         p.transform.SetParent(raiz, false);
         p.Iniciar(caja, mostrador);
@@ -241,6 +245,13 @@ public class BandejaDinero : MonoBehaviour
         vueltoMostrado = 0;
     }
 
+    /// <summary>El pago del cliente vuela de la bandeja al cajon abierto.</summary>
+    public void PagoAlCajon(CajonDinero c)
+    {
+        foreach (var g in pago) if (g != null) c.Guardar(g);
+        pago.Clear();
+    }
+
     void AlCobrar(CajaRegistradora.Venta v)
     {
         // El pago entra al cajon.
@@ -264,7 +275,13 @@ public class BandejaDinero : MonoBehaviour
         }
         int falta = entregado - vueltoMostrado;
         foreach (var d in CajaRegistradora.DesgloseLista(falta))
-            if (vuelto.Count < 14) vuelto.Add(Crear(d, vuelto.Count, false));
+            if (vuelto.Count < 14)
+            {
+                var pieza = Crear(d, vuelto.Count, false);
+                vuelto.Add(pieza);
+                // Sale de su separador del cajon (si esta abierto) hasta la bandeja.
+                if (CajonDinero.I != null && CajonDinero.I.Abierta) CajonDinero.I.Sacar(pieza, d);
+            }
         vueltoMostrado = entregado;
         Debug.Log("[Bandeja] Vuelto en la bandeja: " + ObjetosCaja.Soles(entregado) + " (" + vuelto.Count + " piezas) en " + transform.position);
     }
@@ -360,6 +377,7 @@ public class BandejaDinero : MonoBehaviour
     public static GameObject Billete3D(int centimos)
     {
         var go = new GameObject("Billete S/ " + centimos / 100);
+        go.AddComponent<Dinero>().centimos = centimos;
         var cuerpo = ObjetosCaja.Caja("Papel", go.transform, new Vector3(0.14f, 0.0015f, 0.066f), MatDe(centimos), false);
         var anverso = MatImagen("b" + centimos / 100 + "a", 0.1f);
         var reverso = MatImagen("b" + centimos / 100 + "r", 0.1f);
@@ -387,6 +405,7 @@ public class BandejaDinero : MonoBehaviour
     public static GameObject Moneda3D(int centimos)
     {
         var go = new GameObject("Moneda " + ObjetosCaja.Soles(centimos));
+        go.AddComponent<Dinero>().centimos = centimos;
         // Diametros reales: S/5 24.4 mm, S/2 22.3 mm, S/1 25.5 mm, 50c 22 mm, 20c 21 mm, 10c 20.5 mm.
         float d = centimos >= 500 ? 0.0244f : centimos >= 200 ? 0.0223f : centimos >= 100 ? 0.0255f
                 : centimos >= 50 ? 0.022f : centimos >= 20 ? 0.021f : 0.0205f;
