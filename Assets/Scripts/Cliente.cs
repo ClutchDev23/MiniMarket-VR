@@ -52,6 +52,8 @@ public class Cliente : MonoBehaviour
     float hablarHasta;
     float altura = 1.8f;
 
+    CarritoCliente carrito;
+
     // voz
     AudioSource voz;
     bool esMujer;
@@ -129,8 +131,9 @@ public class Cliente : MonoBehaviour
 
     IEnumerator Vida()
     {
-        // 1. entrar
+        // 1. entrar (y, si hay uno libre cerca, tomar un carrito)
         yield return IrA(g.EntradaDentro);
+        if (Random.value < g.Config.probCarrito) yield return TomarCarrito();
 
         // 2. comprar
         int paradas = Random.Range(1, 3);
@@ -178,7 +181,15 @@ public class Cliente : MonoBehaviour
             if (g.PosicionEnFila(this) != pos) continue;   // avanzo la fila mientras caminaba
 
             yield return MirarHacia(g.ZonaProductos);
-            if (pos == 0) break;
+            if (pos == 0)
+            {
+                // Deja el carrito detras de el, para no chocar con el mostrador.
+                if (carrito != null && carrito.Carrito != null)
+                {
+                    carrito.Estacionar(transform.position + g.DireccionFila * 0.95f, Quaternion.LookRotation(-g.DireccionFila));
+                }
+                break;
+            }
             while (g.PosicionEnFila(this) == pos) yield return null;
         }
 
@@ -186,10 +197,11 @@ public class Cliente : MonoBehaviour
         EnCaja = true;
         var caja = g.Caja;
         if (caja != null) caja.VentaCobrada += AlCobrar;   // antes de nada: asi no se pierde un cobro rapido
-        PonerProductos();
-        GestorClientes.Log(name + " llego a la caja y dejo " + copias.Count + " producto(s) en " + g.ZonaProductos);
         Decir(Saludo(out var claveSaludo), 4f, claveSaludo);
-        yield return new WaitForSeconds(1.5f);
+        yield return PonerProductos();
+        GestorClientes.Log(name + " llego a la caja y dejo " + copias.Count + " producto(s) en " + g.ZonaProductos +
+                           (carrito != null && carrito.Carrito != null ? " (los saco del carrito)" : ""));
+        yield return new WaitForSeconds(0.5f);
 
         // 5. esperar a que escanees todo
         float t0 = Time.time, ultimoCambio = Time.time;
@@ -336,6 +348,7 @@ public class Cliente : MonoBehaviour
             var imp = ImpresoraBoletas.I; if (imp != null) imp.ClienteSeLlevaBoleta();
         }
         EnCaja = false;
+        if (carrito != null && carrito.Carrito != null) carrito.Empujar();   // se va con su carrito
         var caja = g.Caja;
         if (caja != null) caja.VentaCobrada -= AlCobrar;
         g.SalirDeFila(this);
@@ -359,11 +372,27 @@ public class Cliente : MonoBehaviour
         {
             lista.Add(p);
             originales.Add(original);
+            if (carrito != null && carrito.Carrito != null) carrito.AgregarVisual(original);
         }
     }
 
-    /// <summary>Pone copias de sus productos en la banda de la caja, para que los escanees.</summary>
-    void PonerProductos()
+    IEnumerator TomarCarrito()
+    {
+        var c = CarritoCliente.BuscarLibre(transform.position, 9f);
+        if (c == null) yield break;
+        var hacia = transform.position - c.position; hacia.y = 0f;
+        var junto = g.Muestrear(c.position + (hacia.sqrMagnitude > 0.01f ? hacia.normalized : Vector3.forward) * 0.9f, 1.2f, transform.position);
+        yield return IrA(junto);
+        yield return MirarHacia(c.position);
+        carrito = gameObject.AddComponent<CarritoCliente>();
+        if (!carrito.Tomar(c, transform)) { Destroy(carrito); carrito = null; yield break; }
+        GestorClientes.Log(name + " toma el carrito " + c.name);
+        yield return new WaitForSeconds(0.4f);
+    }
+
+    /// <summary>Pone copias de sus productos en la banda de la caja, para que los escanees.
+    /// Si trae carrito, los saca uno por uno del cesto.</summary>
+    IEnumerator PonerProductos()
     {
         var m = g.Mostrador;
         Vector3 centro = g.ZonaProductos;
@@ -383,6 +412,22 @@ public class Cliente : MonoBehaviour
             Vector3 pos = centro + der * ((c - 1) * 0.14f) + adel * ((f - 0.5f) * 0.16f);
             pos.y = y + 0.12f;
 
+            var visual = carrito != null ? carrito.SacarVisual() : null;
+            if (visual != null)
+            {
+                // Del carrito a la mesa, en un arco (como si lo levantara con la mano).
+                var desde = visual.transform.position;
+                float k = 0f;
+                while (k < 1f)
+                {
+                    k += Time.deltaTime / 0.5f;
+                    var p = Vector3.Lerp(desde, pos, Mathf.SmoothStep(0f, 1f, k));
+                    p.y += Mathf.Sin(Mathf.Clamp01(k) * Mathf.PI) * 0.35f;
+                    visual.transform.position = p;
+                    yield return null;
+                }
+                Destroy(visual);
+            }
             var copia = Instantiate(o, pos, Quaternion.Euler(0f, Random.Range(0f, 360f), 0f), o.transform.parent);
             copia.name = o.name;   // mismo nombre = mismo precio en la base de datos
             ProductoEstante.ComoSuelto(copia);   // visible y suelto (no lo dibuja el bloque)
@@ -396,6 +441,7 @@ public class Cliente : MonoBehaviour
                 rb.angularVelocity = Vector3.zero;
             }
             copias.Add(copia);
+            if (visual != null) yield return new WaitForSeconds(0.15f);
         }
         g.ActualizarLectores();
     }
