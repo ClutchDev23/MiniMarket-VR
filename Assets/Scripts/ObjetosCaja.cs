@@ -448,27 +448,47 @@ public class POS3D : MonoBehaviour
         // Mira hacia el lado del cliente (+x del mostrador).
         transform.rotation = Quaternion.LookRotation(m.right, Vector3.up);
 
-        var cuerpo = ObjetosCaja.Mat(new Color(0.12f, 0.12f, 0.14f), 0.6f);
-        var gris = ObjetosCaja.Mat(new Color(0.30f, 0.31f, 0.34f), 0.4f);
-        var verde = ObjetosCaja.Mat(new Color(0.55f, 0.75f, 0.55f), 0.2f, true);
 
-        var b = ObjetosCaja.Caja("Cuerpo", transform, new Vector3(0.08f, 0.035f, 0.17f), cuerpo);
-        b.transform.localPosition = new Vector3(0f, 0.0175f, 0f);
+        // POS Android (tipo celular): cuerpo naranja, pantalla tactil grande, cabezal negro
+        // arriba (impresora + lector de tarjeta sin contacto) y agarre negro atras.
+        var naranja = ObjetosCaja.Mat(new Color(0.95f, 0.45f, 0.12f), 0.55f);
+        var negro = ObjetosCaja.Mat(new Color(0.07f, 0.07f, 0.08f), 0.35f);
+        var blanco = ObjetosCaja.Mat(new Color(0.95f, 0.96f, 0.98f), 0.8f, true);
+        var b = ObjetosCaja.Caja("Cuerpo", transform, new Vector3(0.078f, 0.013f, 0.17f), naranja);
+        b.transform.localPosition = new Vector3(0f, 0.03f, 0f);
+        b.transform.localRotation = Quaternion.Euler(-18f, 0f, 0f);
+        var pant = ObjetosCaja.Caja("Pantalla", b.transform, new Vector3(0.86f, 0.08f, 0.62f), blanco, false);
+        pant.transform.localPosition = new Vector3(0f, 0.5f, -0.1f);
+        var cabezal = ObjetosCaja.Caja("Cabezal", b.transform, new Vector3(1.02f, 2.3f, 0.22f), negro, false);
+        cabezal.transform.localPosition = new Vector3(0f, 0.75f, 0.4f);
+        var agarre = ObjetosCaja.Caja("Agarre", b.transform, new Vector3(0.7f, 1.8f, 0.5f), negro, false);
+        agarre.transform.localPosition = new Vector3(0f, -1.1f, -0.12f);
+        ObjetosCaja.Texto(cabezal.transform, ")))", new Vector3(0f, 0.51f, 0f), Quaternion.Euler(90f, 0f, 0f),
+            new Vector2(80, 40), 0.0003f, 26, new Color(0.7f, 0.7f, 0.7f));
+        // Si pusiste tu propio modelo en Assets/Resources/POS/POS.prefab, se usa ese
+        // (se ajusta solo a ~17 cm de largo) y el POS de cajas se esconde (su texto queda).
+        var propio = Resources.Load<GameObject>("POS/POS");
+        if (propio != null)
+        {
+            var go = Instantiate(propio, transform, false);
+            go.name = "POS (modelo propio)";
+            foreach (var col in go.GetComponentsInChildren<Collider>()) Destroy(col);
+            var rs = go.GetComponentsInChildren<Renderer>();
+            if (rs.Length > 0)
+            {
+                var bb = rs[0].bounds; foreach (var r in rs) bb.Encapsulate(r.bounds);
+                float largo = Mathf.Max(bb.size.x, Mathf.Max(bb.size.y, bb.size.z));
+                if (largo > 0.0001f) go.transform.localScale *= 0.17f / largo;
+                bb = rs[0].bounds; foreach (var r in rs) bb.Encapsulate(r.bounds);
+                go.transform.position += new Vector3(transform.position.x - bb.center.x, transform.position.y - bb.min.y, transform.position.z - bb.center.z);
+            }
+            foreach (var r in b.GetComponentsInChildren<MeshRenderer>()) r.enabled = false;
+        }
         b.transform.localRotation = Quaternion.Euler(-12f, 0f, 0f);
         var pant = ObjetosCaja.Caja("Pantallita", b.transform, new Vector3(0.8f, 0.05f, 0.32f), verde, false);
         pant.transform.localPosition = new Vector3(0f, 0.52f, 0.22f);
-        // Teclado: 3 x 4 botoncitos.
-        for (int i = 0; i < 12; i++)
-        {
-            var k = ObjetosCaja.Caja("Tecla", b.transform, new Vector3(0.18f, 0.1f, 0.07f), gris, false);
-            k.transform.localPosition = new Vector3(-0.25f + (i % 3) * 0.25f, 0.52f, -0.06f - (i / 3) * 0.1f);
-        }
-        // Papelito del voucher.
-        var papel = ObjetosCaja.Caja("Ranura", b.transform, new Vector3(0.7f, 0.12f, 0.03f), ObjetosCaja.Mat(Color.white, 0.1f), false);
-        papel.transform.localPosition = new Vector3(0f, 0.5f, 0.49f);
-
         pantalla = ObjetosCaja.Texto(pant.transform, "", new Vector3(0f, 0.6f, 0f), Quaternion.Euler(90f, 0f, 0f),
-            new Vector2(220, 90), 0.0003f, 20, new Color(0.05f, 0.15f, 0.05f));
+            new Vector2(220, 340), 0.0003f, 20, new Color(0.1f, 0.12f, 0.18f));
 
         sfx = gameObject.AddComponent<AudioSource>();
         sfx.spatialBlend = 1f; sfx.minDistance = 0.5f; sfx.maxDistance = 5f; sfx.playOnAwake = false;
