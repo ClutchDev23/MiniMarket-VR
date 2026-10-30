@@ -150,6 +150,9 @@ public class GestorClientes : MonoBehaviour
         clientes.RemoveAll(c => c == null);
         fila.RemoveAll(c => c == null);
 
+        // Mientras esta el tutorial no entra nadie: el turno empieza al terminarlo.
+        if (Tutorial.Activo) { proximoCliente = Time.time + Config.primerClienteEn; return; }
+
         if (Time.time >= proximoCliente)
         {
             if (clientes.Count < Config.maxClientes) TraerCliente();
