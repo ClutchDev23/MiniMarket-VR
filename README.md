@@ -191,7 +191,7 @@ flowchart LR
 | **Caminar** | Joystick izquierdo | Estirar los brazos y moverlos |
 | **Girar** | Joystick derecho | Girar el cuerpo |
 | **Pausa** | Botón **☰** (mando izquierdo) o **B** · **Escape** en PC | — |
-| **Hablar a un cliente** | Di una frase corta: *"hola"*, *"¿cómo va a pagar?"*, *"¿algo más?"*, *"gracias"* (PC / Link) | Igual |
+| **Hablar a un cliente** | Di una frase corta: *"hola"*, *"¿cómo va a pagar?"*, *"¿algo más?"*, *"gracias"*. En PC / Link basta con decirla; en el Quest solo, **mantén el stick izquierdo** mientras hablas (Wit.ai) | Mantén **V** y habla (con Wit.ai) |
 
 
 <br>
@@ -242,7 +242,7 @@ MiniMarket-VR/
 | `MainMenu` · `MenuPausa` | Menú principal y menú de pausa en VR |
 | `ObjetosCaja` | Bandeja de dinero, POS y impresora de boletas en 3D |
 | `CarritoCliente` | El carrito que empuja cada cliente |
-| `VocesClientes` · `VozJugador` | Voces de los clientes y reconocimiento de voz del jugador |
+| `VocesClientes` · `VozJugador` · `VozWit` | Voces de los clientes y reconocimiento de voz del jugador (Windows o Wit.ai en el Quest) |
 | `Haptica` · `SonidosProcedurales` | Vibración de los mandos y sonidos hechos por código |
 | `ArmSwingLocomotion` | Caminar moviendo los brazos |
 
@@ -290,6 +290,8 @@ Todo vive en el menú **Tools › Minimarket**:
 | | 6 · Grabar voces | Graba las frases de los clientes con la voz en español de Windows |
 | **Caja** | 1 · 2 · 3 · Pruebas | Escanear y cobrar de prueba en Play |
 | | 4 · Prueba completa con fotos | Hace una venta entera y guarda fotos en `Logs/` |
+| | 5 · Foto de billetes y monedas | Pone todos los billetes y monedas y les toma una foto |
+| **Voz** | Configurar Wit.ai | Guarda el token de Wit.ai para hablar con los clientes en el Quest |
 | **Letrero** | Poner letrero Cajero XR | Pone el letrero nuevo en la fachada (día y noche) |
 | **Menu** | Rehacer menú con estilo de la tienda | Rehace el cuarto y el menú principal con los colores de la tienda |
 | **Git** | Subir cambios a main | Trae los commits preparados en `Logs/cambios.bundle` y los sube |
@@ -349,7 +351,7 @@ En `Assets/Resources/ConfigClientes.asset` puedes cambiar cuántos clientes entr
 **🔧 Pendiente**
 
 - [x] Billetes y monedas con la imagen del BCRP (anverso y reverso), siempre con la marca **MUESTRA** y "sin valor · solo práctica"
-- [ ] Conversación por voz en el Quest sin PC (Meta Voice SDK)
+- [x] Conversación por voz en el Quest sin PC con Wit.ai, el servicio de voz de Meta (pide el token en *Tools → Minimarket → Voz → Configurar Wit.ai*)
 - [ ] Modo realidad mixta (passthrough + detección de planos)
 - [ ] Multijugador con varias cajas
 - [ ] Supervisor que guía la capacitación
