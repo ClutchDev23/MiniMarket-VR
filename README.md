@@ -338,14 +338,22 @@ En `Assets/Resources/ConfigClientes.asset` puedes cambiar cuántos clientes entr
 - [x] Cobro en efectivo con vuelto verificado y con tarjeta (POS)
 - [x] Clientes que compran, hacen fila y pagan
 - [x] Tienda llena con productos de tamaño real
+- [x] Lógica de venta corregida (pago que cambia, cliente que se va, doble escaneo, stock)
+- [x] Cubículos y refrigeradoras llenos
+- [x] Evaluación del turno con nota de 0 a 20
+- [x] Dinero, POS, tarjeta y boleta en 3D
+- [x] Clientes con voz, carritos y conversación por voz (PC)
+- [x] Vibración y sonidos de la caja
+- [x] Menú de pausa con el botón ☰ y menú principal con el estilo de la tienda
 
 **🔧 Pendiente**
 
-- [ ] **Corregir la lógica de venta**
-- [ ] Llenar los cubículos rosados y las refrigeradoras
-- [ ] Evaluación al final del turno (aciertos, tiempo y errores)
+- [ ] Billetes y monedas con la imagen oficial del BCRP (marcados como muestra)
+- [ ] Conversación por voz en el Quest sin PC (Meta Voice SDK)
+- [ ] Modo realidad mixta (passthrough + detección de planos)
+- [ ] Multijugador con varias cajas
 - [ ] Supervisor que guía la capacitación
-- [ ] Optimizar más para Quest
+- [ ] Optimizar más para Quest (~1.6 M triángulos)
 
 <br>
 
