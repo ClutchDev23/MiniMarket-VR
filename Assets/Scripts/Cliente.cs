@@ -69,7 +69,7 @@ public class Cliente : MonoBehaviour
         if (anim == null) anim = gameObject.AddComponent<Animator>();
         anim.runtimeAnimatorController = g.Config.animador;
         anim.applyRootMotion = false;
-        anim.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
+        anim.cullingMode = AnimatorCullingMode.AlwaysAnimate;   // solo son 3-4 clientes: asi nunca se ven en pose T
 
         QuiereTarjeta = Random.value < g.Config.probTarjeta;
 
