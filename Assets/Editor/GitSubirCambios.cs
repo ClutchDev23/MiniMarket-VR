@@ -77,6 +77,15 @@ public static class GitSubirCambios
     {
         string raiz = Directory.GetCurrentDirectory();
         var log = new StringBuilder();
+        // Objetos LFS que llegan aparte como texto (Logs/lfs_*.b64: 1a linea = ruta, resto = base64).
+        foreach (var b64 in Directory.GetFiles(Path.Combine(raiz, "Logs"), "lfs_*.b64"))
+        {
+            var lineas = File.ReadAllText(b64).Split(new[] { '\n' }, 2);
+            if (lineas.Length < 2) continue;
+            var datos = System.Convert.FromBase64String(lineas[1].Replace("\n", "").Replace("\r", "").Trim());
+            GuardarBytesEnLfs(raiz, log, lineas[0].Trim(), datos);
+            File.Delete(b64);
+        }
         foreach (var f in Salida(raiz, "diff --name-only origin/main HEAD").Split('\n'))
         {
             string ruta = f.Trim();
@@ -130,6 +139,11 @@ public static class GitSubirCambios
 
     static void GuardarEnLfs(string dir, StringBuilder log, string ruta)
     {
+        GuardarBytesEnLfs(dir, log, ruta, File.ReadAllBytes(Path.Combine(dir, ruta)));
+    }
+
+    static void GuardarBytesEnLfs(string dir, StringBuilder log, string ruta, byte[] datos)
+    {
         var psi = new ProcessStartInfo("git", "lfs clean -- \"" + ruta + "\"")
         {
             WorkingDirectory = dir, UseShellExecute = false, RedirectStandardInput = true,
@@ -137,7 +151,6 @@ public static class GitSubirCambios
         };
         using (var p = Process.Start(psi))
         {
-            var datos = File.ReadAllBytes(Path.Combine(dir, ruta));
             p.StandardInput.BaseStream.Write(datos, 0, datos.Length);
             p.StandardInput.Close();
             string o = p.StandardOutput.ReadToEnd();
