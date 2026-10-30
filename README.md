@@ -147,6 +147,9 @@ flowchart LR
 | **3** 💳 | El cliente acerca la tarjeta: *Procesando… → APROBADO*. | **ENVIAR AL POS** |
 | ✅ | El cliente se despide (o reclama si algo salió mal). | **Siguiente cliente** |
 
+> [!NOTE]
+> Mientras cobras, en el mostrador pasa lo mismo en 3D: el cliente deja su dinero en la **bandeja**, el vuelto que marcas aparece al otro lado y, al terminar, la **impresora** saca la boleta de práctica. Con el botón **Resumen del turno** ves tu nota.
+
 > [!TIP]
 > Si no sabes cómo armar el vuelto, el botón **Ayuda** te sugiere qué billetes y monedas dar.<br>
 > Ejemplo: vuelto de **S/ 23.60** → 1 × S/ 20 · 1 × S/ 2 · 1 × S/ 1 · 1 × S/ 0.50 · 1 × S/ 0.10.
