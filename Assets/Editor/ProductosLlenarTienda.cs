@@ -146,6 +146,26 @@ public static class ProductosLlenarTienda
         EditorUtility.DisplayDialog("Llenar tienda", ResumenCorto(log.ToString()), "OK");
     }
 
+    /// <summary>
+    /// Llena UN mueble (por ejemplo el estante del cuarto del menu) con productos de
+    /// tamano real, agarrables. Devuelve cuantos puso.
+    /// </summary>
+    public static int LlenarMueble(Transform mueble, Transform padre, float pisoY, int semilla)
+    {
+        var mi = (ModelImporter)AssetImporter.GetAtPath(Fbx);
+        if (mi != null && !mi.isReadable) { mi.isReadable = true; mi.SaveAndReimport(); }
+        var catalogo = Catalogo();
+        if (catalogo.Count == 0) return 0;
+        Physics.SyncTransforms();
+        var lugares = new List<Lugar>();
+        LlenarEstante(mueble, catalogo, pisoY, new System.Random(semilla), lugares);
+        var bloque = new GameObject("Productos " + mueble.name);
+        bloque.transform.SetParent(padre, false);
+        bloque.AddComponent<BloqueProductos>();
+        foreach (var l in lugares) Crear(l, bloque.transform);
+        return lugares.Count;
+    }
+
     static string ResumenCorto(string log)
     {
         var lineas = log.Split('\n').Where(l => l.StartsWith("ESCENA")).ToArray();
