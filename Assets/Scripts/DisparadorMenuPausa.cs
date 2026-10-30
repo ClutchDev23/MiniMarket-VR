@@ -178,6 +178,10 @@ public class DisparadorMenuPausa : MonoBehaviour
     /// </summary>
     static bool Pulsado(InputDevice device, string[] nombres, UnityEngine.InputSystem.Utilities.InternedString uso)
     {
+        // Solo mandos (de VR o de consola). El clic izquierdo del mouse tambien es
+        // "PrimaryAction" y abria la pausa sola al hacer clic en el editor.
+        if (!(device is UnityEngine.InputSystem.XR.XRController) && !(device is Gamepad)) return false;
+
         // OJO: GetChildControl LANZA un error si el control no existe (el teclado no tiene
         // "PrimaryAction"), y ese error cortaba el Update antes de mirar los mandos: por
         // eso el menu de pausa no abria nunca. TryGetChildControl devuelve null.
