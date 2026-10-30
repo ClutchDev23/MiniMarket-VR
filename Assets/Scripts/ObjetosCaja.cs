@@ -144,6 +144,10 @@ public static class ObjetosCaja
         g.useDynamicAttach = true;
         g.smoothPosition = true;
         g.smoothRotation = true;
+        // Quieto donde lo dejan (bandeja, mostrador) hasta que alguien lo agarra; al
+        // soltarlo cae como un objeto normal. Asi no se resbala ni atraviesa la bandeja.
+        rb.isKinematic = true;
+        g.selectExited.AddListener(_ => { if (rb != null) { rb.isKinematic = false; rb.useGravity = true; rb.WakeUp(); } });
         return g;
     }
 
