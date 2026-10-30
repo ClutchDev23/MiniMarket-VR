@@ -65,6 +65,8 @@ public class VozJugador : MonoBehaviour
     void Start()
     {
         I = this;
+        // En el Quest (sin Windows) se habla con Wit.ai: manten el stick izquierdo y habla.
+        if (GetComponent<VozWit>() == null) gameObject.AddComponent<VozWit>();
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
         try
         {
@@ -82,7 +84,7 @@ public class VozJugador : MonoBehaviour
                              " (revisa Configuracion > Privacidad > Voz y el idioma de voz en espanol).");
         }
 #else
-        Debug.Log("[Voz] En esta plataforma no hay reconocimiento de voz sin internet (propuesta: Meta Voice SDK).");
+        Debug.Log("[Voz] Sin reconocedor de Windows: se usa Wit.ai (manten el stick izquierdo y habla).");
 #endif
     }
 
