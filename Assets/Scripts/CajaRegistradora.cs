@@ -54,6 +54,9 @@ public class CajaRegistradora : MonoBehaviour
         public int erroresVuelto;
         public int articulos;
         public string hora;
+        public float segundos;        // desde el primer producto hasta cobrar
+        public bool conforme = true;  // el cliente no reclamo
+        public string queja = "";
         public List<LineaVenta> lineas = new List<LineaVenta>();
     }
 
@@ -109,6 +112,23 @@ public class CajaRegistradora : MonoBehaviour
     public float Total => TotalCent / 100f;
     public IReadOnlyList<Venta> VentasDelTurno => ventas;
     public Venta UltimaVenta => ventas.Count > 0 ? ventas[ventas.Count - 1] : null;
+    public int Abandonos => abandonos;
+    /// <summary>El mostrador donde esta esta caja (Pref_CashCounter).</summary>
+    public Transform Mostrador { get; private set; }
+
+    /// <summary>Lo que muestra la pantallita del POS 3D.</summary>
+    public string TextoPOS
+    {
+        get
+        {
+            if (paso == Paso.Tarjeta)
+                return pos == EstadoPOS.Listo ? "MONTO\n" + Dinero(TotalCent) : posMensaje.Replace("\n", " ");
+            var u = UltimaVenta;
+            if (paso == Paso.Completada && u != null && u.metodo == MetodoPago.Tarjeta)
+                return "APROBADO\n" + Dinero(u.totalCent);
+            return "CAJERO XR\nListo";
+        }
+    }
 
     // ================================================================== privado (estatico)
 
@@ -120,6 +140,12 @@ public class CajaRegistradora : MonoBehaviour
     static int entregado;     // el vuelto que va devolviendo el cajero
     static int erroresVuelto;
     static int seleccion = -1;
+    static float inicioVenta = -1f;   // Time.time del primer producto de la venta
+    static int abandonos;             // clientes que se fueron sin pagar
+    static bool viendoResumen;
+
+    GameObject ultimoObjeto;          // para no sumar dos veces el mismo bip
+    float ultimoObjetoHora = -10f;
 
     readonly HashSet<GameObject> objetosCobrados = new HashSet<GameObject>();
     int primeraFila = 0;
@@ -135,6 +161,7 @@ public class CajaRegistradora : MonoBehaviour
         lineas.Clear(); ventas.Clear();
         paso = Paso.Escaneando; metodo = MetodoPago.Efectivo;
         recibido = 0; entregado = 0; erroresVuelto = 0; seleccion = -1;
+        inicioVenta = -1f; abandonos = 0; viendoResumen = false;
         instalado = false;
     }
 
@@ -181,6 +208,9 @@ public class CajaRegistradora : MonoBehaviour
     Text vAEntregar, vEntregando, vEstado; Button vConfirmar;
     Text tMonto, tEstado; Button tEnviar;
     Text fTitulo, fDetalle, fVuelto;
+    GameObject pResumen;
+    Text rsNota, rsCalificacion, rsConsejo;
+    readonly List<Text> rsValores = new List<Text>();
 
     Transform aviso;
     Text txtAviso;
@@ -189,7 +219,7 @@ public class CajaRegistradora : MonoBehaviour
     Transform cam;
 
     AudioSource sfx;
-    AudioClip cClick, cCobro, cError, cPos;
+    AudioClip cClick, cCobro, cError, cPos, cMoneda, cBillete, cCajon, cImpresora;
 
     // colores
     static readonly Color CFondo = new Color(0.07f, 0.09f, 0.13f, 0.97f);
@@ -226,6 +256,7 @@ public class CajaRegistradora : MonoBehaviour
         AsegurarEventSystem();
         CrearPantalla();
         if (mostrarAvisoEnLector) CrearAviso();
+        if (Mostrador != null && Mostrador.name.StartsWith("Pref_CashCounter")) ObjetosCaja.Instalar(this, Mostrador);
 
         // Si venimos del cambio dia/noche, se sigue con la venta que habia.
         if (paso == Paso.Tarjeta) paso = Paso.Metodo;   // el POS no sobrevive al cambio
@@ -281,6 +312,16 @@ public class CajaRegistradora : MonoBehaviour
             Sonar(cError);
             return;
         }
+        // El mismo objeto leido otra vez en menos de 0.8 s es el mismo bip repetido
+        // (gatillo rebotando o la pistola quieta sobre el producto), no otra unidad.
+        if (objeto == ultimoObjeto && Time.time - ultimoObjetoHora < 0.8f)
+        {
+            ultimoObjetoHora = Time.time;
+            return;
+        }
+        ultimoObjeto = objeto;
+        ultimoObjetoHora = Time.time;
+
         if (noCobrarDosVeces && objetosCobrados.Contains(objeto))
         {
             Mensaje("Ya escaneado: " + p.nombre, CAviso, true);
@@ -304,6 +345,9 @@ public class CajaRegistradora : MonoBehaviour
             recibido = 0; entregado = 0;
             paso = Paso.Escaneando;
         }
+
+        if (lineas.Count == 0 || inicioVenta < 0f) inicioVenta = Time.time;
+        if (p.stock <= 0) Debug.LogWarning("[Caja] " + p.nombre + " figura SIN STOCK en la base de datos.");
 
         int idx = lineas.FindIndex(x => x.producto == p);
         if (idx < 0)
@@ -375,6 +419,7 @@ public class CajaRegistradora : MonoBehaviour
         objetosCobrados.Clear();
         recibido = 0; entregado = 0; erroresVuelto = 0;
         seleccion = -1; primeraFila = 0;
+        inicioVenta = -1f;
         paso = Paso.Escaneando;
         Recalcular();
         Mensaje("Venta cancelada", CAviso);
@@ -449,8 +494,10 @@ public class CajaRegistradora : MonoBehaviour
     /// <summary>Billete/moneda: en el paso 3 suma a lo RECIBIDO; en el paso 4 suma al VUELTO.</summary>
     public void PulsarDenominacion(int centimos)
     {
+        if (paso != Paso.RecibirEfectivo && paso != Paso.EntregarVuelto) return;
+        Sonar(centimos >= 1000 ? cBillete : cMoneda);
         if (paso == Paso.RecibirEfectivo) ClienteEntrega(centimos);
-        else if (paso == Paso.EntregarVuelto) EntregarDenominacion(centimos);
+        else EntregarDenominacion(centimos);
     }
 
     /// <summary>El cliente entrega un billete/moneda (en centimos).</summary>
@@ -580,6 +627,7 @@ public class CajaRegistradora : MonoBehaviour
         pos = EstadoPOS.Aprobado;
         posMensaje = "APROBADO";
         recibido = TotalCent;
+        Haptica.Ambos(0.25f, 0.08f);
         Sonar(cCobro);
         Refrescar();
         yield return new WaitForSeconds(1.0f);
@@ -610,12 +658,21 @@ public class CajaRegistradora : MonoBehaviour
             erroresVuelto = erroresVuelto,
             articulos = CantidadArticulos,
             hora = DateTime.Now.ToString("HH:mm:ss"),
+            segundos = inicioVenta >= 0f ? Time.time - inicioVenta : 0f,
         };
         foreach (var l in lineas)
+        {
             v.lineas.Add(new LineaVenta { producto = l.producto, cantidad = l.cantidad });
+            // Lo vendido sale del inventario.
+            l.producto.stock = Mathf.Max(0, l.producto.stock - l.cantidad);
+            if (l.producto.stock == 0) Debug.Log("[Caja] Se acabo el stock de " + l.producto.nombre + ".");
+        }
         ventas.Add(v);
+        inicioVenta = -1f;
 
         paso = Paso.Completada;
+        Sonar(metodo == MetodoPago.Efectivo ? cCajon : cImpresora);
+        Haptica.Ambos(0.3f, 0.12f);
         Sonar(cCobro);
         Mensaje("Venta #" + v.numero + " cobrada", COk);
         Refrescar();
@@ -635,10 +692,44 @@ public class CajaRegistradora : MonoBehaviour
         objetosCobrados.Clear();
         recibido = 0; entregado = 0; erroresVuelto = 0;
         seleccion = -1; primeraFila = 0;
+        inicioVenta = -1f;
         paso = Paso.Escaneando;
         Recalcular();
         Mensaje("Nueva venta. Escanea los productos.", CAviso);
         Refrescar();
+    }
+
+    /// <summary>
+    /// El cliente de la caja se fue sin pagar (se canso de esperar). Lo que estaba
+    /// escaneado era SUYO: se anula, asi el siguiente cliente no paga sus productos.
+    /// </summary>
+    public void ClienteSeFue()
+    {
+        abandonos++;
+        if (paso != Paso.Completada && lineas.Count > 0)
+        {
+            CancelarPOS();
+            lineas.Clear();
+            objetosCobrados.Clear();
+            recibido = 0; entregado = 0; erroresVuelto = 0;
+            seleccion = -1; primeraFila = 0;
+            inicioVenta = -1f;
+            paso = Paso.Escaneando;
+            Recalcular();
+        }
+        Mensaje("El cliente se fue sin pagar. Venta anulada.", CError);
+        Sonar(cError);
+        Refrescar();
+        Debug.Log("[Caja] Cliente se fue sin pagar (" + abandonos + " en el turno).");
+    }
+
+    /// <summary>El cliente dice si quedo conforme con la venta (para la evaluacion del turno).</summary>
+    public void RegistrarOpinion(Venta v, bool conforme, string queja)
+    {
+        if (v == null) return;
+        v.conforme = conforme;
+        v.queja = conforme ? "" : queja;
+        if (viendoResumen) RefrescarResumen();
     }
 
     /// <summary>
@@ -671,6 +762,7 @@ public class CajaRegistradora : MonoBehaviour
     void Error(string texto)
     {
         Mensaje(texto, CError);
+        Haptica.Ambos(0.5f, 0.15f);
         Sonar(cError);
         Refrescar();
     }
@@ -782,6 +874,11 @@ public class CajaRegistradora : MonoBehaviour
         pVuelto.SetActive(paso == Paso.EntregarVuelto);
         pTarjeta.SetActive(paso == Paso.Tarjeta);
         pFin.SetActive(paso == Paso.Completada);
+        if (pResumen != null)
+        {
+            pResumen.SetActive(viendoResumen);
+            if (viendoResumen) RefrescarResumen();
+        }
 
         eTotal.text = Dinero(TotalCent);
         eArticulos.text = CantidadArticulos + " articulo(s)";
@@ -837,6 +934,7 @@ public class CajaRegistradora : MonoBehaviour
             baseT = BuscarMostradorMasCercano(lector.position);
             if (baseT == null) baseT = lector;
         }
+        Mostrador = baseT;
         Vector3 pos = baseT.position + baseT.rotation * desplazamientoPantalla;
 
         canvasPantalla = CrearCanvas("Pantalla Caja", new Vector2(W, H), pos, escalaPantalla, true);
@@ -893,7 +991,7 @@ public class CajaRegistradora : MonoBehaviour
         botonesEdicion.Add(Btn(raiz, "Mas", "+1", CBoton, x, ay, 86, ah, 32, () => CambiarCantidad(+1))); x += 86 + g;
         botonesEdicion.Add(Btn(raiz, "Quitar", "Quitar", CPeligro, x, ay, 120, ah, 26, QuitarLinea)); x += 120 + g;
         botonesEdicion.Add(Btn(raiz, "Cancelar", "Cancelar venta", CPeligro, x, ay, lx + lw - x, ah, 22, CancelarVenta));
-        Txt(raiz, "Ayuda", "Toca una linea para elegirla.  Escanear de nuevo suma 1 unidad.",
+        Txt(raiz, "Ayuda", "Toca una linea para elegirla.   Pausa: boton ☰ o B del mando.",
             19, TextAnchor.MiddleLeft, FontStyle.Italic, lx + 4, 646, lw, 40).color = CTextoSuave;
 
         // ---- derecha: un panel por paso
@@ -914,7 +1012,8 @@ public class CajaRegistradora : MonoBehaviour
         eTotal = Txt(caja1, "Total", "", 60, TextAnchor.LowerRight, FontStyle.Bold, 16, 40, rw - 32, 74);
         eTotal.color = COk;
         Txt(p1, "Instr", "1. Apunta la pistola al producto\n    y aprieta el gatillo.\n2. Si lleva varios iguales,\n    escanea cada uno (o +1).\n3. Cuando termines: COBRAR.",
-            25, TextAnchor.UpperLeft, FontStyle.Normal, 10, 134, rw - 20, 260).color = CTexto;
+            25, TextAnchor.UpperLeft, FontStyle.Normal, 10, 134, rw - 20, 200).color = CTexto;
+        Btn(p1, "Resumen", "Resumen del turno", CBoton, 0, 346, rw, 70, 26, MostrarResumen);
         Btn(p1, "Cobrar", "COBRAR  >", CVerde, 0, 430, rw, 130, 48, IrACobrar);
 
         // P2
@@ -968,7 +1067,155 @@ public class CajaRegistradora : MonoBehaviour
         fDetalle = Txt(pf, "Detalle", "", 26, TextAnchor.MiddleCenter, FontStyle.Normal, 0, 60, rw, 80);
         fVuelto = Txt(pf, "Vuelto", "", 28, TextAnchor.MiddleCenter, FontStyle.Bold, 0, 150, rw, 150);
         fVuelto.color = Color.white;
+        Btn(pf, "Resumen", "Resumen del turno", CBoton, 16, 330, rw - 32, 80, 26, MostrarResumen);
         Btn(pf, "Siguiente", "Siguiente cliente", CVerde, 16, 430, rw - 32, 120, 38, NuevaVenta);
+
+        CrearResumen(raiz);
+    }
+
+    // ================================================================== evaluacion del turno
+
+    /// <summary>Numeros del turno, para la pantalla de resumen y las pruebas.</summary>
+    public struct Evaluacion
+    {
+        public int ventas, articulos, totalCent, efectivo, tarjeta;
+        public int erroresVuelto, quejas, abandonos, lentas;
+        public float tiempoPromedio;
+        public int nota;
+        public string calificacion, consejo;
+    }
+
+    public const float SegundosVentaLenta = 120f;
+
+    public Evaluacion Evaluar()
+    {
+        var e = new Evaluacion();
+        float tiempo = 0f;
+        foreach (var v in ventas)
+        {
+            e.ventas++;
+            e.articulos += v.articulos;
+            e.totalCent += v.totalCent;
+            if (v.metodo == MetodoPago.Efectivo) e.efectivo++; else e.tarjeta++;
+            e.erroresVuelto += v.erroresVuelto;
+            if (!v.conforme) e.quejas++;
+            if (v.segundos > SegundosVentaLenta) e.lentas++;
+            tiempo += v.segundos;
+        }
+        e.abandonos = abandonos;
+        e.tiempoPromedio = e.ventas > 0 ? tiempo / e.ventas : 0f;
+
+        // Nota de 0 a 20 (como en el colegio): se parte de 20 y se resta por cada falla.
+        int puntos = 20 - 2 * e.quejas - e.erroresVuelto - 3 * e.abandonos - e.lentas;
+        e.nota = Mathf.Clamp(puntos, 0, 20);
+        if (e.ventas == 0 && e.abandonos == 0) { e.nota = 0; e.calificacion = "Sin ventas todavia"; }
+        else if (e.nota >= 18) e.calificacion = "¡Excelente!";
+        else if (e.nota >= 14) e.calificacion = "Bien";
+        else if (e.nota >= 11) e.calificacion = "Regular";
+        else e.calificacion = "Necesitas practicar";
+
+        // El consejo apunta a la falla mas costosa.
+        int pQ = 2 * e.quejas, pV = e.erroresVuelto, pA = 3 * e.abandonos, pL = e.lentas;
+        int peor = Mathf.Max(Mathf.Max(pQ, pV), Mathf.Max(pA, pL));
+        if (e.ventas == 0 && e.abandonos == 0) e.consejo = "Atiende a un cliente para ver tu evaluacion.";
+        else if (peor == 0) e.consejo = "Sin errores. ¡Sigue asi!";
+        else if (peor == pA) e.consejo = "Atiende mas rapido: los clientes se cansan de esperar.";
+        else if (peor == pQ) e.consejo = "Revisa que escaneaste TODO y el metodo de pago antes de cobrar.";
+        else if (peor == pV) e.consejo = "Usa el boton Ayuda para armar el vuelto exacto.";
+        else e.consejo = "Practica el escaneo: algunas ventas pasaron de 2 minutos.";
+        return e;
+    }
+
+    public void MostrarResumen()
+    {
+        viendoResumen = true;
+        Sonar(cClick);
+        Refrescar();
+        var e = Evaluar();
+        Debug.Log("[Caja] RESUMEN: ventas " + e.ventas + " | total " + Dinero(e.totalCent) +
+                  " | prom " + e.tiempoPromedio.ToString("0") + " s | errores vuelto " + e.erroresVuelto +
+                  " | quejas " + e.quejas + " | se fueron " + e.abandonos + " | nota " + e.nota + "/20");
+    }
+
+    public void CerrarResumen()
+    {
+        viendoResumen = false;
+        Sonar(cClick);
+        Refrescar();
+    }
+
+    /// <summary>Empieza un turno nuevo: borra las ventas y la evaluacion.</summary>
+    public void NuevoTurno()
+    {
+        ventas.Clear();
+        abandonos = 0;
+        NuevaVenta();
+        viendoResumen = false;
+        Mensaje("Turno nuevo. ¡Suerte!", CAviso);
+        Sonar(cClick);
+        Refrescar();
+    }
+
+    void CrearResumen(RectTransform raiz)
+    {
+        var rt = Img(raiz, "Resumen", CFondo, 0, 60, W, H - 60);
+        // Tapa los botones de debajo mientras esta abierto.
+        rt.GetComponent<Image>().raycastTarget = true;
+        pResumen = rt.gameObject;
+
+        Txt(rt, "Titulo", "RESUMEN DEL TURNO", 36, TextAnchor.MiddleLeft, FontStyle.Bold, 24, 8, 600, 56).color = CAviso;
+
+        string[] etiquetas = { "Ventas", "Total vendido", "Articulos", "Tiempo promedio", "Efectivo / Tarjeta",
+                               "Errores de vuelto", "Clientes con queja", "Se fueron sin pagar", "Ventas lentas (+2 min)" };
+        float tx = 24, ty = 74, tw = 222, th = 118, tg = 12;
+        for (int i = 0; i < etiquetas.Length; i++)
+        {
+            float x = tx + (i % 3) * (tw + tg), y = ty + (i / 3) * (th + tg);
+            var tile = Img(rt, "Dato " + i, CPanel, x, y, tw, th);
+            Txt(tile, "Etiqueta", etiquetas[i], 20, TextAnchor.UpperLeft, FontStyle.Normal, 14, 10, tw - 28, 28).color = CTextoSuave;
+            var val = Txt(tile, "Valor", "", 40, TextAnchor.LowerLeft, FontStyle.Bold, 14, 40, tw - 28, 66);
+            rsValores.Add(val);
+        }
+
+        float nx = 740, nw = 336;
+        var notaCaja = Img(rt, "Nota", CPanel, nx, 74, nw, 250);
+        Txt(notaCaja, "Etiqueta", "NOTA", 24, TextAnchor.UpperCenter, FontStyle.Bold, 0, 12, nw, 30).color = CTextoSuave;
+        rsNota = Txt(notaCaja, "Valor", "", 96, TextAnchor.MiddleCenter, FontStyle.Bold, 0, 40, nw, 130);
+        rsCalificacion = Txt(notaCaja, "Calif", "", 30, TextAnchor.MiddleCenter, FontStyle.Bold, 0, 180, nw, 50);
+
+        rsConsejo = Txt(rt, "Consejo", "", 24, TextAnchor.MiddleLeft, FontStyle.Italic, 24, 470, 690, 70);
+        rsConsejo.color = CTexto;
+
+        Btn(rt, "Volver", "<  Volver a la caja", CVerde, nx, 340, nw, 100, 32, CerrarResumen);
+        Btn(rt, "Nuevo", "Nuevo turno", CPeligro, nx, 456, nw, 80, 28, NuevoTurno);
+        Txt(rt, "Regla", "Nota: 20 - 2 por queja - 1 por error de vuelto - 3 por cliente perdido - 1 por venta lenta",
+            18, TextAnchor.MiddleLeft, FontStyle.Normal, 24, 560, W - 48, 40).color = CTextoSuave;
+        pResumen.SetActive(false);
+    }
+
+    void RefrescarResumen()
+    {
+        if (pResumen == null) return;
+        var e = Evaluar();
+        string[] v =
+        {
+            e.ventas.ToString(), Dinero(e.totalCent), e.articulos.ToString(),
+            e.ventas > 0 ? e.tiempoPromedio.ToString("0") + " s" : "-",
+            e.efectivo + " / " + e.tarjeta,
+            e.erroresVuelto.ToString(), e.quejas.ToString(), e.abandonos.ToString(), e.lentas.ToString(),
+        };
+        for (int i = 0; i < rsValores.Count && i < v.Length; i++)
+        {
+            rsValores[i].text = v[i];
+            bool malo = (i >= 5) && v[i] != "0";
+            rsValores[i].color = i == 1 ? COk : malo ? CError : CTexto;
+        }
+        bool sinDatos = e.ventas == 0 && e.abandonos == 0;
+        rsNota.text = sinDatos ? "-" : e.nota + "<size=40>/20</size>";
+        rsNota.color = sinDatos ? CTextoSuave : e.nota >= 14 ? COk : e.nota >= 11 ? CAviso : CError;
+        rsCalificacion.text = e.calificacion;
+        rsCalificacion.color = rsNota.color;
+        rsConsejo.text = e.consejo;
     }
 
     GameObject Panel(RectTransform padre, string nombre, float x, float y, float w, float h)
@@ -1117,6 +1364,10 @@ public class CajaRegistradora : MonoBehaviour
         cError = Tono("caja_error", new[] { 220f, 180f }, 0.22f);
         cCobro = Tono("caja_cobro", new[] { 1320f, 1760f, 2640f }, 0.45f);
         cPos = Tono("caja_pos", new[] { 880f, 880f }, 0.25f);
+        cMoneda = SonidosProcedurales.Moneda();
+        cBillete = SonidosProcedurales.Billete();
+        cCajon = SonidosProcedurales.Cajon();
+        cImpresora = SonidosProcedurales.Impresora();
     }
 
     void Sonar(AudioClip c)
