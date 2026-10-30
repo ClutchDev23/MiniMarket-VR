@@ -127,8 +127,9 @@ public class MenuPausa : MonoBehaviour
         var cam = Camera.main;
         if (!cam || !panel) return;
 
-        var xrOrigin = cam.GetComponentInParent<Unity.XR.CoreUtils.XROrigin>();
-        Transform refTransform = xrOrigin != null ? xrOrigin.transform : cam.transform;
+        // Hacia donde MIRA el jugador (la camara), no hacia donde apunta el XR Origin:
+        // si giraste la cabeza, el menu tiene que salir delante de tus ojos.
+        Transform refTransform = cam.transform;
 
         Vector3 fwd = refTransform.forward;
         fwd.y = 0f;
@@ -143,7 +144,9 @@ public class MenuPausa : MonoBehaviour
         pos.y = alturaFija > 0.01f ? alturaFija : AlturaDelPanel(cam);
 
         panel.transform.position = pos;
-        panel.transform.rotation = Quaternion.LookRotation(-fwd, Vector3.up);
+        // Un canvas en el mundo se lee de frente cuando su "forward" apunta HACIA
+        // DELANTE del jugador (igual que la mirada). Con -fwd el texto salia en espejo.
+        panel.transform.rotation = Quaternion.LookRotation(fwd, Vector3.up);
     }
 
     /// <summary>
