@@ -240,6 +240,10 @@ MiniMarket-VR/
 | `BloqueProductos` | Dibuja miles de productos en pocas llamadas |
 | `AlternarDiaNoche` | Cambia entre la escena de día y la de noche |
 | `MainMenu` · `MenuPausa` | Menú principal y menú de pausa en VR |
+| `ObjetosCaja` | Bandeja de dinero, POS y impresora de boletas en 3D |
+| `CarritoCliente` | El carrito que empuja cada cliente |
+| `VocesClientes` · `VozJugador` | Voces de los clientes y reconocimiento de voz del jugador |
+| `Haptica` · `SonidosProcedurales` | Vibración de los mandos y sonidos hechos por código |
 | `ArmSwingLocomotion` | Caminar moviendo los brazos |
 
 </details>
