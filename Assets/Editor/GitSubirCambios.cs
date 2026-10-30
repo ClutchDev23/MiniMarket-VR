@@ -29,7 +29,23 @@ public static class GitSubirCambios
         Git(raiz, log, "fetch " + bundle + " main:refs/heads/cambios-nuevos");
         // Si hay archivos modificados que ya son iguales a los del commit, se guardan aparte un momento.
         int st = Git(raiz, log, "stash push -m auto-subir");
-        int m = Git(raiz, log, "merge --ff-only cambios-nuevos");
+
+        // Los archivos NUEVOS que trae el bundle ya estan copiados en esta carpeta (sin
+        // seguimiento): git no deja avanzar si los pisaria. Se guarda su contenido, se
+        // quitan, se avanza y se vuelven a poner (asi las imagenes LFS quedan bien).
+        var respaldo = new System.Collections.Generic.Dictionary<string, byte[]>();
+        foreach (var f in Salida(raiz, "diff --name-only --diff-filter=A HEAD cambios-nuevos").Split('\n'))
+        {
+            string ruta = f.Trim();
+            string completo = Path.Combine(raiz, ruta);
+            if (ruta.Length == 0 || !File.Exists(completo)) continue;
+            respaldo[ruta] = File.ReadAllBytes(completo);
+            File.Delete(completo);
+        }
+        log.AppendLine("archivos nuevos respaldados: " + respaldo.Count);
+
+        int m = Git(raiz, log, "merge --ff-only cambios-nuevos", true);
+        foreach (var kv in respaldo) File.WriteAllBytes(Path.Combine(raiz, kv.Key), kv.Value);
         // Se devuelven los cambios guardados (los que ya estan en el commit se juntan solos).
         if (st == 0 && !Salida(raiz, "stash list").Contains("auto-subir")) st = 1;
         if (st == 0) Git(raiz, log, "stash pop");
@@ -112,7 +128,7 @@ public static class GitSubirCambios
         }
     }
 
-    static int Git(string dir, StringBuilder log, string args)
+    static int Git(string dir, StringBuilder log, string args, bool sinLfs = false)
     {
         log.AppendLine("=== git " + args);
         var psi = new ProcessStartInfo("git", args)
@@ -123,6 +139,8 @@ public static class GitSubirCambios
             RedirectStandardError = true,
             CreateNoWindow = true,
         };
+        // Sin bajar LFS al avanzar: el contenido de las imagenes nuevas ya esta en la PC.
+        if (sinLfs) psi.EnvironmentVariables["GIT_LFS_SKIP_SMUDGE"] = "1";
         using (var p = Process.Start(psi))
         {
             string o = p.StandardOutput.ReadToEnd();
