@@ -378,7 +378,7 @@ public class Cliente : MonoBehaviour
 
     IEnumerator TomarCarrito()
     {
-        var c = CarritoCliente.BuscarLibre(transform.position, 9f);
+        var c = CarritoCliente.BuscarLibre(transform.position, 25f);   // los carritos suelen estar afuera, junto a la puerta
         if (c == null) yield break;
         var hacia = transform.position - c.position; hacia.y = 0f;
         var junto = g.Muestrear(c.position + (hacia.sqrMagnitude > 0.01f ? hacia.normalized : Vector3.forward) * 0.9f, 1.2f, transform.position);
