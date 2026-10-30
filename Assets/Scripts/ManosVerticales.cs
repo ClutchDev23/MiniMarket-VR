@@ -57,6 +57,10 @@ public class ManosVerticales : MonoBehaviour
     public Vector3 correccionIzquierda = Vector3.zero;
     public Vector3 correccionDerecha = Vector3.zero;
 
+    [Header("Posicion")]
+    [Tooltip("Metros que se lleva la mano hacia atras (hacia la muneca) para que quede donde agarras el mando.")]
+    public float retroceso = 0.05f;
+
     [Header("Suavizado")]
     [Tooltip("Velocidad con la que se aplica la correccion. 0 = inmediata.")]
     [Range(0f, 30f)] public float suavizado = 12f;
@@ -103,6 +107,8 @@ public class ManosVerticales : MonoBehaviour
 
             // ------------------------------------------------------ aplicacion
             Aplicar(driver.rootTransform, correccion, suavizado);
+            // La mano salia ~5 cm mas adelante que el mando: se trae hacia la muneca.
+            if (retroceso != 0f) driver.rootTransform.position -= dedos.normalized * retroceso;
 
             if (girarPuntoDePinza) GirarPunto("Pinch Grab Pose", correccion, izquierda, suavizado);
             if (girarPuntoDeApuntado) GirarPunto("Aim Pose", correccion, izquierda, suavizado);
