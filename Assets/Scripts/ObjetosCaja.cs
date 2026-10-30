@@ -484,9 +484,6 @@ public class POS3D : MonoBehaviour
             }
             foreach (var r in b.GetComponentsInChildren<MeshRenderer>()) r.enabled = false;
         }
-        b.transform.localRotation = Quaternion.Euler(-12f, 0f, 0f);
-        var pant = ObjetosCaja.Caja("Pantallita", b.transform, new Vector3(0.8f, 0.05f, 0.32f), verde, false);
-        pant.transform.localPosition = new Vector3(0f, 0.52f, 0.22f);
         pantalla = ObjetosCaja.Texto(pant.transform, "", new Vector3(0f, 0.6f, 0f), Quaternion.Euler(90f, 0f, 0f),
             new Vector2(220, 340), 0.0003f, 20, new Color(0.1f, 0.12f, 0.18f));
 
