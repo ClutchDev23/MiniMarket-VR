@@ -32,19 +32,21 @@ public static class MenuBuilder
     // =====================================================================
     //  PALETA (cambia estos colores para personalizar)
     // =====================================================================
-    static readonly Color PanelColor   = new Color(0.07f, 0.04f, 0.15f, 0.84f);
-    static readonly Color CardColor    = new Color(0.13f, 0.08f, 0.26f, 0.95f);
-    static readonly Color Accent       = new Color(0.27f, 0.93f, 1.00f, 1f);   // cian neon
-    static readonly Color AccentGreen  = new Color(0.40f, 1.00f, 0.70f, 1f);
+    // Colores de la TIENDA (los mismos del letrero "Cajero XR", la caja y la pausa):
+    // naranja de las columnas, gris oscuro del mostrador, blanco del piso y celeste.
+    static readonly Color PanelColor   = new Color(0.06f, 0.07f, 0.09f, 0.90f);
+    static readonly Color CardColor    = new Color(0.12f, 0.13f, 0.17f, 0.96f);
+    static readonly Color Accent       = new Color(0.95f, 0.55f, 0.16f, 1f);   // naranja tienda
+    static readonly Color AccentGreen  = new Color(0.35f, 0.85f, 0.45f, 1f);   // verde de las ofertas
     static readonly Color AccentAmber  = new Color(1.00f, 0.78f, 0.30f, 1f);
-    static readonly Color AccentPink   = new Color(1.00f, 0.28f, 0.66f, 1f);
-    static readonly Color BtnMain      = new Color(1.00f, 0.25f, 0.60f, 1f);   // rosa neon
-    static readonly Color BtnSecondary = new Color(0.22f, 0.14f, 0.40f, 1f);
-    static readonly Color BtnDanger    = new Color(0.78f, 0.20f, 0.30f, 1f);
-    static readonly Color TextSoft     = new Color(0.93f, 0.89f, 1.00f, 1f);
-    static readonly Color TextDim      = new Color(0.62f, 0.56f, 0.80f, 1f);
-    static readonly Color Track        = new Color(0.17f, 0.11f, 0.32f, 1f);
-    static readonly Color FogColor     = new Color(0.018f, 0.012f, 0.035f, 1f);
+    static readonly Color AccentPink   = new Color(0.59f, 0.86f, 1.00f, 1f);   // celeste del letrero
+    static readonly Color BtnMain      = new Color(0.95f, 0.55f, 0.16f, 1f);   // naranja
+    static readonly Color BtnSecondary = new Color(0.20f, 0.22f, 0.27f, 1f);
+    static readonly Color BtnDanger    = new Color(0.80f, 0.25f, 0.25f, 1f);
+    static readonly Color TextSoft     = new Color(0.97f, 0.97f, 0.98f, 1f);
+    static readonly Color TextDim      = new Color(0.66f, 0.70f, 0.77f, 1f);
+    static readonly Color Track        = new Color(0.20f, 0.22f, 0.27f, 1f);
+    static readonly Color FogColor     = new Color(0.80f, 0.78f, 0.74f, 1f);
 
     // =====================================================================
     //  CUARTO: medidas (metros)
@@ -820,6 +822,19 @@ public static class MenuBuilder
         BuildMenu();
     }
 
+    /// <summary>Rehace el cuarto y el menu con el estilo de la tienda y guarda la escena Menu (sin preguntas).</summary>
+    [MenuItem("Tools/Minimarket/Menu/Rehacer menu con estilo de la tienda")]
+    public static void RehacerEstiloTienda()
+    {
+        var escena = EditorSceneManager.OpenScene("Assets/Scenes/Menu.unity", OpenSceneMode.Single);
+        EnsureSprites();
+        lastFloaters = null; lastBob = null; lastNeon = null;
+        BuildRoom();
+        BuildMenu();
+        EditorSceneManager.MarkSceneDirty(escena);
+        EditorSceneManager.SaveScene(escena);
+    }
+
     [MenuItem("Tools/MiniMarket/Crear Cuarto del Menu")]
     static void BuildRoomOnly()
     {
@@ -1157,8 +1172,9 @@ public static class MenuBuilder
     {
         const int s = 128;
         var t = new Texture2D(s, s, TextureFormat.RGBA32, true);
-        var a = new Color(0.075f, 0.065f, 0.105f, 1f);
-        var b = new Color(0.055f, 0.048f, 0.082f, 1f);
+        // Losetas claras como el piso de la tienda.
+        var a = new Color(0.93f, 0.91f, 0.87f, 1f);
+        var b = new Color(0.90f, 0.88f, 0.84f, 1f);
         int half = s / 2;
         for (int y = 0; y < s; y++)
         {
@@ -1166,7 +1182,7 @@ public static class MenuBuilder
             {
                 bool alt = (x < half) ^ (y < half);
                 Color c = alt ? a : b;
-                if ((x % half) < 2 || (y % half) < 2) c = Color.Lerp(c, Accent, 0.10f);
+                if ((x % half) < 2 || (y % half) < 2) c = new Color(0.74f, 0.73f, 0.71f, 1f);   // fragua
                 t.SetPixel(x, y, c);
             }
         }
@@ -1284,15 +1300,15 @@ public static class MenuBuilder
         // ---------- Materiales ----------
         var floorTex = MakeFloorTexture();
         var mFloor = Mat("Piso", Color.white, Color.clear, 0.65f, floorTex, new Vector2(RoomW / 2f, RoomL / 2f));
-        var mWall  = Mat("Pared", new Color(0.045f, 0.04f, 0.075f), Color.clear, 0.25f);
-        var mCeil  = Mat("Techo", new Color(0.03f, 0.028f, 0.05f), Color.clear, 0.1f);
-        var mRug   = Mat("Alfombra", new Color(0.065f, 0.05f, 0.11f), Color.clear, 0.05f);
+        var mWall  = Mat("Pared", new Color(0.95f, 0.66f, 0.27f), Color.clear, 0.2f);      // naranja de la tienda
+        var mCeil  = Mat("Techo", new Color(0.88f, 0.88f, 0.87f), Color.clear, 0.1f);
+        var mRug   = Mat("Alfombra", new Color(0.12f, 0.13f, 0.16f), Color.clear, 0.05f);
         var mCable = Mat("Cable", new Color(0.02f, 0.02f, 0.02f), Color.clear, 0.3f);
         var mSocket = Mat("Casquillo", new Color(0.10f, 0.10f, 0.12f), Color.clear, 0.5f);
         Color bulbCol = new Color(1f, 0.80f, 0.52f);
         var mBulb  = Mat("Foco", bulbCol, bulbCol * 3f, 0f);
 
-        Color violet = new Color(0.55f, 0.30f, 1f);
+        Color violet = new Color(1f, 0.97f, 0.92f);   // tubos de luz blancos (como el techo de la tienda)
         var mLedCyan   = Mat("LedCian",    Accent,     Accent * 2.6f, 0f);
         var mLedPink   = Mat("LedRosa",    AccentPink, AccentPink * 2.6f, 0f);
         var mLedViolet = Mat("LedVioleta", violet,     violet * 2.2f, 0f);
@@ -1435,15 +1451,13 @@ public static class MenuBuilder
 
         // ---------- Luces (solo 3, para Quest) ----------
         MakeLight(luces, "Luz Foco", new Vector3(0f, bulbY - 0.05f, 0.2f), new Color(1f, 0.78f, 0.50f), 2.2f, 6.5f);
-        MakeLight(luces, "Luz LED Rosa", new Vector3(hw - 0.6f, 1.6f, hl - 0.6f), AccentPink, 0.9f, 4.5f);
-        MakeLight(luces, "Luz LED Cian", new Vector3(-hw + 0.6f, 1.6f, hl - 0.6f), Accent, 0.9f, 4.5f);
+        MakeLight(luces, "Luz Tienda Der", new Vector3(hw - 0.8f, 2.6f, hl - 0.8f), new Color(1f, 0.96f, 0.90f), 1.4f, 6f);
+        MakeLight(luces, "Luz Tienda Izq", new Vector3(-hw + 0.8f, 2.6f, -hl + 0.8f), new Color(1f, 0.96f, 0.90f), 1.4f, 6f);
 
-        // ---------- Ambiente: oscuro ----------
+        // ---------- Ambiente: claro, como dentro de la tienda ----------
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-        RenderSettings.ambientLight = new Color(0.035f, 0.035f, 0.06f);
-        RenderSettings.fog = true;
-        RenderSettings.fogMode = FogMode.Exponential;
-        RenderSettings.fogDensity = 0.022f;
+        RenderSettings.ambientLight = new Color(0.42f, 0.40f, 0.37f);
+        RenderSettings.fog = false;
         RenderSettings.fogColor = FogColor;
 
         var cam = Camera.main;
@@ -1452,6 +1466,9 @@ public static class MenuBuilder
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = FogColor;
         }
+
+        // Muebles de la tienda de verdad: estante con productos, caja, carrito y letrero.
+        MenuDecorarTienda.Decorar(root.transform, RoomW, RoomL, RoomH);
 
         // Estructura quieta -> batching estatico (menos draw calls en Quest)
         foreach (var tr in estructura.GetComponentsInChildren<Transform>())
@@ -1465,6 +1482,6 @@ public static class MenuBuilder
         AssetDatabase.SaveAssets();
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         Selection.activeGameObject = root;
-        Debug.Log("Cuarto gamer creado. El jugador (XR Origin) va en el centro, en 0,0,0.");
+        Debug.Log("Cuarto del menu (estilo tienda) creado. El jugador (XR Origin) va en el centro, en 0,0,0.");
     }
 }
