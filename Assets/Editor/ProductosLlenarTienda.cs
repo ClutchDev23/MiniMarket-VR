@@ -43,7 +43,7 @@ public static class ProductosLlenarTienda
     };
 
     // ------------------------------------------------------------------ ajustes
-    const int MaxProductos = 6500;       // tope total por escena (rendimiento en Quest)
+    const int MaxProductos = 7600;       // tope total por escena (rendimiento en Quest)
     const int MaxFilasFondo = 1;         // filas hacia el fondo (1 = la fila de adelante, la que se ve)
     const float Paso = 0.05f;            // resolucion del sondeo de baldas
     const float Hueco = 0.008f;          // separacion entre productos
@@ -402,6 +402,7 @@ public static class ProductosLlenarTienda
             if (aptos.Count == 0) continue;
             usadas++;
 
+            var ocupado = new List<Vector2>();   // tramos [u0,u1] ya usados en esta balda
             float u = uMin + 0.01f;
             while (u < uMax - 0.03f)
             {
@@ -427,6 +428,7 @@ public static class ProductosLlenarTienda
                             var rotProd = giro * Quaternion.Euler(0, largoEnX ? 0 : 90, 0);
                             if (!Cabe(mundo, prod, rotProd, propios, originales, y)) continue;
                             salida.Add(new Lugar { prod = prod, centroBase = mundo, giroEstante = rotProd, fila = fila });
+                            if (fila == 0) ocupado.Add(new Vector2(u, u + ancho));
                             alguno = true;
                             break;
                         }
@@ -434,6 +436,43 @@ public static class ProductosLlenarTienda
                     u += ancho;
                 }
                 if (!alguno) u += 0.04f;   // hueco (parante, etc.): seguir mas alla
+            }
+
+            // 2a PASADA: los huecos que quedaron (entre parantes, en los cubiculos chicos)
+            // se rellenan con lo que quepa, de a poquito. Antes quedaban cubiculos vacios.
+            var chicos = aptos.OrderBy(p => p.tam.x).ToList();
+            u = uMin + 0.005f;
+            while (u < uMax - 0.03f)
+            {
+                var tramo = ocupado.FirstOrDefault(o => u >= o.x - 0.001f && u < o.y);
+                if (tramo != default) { u = tramo.y + 0.001f; continue; }
+                float siguiente = ocupado.Where(o => o.x >= u).Select(o => o.x).DefaultIfEmpty(uMax).Min();
+                bool puso = false;
+                // Prueba unos cuantos al azar entre los que caben en el hueco.
+                var candidatos = chicos.Where(p => p.tam.x + Hueco <= siguiente - u + 0.002f).ToList();
+                for (int intento = 0; intento < 4 && candidatos.Count > 0 && !puso; intento++)
+                {
+                    var prod = Elegir(candidatos, rnd);
+                    float ancho = prod.tam.x + Hueco, prof = prod.tam.z + Hueco;
+                    foreach (float atras in new[] { 0f, 0.025f, 0.05f, 0.08f })
+                    {
+                        float v = vMax - 0.01f - atras - 0.5f * prof;
+                        if (v - prof * 0.5f < vMin) break;
+                        float cu = u + ancho * 0.5f;
+                        var local = largoEnX ? new Vector3(cu, 0, v) : new Vector3(v, 0, cu);
+                        var mundo = est.position + giro * local;
+                        mundo.y = y;
+                        var rotProd = giro * Quaternion.Euler(0, largoEnX ? 0 : 90, 0);
+                        if (!Cabe(mundo, prod, rotProd, propios, originales, y)) continue;
+                        salida.Add(new Lugar { prod = prod, centroBase = mundo, giroEstante = rotProd, fila = 0 });
+                        ocupado.Add(new Vector2(u, u + ancho));
+                        u += ancho;
+                        puso = true;
+                        break;
+                    }
+                    if (!puso) candidatos.Remove(prod);
+                }
+                if (!puso) u += 0.02f;
             }
         }
         return usadas;
