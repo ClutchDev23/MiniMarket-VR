@@ -190,7 +190,8 @@ flowchart LR
 | **Pulsar la pantalla** | Apuntar con el rayo y apretar el **gatillo** | Apuntar y pellizcar |
 | **Caminar** | Joystick izquierdo | Estirar los brazos y moverlos |
 | **Girar** | Joystick derecho | Girar el cuerpo |
-| **Pausa** | Botón **A / B** o **Menú** | — |
+| **Pausa** | Botón **☰** (mando izquierdo) o **B** · **Escape** en PC | — |
+| **Hablar a un cliente** | Di una frase corta: *"hola"*, *"¿cómo va a pagar?"*, *"¿algo más?"*, *"gracias"* (PC / Link) | Igual |
 
 
 <br>
