@@ -348,7 +348,7 @@ En `Assets/Resources/ConfigClientes.asset` puedes cambiar cuántos clientes entr
 
 **🔧 Pendiente**
 
-- [ ] Billetes y monedas con la imagen oficial del BCRP (marcados como muestra)
+- [ ] Billetes con la imagen oficial del BCRP (por ahora son de práctica, con los colores y tamaños reales: reproducir billetes de verdad necesita permiso del BCRP)
 - [ ] Conversación por voz en el Quest sin PC (Meta Voice SDK)
 - [ ] Modo realidad mixta (passthrough + detección de planos)
 - [ ] Multijugador con varias cajas
