@@ -54,7 +54,8 @@ public class AvatarJugador : MonoBehaviour
     static void Asegurar(UnityEngine.SceneManagement.Scene esc)
     {
         if (!esc.IsValid() || !esc.name.StartsWith("MinimarketXR")) return;
-        if (PlayerPrefs.GetInt("cuerpo", 1) == 0) return;
+        // Apagado: el jugador prefiere ver solo las manos de VR (se activa con "cuerpo" = 1).
+        if (PlayerPrefs.GetInt("cuerpo", 0) == 0) return;
         if (I != null) return;
         var go = new GameObject("Cuerpo del jugador");
         UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(go, esc);
