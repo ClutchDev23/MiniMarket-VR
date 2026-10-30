@@ -45,6 +45,7 @@ public static class GitSubirCambios
                 if (!Salida(raiz, "check-attr filter -- \"" + ruta + "\"").Contains("filter: lfs")) continue;
                 GuardarEnLfs(raiz, log, ruta);
             }
+            CommitsDeEstaPC(raiz, log);
             Git(raiz, log, "push origin main");
         }
         Git(raiz, log, "branch -D cambios-nuevos");
@@ -52,6 +53,30 @@ public static class GitSubirCambios
         Git(raiz, log, "log --oneline -5");
         log.AppendLine(m == 0 ? "LISTO" : "NO SE PUDO AVANZAR MAIN");
         Escribir(raiz, log);
+    }
+
+    /// <summary>
+    /// Lo que se genero en ESTA PC (escenas, audios grabados, .meta) se sube en commits
+    /// pequenos definidos en Logs/commits_pc.txt, una linea por commit:
+    ///     mensaje|ruta1;ruta2;carpeta/
+    /// </summary>
+    static void CommitsDeEstaPC(string raiz, StringBuilder log)
+    {
+        string archivo = Path.Combine(raiz, "Logs", "commits_pc.txt");
+        if (!File.Exists(archivo)) return;
+        const string id = "-c user.name=AbnerGA7 -c user.email=215039447+AbnerGA7@users.noreply.github.com -c commit.gpgsign=false ";
+        foreach (var linea in File.ReadAllLines(archivo, Encoding.UTF8))
+        {
+            var partes = linea.Split('|');
+            if (partes.Length != 2) continue;
+            foreach (var ruta in partes[1].Split(';'))
+                if (ruta.Trim().Length > 0) Git(raiz, log, "add -A -- \"" + ruta.Trim() + "\"");
+            if (Salida(raiz, "diff --cached --name-only").Trim().Length == 0) { log.AppendLine("(nada que subir para: " + partes[0] + ")"); continue; }
+            string msg = Path.Combine(raiz, "Logs", "msg_commit.txt");
+            File.WriteAllText(msg, partes[0], new UTF8Encoding(false));
+            Git(raiz, log, id + "commit -F \"" + msg + "\"");
+        }
+        File.Delete(archivo);
     }
 
     static string Salida(string dir, string args)
