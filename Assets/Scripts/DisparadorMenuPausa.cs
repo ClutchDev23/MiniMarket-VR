@@ -178,14 +178,18 @@ public class DisparadorMenuPausa : MonoBehaviour
     /// </summary>
     static bool Pulsado(InputDevice device, string[] nombres, UnityEngine.InputSystem.Utilities.InternedString uso)
     {
-        // 1) Por el uso del Input System.
-        var porUso = device.GetChildControl(uso.ToString());
+        // OJO: GetChildControl LANZA un error si el control no existe (el teclado no tiene
+        // "PrimaryAction"), y ese error cortaba el Update antes de mirar los mandos: por
+        // eso el menu de pausa no abria nunca. TryGetChildControl devuelve null.
+
+        // 1) Por el uso del Input System ("{PrimaryAction}" = el control con ese uso).
+        var porUso = device.TryGetChildControl("{" + uso + "}");
         if (porUso is ButtonControl botonUso && botonUso.wasPressedThisFrame) return true;
 
         // 2) Por los nombres de control de cada fabricante.
         for (int i = 0; i < nombres.Length; i++)
         {
-            var c = device.GetChildControl(nombres[i]);
+            var c = device.TryGetChildControl(nombres[i]);
             if (c is ButtonControl boton && boton.wasPressedThisFrame) return true;
         }
 
