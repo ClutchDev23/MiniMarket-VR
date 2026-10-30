@@ -325,10 +325,53 @@ public class BandejaDinero : MonoBehaviour
         return m;
     }
 
+    // Imagenes del BCRP (anverso/reverso de billetes y cara de las monedas), con la marca
+    // "MUESTRA" ya puesta en la imagen. Estan en Resources/Soles. Si faltan, se usa el
+    // billete de practica de colores.
+    static readonly Dictionary<string, Material> matsImagen = new Dictionary<string, Material>();
+    static Material MatImagen(string nombre, float brillo)
+    {
+        if (matsImagen.TryGetValue(nombre, out var m)) return m;
+        var tex = Resources.Load<Texture2D>("Soles/" + nombre);
+        if (tex != null)
+        {
+            m = ObjetosCaja.Mat(Color.white, brillo);
+            m.mainTexture = tex;
+            if (m.HasProperty("_BaseMap")) m.SetTexture("_BaseMap", tex);
+        }
+        matsImagen[nombre] = m;
+        return m;
+    }
+
+    static void Cara(Transform padre, Material mat, bool arriba)
+    {
+        var q = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        q.name = arriba ? "Anverso" : "Reverso";
+        Object.Destroy(q.GetComponent<Collider>());
+        q.transform.SetParent(padre, false);
+        q.transform.localPosition = new Vector3(0f, arriba ? 0.00078f : -0.00078f, 0f);
+        q.transform.localRotation = Quaternion.Euler(arriba ? 90f : -90f, 0f, 0f);
+        q.transform.localScale = new Vector3(0.14f, 0.066f, 1f);
+        var r = q.GetComponent<MeshRenderer>();
+        r.sharedMaterial = mat;
+        r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+    }
+
     public static GameObject Billete3D(int centimos)
     {
         var go = new GameObject("Billete S/ " + centimos / 100);
         var cuerpo = ObjetosCaja.Caja("Papel", go.transform, new Vector3(0.14f, 0.0015f, 0.066f), MatDe(centimos), false);
+        var anverso = MatImagen("b" + centimos / 100 + "a", 0.1f);
+        var reverso = MatImagen("b" + centimos / 100 + "r", 0.1f);
+        if (anverso != null && reverso != null)
+        {
+            Cara(go.transform, anverso, true);
+            Cara(go.transform, reverso, false);
+            var c2 = go.AddComponent<BoxCollider>();
+            c2.size = new Vector3(0.14f, 0.012f, 0.066f);
+            ObjetosCaja.Agarrable(go, 0.01f);
+            return go;
+        }
         // Franja clara a un lado (como la zona de la marca de agua de un billete real).
         ObjetosCaja.Caja("Franja", go.transform, new Vector3(0.032f, 0.0016f, 0.062f), MatFranja(centimos), false)
             .transform.localPosition = new Vector3(-0.05f, 0f, 0f);
@@ -354,6 +397,16 @@ public class BandejaDinero : MonoBehaviour
         var r = disco.GetComponent<MeshRenderer>();
         r.sharedMaterial = MatDe(centimos);
         r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        // Con la imagen del BCRP: la tapa del cilindro usa toda la imagen (la moneda llena el cuadro).
+        var img = MatImagen("m" + centimos, 0.75f);
+        if (img != null)
+        {
+            r.sharedMaterial = img;
+            var c3 = go.AddComponent<BoxCollider>();
+            c3.size = new Vector3(0.04f, 0.01f, 0.04f);
+            ObjetosCaja.Agarrable(go, 0.008f);
+            return go;
+        }
         if (centimos == 500 || centimos == 200)
         {
             // Bimetalica: centro dorado un poquito mas alto que el aro.
