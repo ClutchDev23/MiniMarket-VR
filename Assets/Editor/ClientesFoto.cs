@@ -52,6 +52,39 @@ public static class ClientesFoto
         Debug.Log("[Foto] Guardadas en Logs/");
     }
 
+    /// <summary>
+    /// Prueba completa (en Play): escanea, el cliente paga con billete, se entrega el
+    /// vuelto y, 2.5 s despues (cuando ya salio la boleta), saca fotos del mostrador y
+    /// del resumen del turno.
+    /// </summary>
+    [MenuItem("Tools/Minimarket/Caja/4 - Prueba completa con fotos")]
+    public static void PruebaCompleta()
+    {
+        if (!Application.isPlaying) { EditorUtility.DisplayDialog("Prueba", "Dale Play primero.", "OK"); return; }
+        var caja = Object.FindAnyObjectByType<CajaRegistradora>();
+        if (caja == null) return;
+        if (caja.PasoActual == CajaRegistradora.Paso.Completada) caja.NuevaVenta();
+        caja.ProbarCobro();
+        double fin = EditorApplication.timeSinceStartup + 2.5;
+        EditorApplication.CallbackFunction cb = null;
+        cb = () =>
+        {
+            if (EditorApplication.timeSinceStartup < fin) return;
+            EditorApplication.update -= cb;
+            Foto();
+            caja.MostrarResumen();
+            var g = Object.FindAnyObjectByType<GestorClientes>();
+            var pantalla = GameObject.Find("Pantalla Caja");
+            if (g != null && g.Mostrador != null && pantalla != null)
+            {
+                var cajero = g.Mostrador.TransformPoint(new Vector3(-0.35f, 0f, 0.45f)) + Vector3.up * 1.75f;
+                Sacar("foto_resumen.png", cajero, pantalla.transform.position, 60f);
+            }
+            caja.CerrarResumen();
+        };
+        EditorApplication.update += cb;
+    }
+
     /// <summary>Fotos de un mueble de cada tipo (para revisar como quedan llenos).</summary>
     [MenuItem("Tools/Minimarket/Productos/Foto de muebles")]
     public static void FotoMuebles()
