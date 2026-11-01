@@ -42,6 +42,9 @@ public static class ClientesConfigurar
         ("Walking", "walk"),
         ("Talking", "talk"),
         ("Looking", "look"),
+        ("Saludando", "wav"),
+        ("Celular", "texting"),
+        ("Aburrido", "bored"),
     };
 
     [MenuItem("Tools/Minimarket/Clientes/1 - Configurar personajes y animaciones")]
