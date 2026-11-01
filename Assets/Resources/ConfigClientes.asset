@@ -26,6 +26,7 @@ MonoBehaviour:
   probPagoExacto: 0.25
   paciencia: 240
   probTarjeta: 0.5
+  probCarrito: 0.7
   alturaClientes: 1.72
   velocidad: 1.2
   velocidadAnimacion: 1.3
