@@ -12,6 +12,8 @@ public class LectorCodigos : MonoBehaviour
     public AudioSource audioLector;
     public Collider lectorCollider;
     public XRGrabInteractable grab;
+    [Tooltip("Escaner fijo de mostrador: lee solo al acercar el producto (sin gatillo).")]
+    public bool manosLibres;
 
     public UnityEvent<string> OnProductoEscaneado;
 
@@ -45,12 +47,47 @@ public class LectorCodigos : MonoBehaviour
     void Escanear(ActivateEventArgs args)
     {
         if (Time.time - ultimaBip < enfriamiento) return;
-
         Collider detectado = ProductoEnRango();
         if (detectado == null) return;
-
-        ultimaBip = Time.time;
         Haptica.Pulso(args.interactorObject, 0.35f, 0.05f);   // se siente el bip en la mano
+        Leer(detectado);
+    }
+
+    // Manos libres: lee cada producto UNA vez al entrar a la ventana; para volver a
+    // leerlo hay que sacarlo y acercarlo de nuevo.
+    Collider ultimoLeido;
+    float fueraDesde;
+    void Update()
+    {
+        if (!manosLibres) return;
+        var c = ProductoCerca();
+        if (c == null) { if (ultimoLeido != null && Time.time - fueraDesde > 0.4f) ultimoLeido = null; return; }
+        fueraDesde = Time.time;
+        if (c == ultimoLeido || Time.time - ultimaBip < enfriamiento) return;
+        ultimoLeido = c;
+        Haptica.Ambos(0.25f, 0.04f);
+        Leer(c);
+    }
+
+    Transform raizProductos;
+    /// <summary>Producto dentro de la zona de lectura (fisica: incluye los que pone el cliente).</summary>
+    Collider ProductoCerca()
+    {
+        if (raizProductos == null) { var r = GameObject.Find("Productos"); if (r == null) return null; raizProductos = r.transform; }
+        var b = lectorCollider != null ? lectorCollider.bounds : new Bounds(transform.position, Vector3.one * 0.1f);
+        Collider mejor = null; float d = float.MaxValue;
+        foreach (var c in Physics.OverlapBox(b.center, b.extents + Vector3.one * distanciaLectura, transform.rotation, ~0, QueryTriggerInteraction.Ignore))
+        {
+            if (c.isTrigger || !c.transform.IsChildOf(raizProductos)) continue;
+            float dd = (c.bounds.center - b.center).sqrMagnitude;
+            if (dd < d) { d = dd; mejor = c; }
+        }
+        return mejor;
+    }
+
+    void Leer(Collider detectado)
+    {
+        ultimaBip = Time.time;
 
         // El collider puede estar en un hijo: el producto es el objeto agarrable.
         var grabProducto = detectado.GetComponentInParent<XRGrabInteractable>();
