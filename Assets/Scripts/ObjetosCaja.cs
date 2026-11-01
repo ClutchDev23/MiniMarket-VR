@@ -598,6 +598,40 @@ public class ImpresoraBoletas : MonoBehaviour
 
     void Imprimir(CajaRegistradora.Venta v) { StartCoroutine(RutinaImprimir(v)); }
 
+    /// <summary>La boleta que el cajero tiene agarrada (si hay).</summary>
+    public GameObject BoletaEnMano()
+    {
+        foreach (var b in boletas)
+        {
+            if (b == null) continue;
+            var g = b.GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+            if (g != null && g.isSelected) return b;
+        }
+        return null;
+    }
+
+    /// <summary>El cliente toma la boleta de tu mano: se la suelta y vuela a su mano.</summary>
+    public void Entregar(GameObject b, Vector3 manoCliente)
+    {
+        if (b == null) return;
+        boletas.Remove(b);
+        var g = b.GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+        if (g != null && g.isSelected && g.interactionManager != null)
+            foreach (var it in new System.Collections.Generic.List<UnityEngine.XR.Interaction.Toolkit.Interactors.IXRSelectInteractor>(g.interactorsSelecting))
+                g.interactionManager.SelectExit(it, g);
+        if (g != null) g.enabled = false;
+        foreach (var rb in b.GetComponentsInChildren<Rigidbody>()) rb.isKinematic = true;
+        Haptica.Ambos(0.3f, 0.05f);
+        StartCoroutine(Volar(b, manoCliente));
+    }
+
+    IEnumerator Volar(GameObject b, Vector3 hasta)
+    {
+        var desde = b.transform.position; float t = 0f;
+        while (t < 1f && b != null) { t += Time.deltaTime / 0.35f; b.transform.position = Vector3.Lerp(desde, hasta, t); yield return null; }
+        if (b != null) StartCoroutine(ObjetosCaja.Desaparecer(b, 0.4f));
+    }
+
     /// <summary>El cliente se lleva su boleta (la ultima que salio).</summary>
     public void ClienteSeLlevaBoleta()
     {
