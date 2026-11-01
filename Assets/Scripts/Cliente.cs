@@ -36,6 +36,11 @@ public class Cliente : MonoBehaviour
     Animator anim;
     string animActual = "";
     bool hablando;
+    bool esperandoFila;
+    float saludarHasta;
+    bool? celular;   // en la fila: unos miran el celular, otros se aburren
+    bool usaCelular => celular ??= Random.value < 0.5f;
+    bool TieneEstado(string n) => anim != null && anim.HasState(0, Animator.StringToHash(n));
     bool mirando;
 
     readonly List<Producto> lista = new List<Producto>();
@@ -190,13 +195,16 @@ public class Cliente : MonoBehaviour
                 }
                 break;
             }
+            esperandoFila = true;
             while (g.PosicionEnFila(this) == pos) yield return null;
+            esperandoFila = false;
         }
 
         // 4. en la caja
         EnCaja = true;
         var caja = g.Caja;
         if (caja != null) caja.VentaCobrada += AlCobrar;   // antes de nada: asi no se pierde un cobro rapido
+        saludarHasta = Time.time + 2.6f;   // saluda con la mano al llegar a la caja
         Decir(Saludo(out var claveSaludo), 4f, claveSaludo);
         yield return PonerProductos();
         GestorClientes.Log(name + " llego a la caja y dejo " + copias.Count + " producto(s) en " + g.ZonaProductos +
@@ -594,6 +602,8 @@ public class Cliente : MonoBehaviour
         string quiero;
         float vel = agente != null ? agente.velocity.magnitude : 0f;
         if (vel > 0.12f) quiero = "Walking";
+        else if (Time.time < saludarHasta && TieneEstado("Saludando")) quiero = "Saludando";
+        else if (esperandoFila && TieneEstado(usaCelular ? "Celular" : "Aburrido")) quiero = usaCelular ? "Celular" : "Aburrido";
         else if (hablando) quiero = "Talking";
         else if (mirando) quiero = "Looking";
         else quiero = "Idle";
