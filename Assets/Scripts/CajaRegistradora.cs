@@ -241,6 +241,15 @@ public class CajaRegistradora : MonoBehaviour
 
     // ================================================================== ciclo
 
+    /// <summary>Mete la pantalla de la caja dentro de un monitor (centro, giro y ancho en metros).</summary>
+    public void ColocarPantallaEn(Vector3 centro, Quaternion rot, float anchoMetros)
+    {
+        if (pantalla == null) return;
+        pantalla.position = centro;
+        pantalla.rotation = rot;
+        pantalla.localScale = Vector3.one * (anchoMetros / W);
+    }
+
     /// <summary>Un lector que se crea despues (el escaner fijo del mostrador).</summary>
     public void AgregarLector(LectorCodigos l)
     {
@@ -265,7 +274,11 @@ public class CajaRegistradora : MonoBehaviour
         AsegurarEventSystem();
         CrearPantalla();
         if (mostrarAvisoEnLector) CrearAviso();
-        if (Mostrador != null && Mostrador.name.StartsWith("Pref_CashCounter")) ObjetosCaja.Instalar(this, Mostrador);
+        if (Mostrador != null && Mostrador.name.StartsWith("Pref_CashCounter"))
+        {
+            MostradorNuevo.Construir(this, Mostrador);
+            ObjetosCaja.Instalar(this, Mostrador);
+        }
 
         // Si venimos del cambio dia/noche, se sigue con la venta que habia.
         if (paso == Paso.Tarjeta) paso = Paso.Metodo;   // el POS no sobrevive al cambio
@@ -1020,7 +1033,7 @@ public class CajaRegistradora : MonoBehaviour
         eArticulos.color = CTextoSuave;
         eTotal = Txt(caja1, "Total", "", 60, TextAnchor.LowerRight, FontStyle.Bold, 16, 40, rw - 32, 74);
         eTotal.color = COk;
-        Txt(p1, "Instr", "1. Apunta la pistola al producto\n    y aprieta el gatillo.\n2. Si lleva varios iguales,\n    escanea cada uno (o +1).\n3. Cuando termines: COBRAR.",
+        Txt(p1, "Instr", "1. Pasa el producto frente al\n    escaner (o usa la pistola).\n2. Si lleva varios iguales,\n    escanea cada uno (o +1).\n3. Cuando termines: COBRAR.",
             25, TextAnchor.UpperLeft, FontStyle.Normal, 10, 134, rw - 20, 200).color = CTexto;
         Btn(p1, "Resumen", "Resumen del turno", CBoton, 0, 346, rw, 70, 26, MostrarResumen);
         Btn(p1, "Cobrar", "COBRAR  >", CVerde, 0, 430, rw, 130, 48, IrACobrar);
