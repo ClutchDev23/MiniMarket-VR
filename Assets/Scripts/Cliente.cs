@@ -324,7 +324,35 @@ public class Cliente : MonoBehaviour
         GestorClientes.Log(name + ": " + msg.Replace("\n", " ") + " (esperado " + CajaRegistradora.Dinero(totalEsperadoCent) + ")");
 
         yield return new WaitForSeconds(3f);
+        // Espera que le ENTREGUES su boleta en la mano (agarrarla y acercarsela).
+        if (!queja) yield return EsperarBoleta();
         yield return Irse();
+    }
+
+    public bool RecibioBoleta { get; private set; }
+
+    IEnumerator EsperarBoleta()
+    {
+        var imp = ImpresoraBoletas.I;
+        if (imp == null) yield break;
+        float t0 = Time.time; bool pidio = false;
+        while (Time.time - t0 < 18f)
+        {
+            var b = imp.BoletaEnMano();
+            var pecho = transform.position + Vector3.up * (altura * 0.62f) + transform.forward * 0.15f;
+            if (b != null && Vector3.Distance(b.transform.position, pecho) < 0.55f)
+            {
+                imp.Entregar(b, pecho);
+                RecibioBoleta = true;
+                Decir("¡Gracias por la boleta!", 2.5f, "gracias");
+                GestorClientes.Log(name + " recibio su boleta en la mano");
+                yield return new WaitForSeconds(2f);
+                yield break;
+            }
+            if (!pidio && Time.time - t0 > 6f) { pidio = true; Decir("¿Me da mi boleta, por favor?", 5f); }
+            yield return null;
+        }
+        GestorClientes.Log(name + " se fue sin que le entregaran la boleta");
     }
 
     void AlCobrar(CajaRegistradora.Venta v)
