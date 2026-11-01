@@ -40,6 +40,7 @@ public class CajonDinero : MonoBehaviour
     {
         I = this;
         caja = c;
+        SondeoMostrador.Sondear(m);
         transform.position = ObjetosCaja.SobreMostrador(m, CajonLocal);
         // +X local = hacia el cliente; la gaveta sale hacia -X (el cajero).
         transform.rotation = Quaternion.LookRotation(m.forward, Vector3.up);
