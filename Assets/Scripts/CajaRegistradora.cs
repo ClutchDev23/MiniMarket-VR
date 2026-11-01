@@ -241,6 +241,15 @@ public class CajaRegistradora : MonoBehaviour
 
     // ================================================================== ciclo
 
+    /// <summary>Un lector que se crea despues (el escaner fijo del mostrador).</summary>
+    public void AgregarLector(LectorCodigos l)
+    {
+        if (l == null) return;
+        l.ProductoEscaneado += AlEscanear;
+        var lista = new List<LectorCodigos>(lectores ?? new LectorCodigos[0]) { l };
+        lectores = lista.ToArray();
+    }
+
     void Start()
     {
         if (lectores == null || lectores.Length == 0)
