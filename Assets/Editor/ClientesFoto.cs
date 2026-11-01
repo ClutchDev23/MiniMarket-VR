@@ -172,6 +172,22 @@ public static class ClientesFoto
         Debug.Log("[Foto] Cuerpo: Logs/foto_cuerpo_*.png");
     }
 
+    /// <summary>Fotos del mostrador nuevo: desde el cajero (monitor), de arriba y desde el cliente.</summary>
+    [MenuItem("Tools/Minimarket/Caja/6 - Fotos del mostrador nuevo")]
+    public static void FotoMostradorNuevo()
+    {
+        var caja = Object.FindAnyObjectByType<CajaRegistradora>();
+        if (caja == null || caja.Mostrador == null) { Debug.LogWarning("[Foto] Dale Play primero."); return; }
+        var m = caja.Mostrador;
+        Vector3 L(float x, float y, float z) => m.TransformPoint(new Vector3(x, y, z));
+        Sacar("mn_cajero.png", L(-0.30f, 1.60f, 0.35f), L(-0.25f, 0.95f, -0.55f), 70f);
+        Sacar("mn_monitor.png", L(-0.40f, 1.30f, -0.15f), L(-0.47f, 1.24f, -0.74f), 55f);
+        Sacar("mn_arriba.png", L(0.05f, 3.2f, 0.0f), L(0.05f, 0.9f, -0.01f), 60f);
+        Sacar("mn_cliente.png", L(1.9f, 1.6f, 0.3f), L(0.3f, 0.9f, -0.2f), 60f);
+        Sacar("mn_escaner.png", L(-0.15f, 1.15f, 0.15f), L(0.40f, 1.0f, -0.08f), 45f);
+        Debug.Log("[Foto] Mostrador nuevo: Logs/mn_*.png");
+    }
+
     [MenuItem("Tools/Minimarket/Tutorial/Siguiente paso (Play)")]
     public static void SiguientePaso() { Tutorial.Saltar(); }
 
