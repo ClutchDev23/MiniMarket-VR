@@ -277,6 +277,8 @@ public class CajaRegistradora : MonoBehaviour
         if (Mostrador != null && Mostrador.name.StartsWith("Pref_CashCounter"))
         {
             MostradorNuevo.Construir(this, Mostrador);
+            MostradorNuevo.ConstruirOtras(Mostrador);
+            CartelesOferta.Instalar();
             ObjetosCaja.Instalar(this, Mostrador);
         }
 
