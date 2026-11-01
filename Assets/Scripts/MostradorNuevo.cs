@@ -25,6 +25,23 @@ public static class MostradorNuevo
 
     static Material madera, cuarzo, acero, negro, goma, led, aceroOscuro;
     public static Transform Faja;
+    static string numeroCaja = "CAJA 1";
+
+    /// <summary>Las demas cajas de la tienda: mismo mostrador, pero cerradas (sin lector).</summary>
+    public static void ConstruirOtras(Transform principal)
+    {
+        foreach (var t in Object.FindObjectsByType<Transform>(FindObjectsSortMode.None))
+            if (t != principal && t.name.StartsWith("Pref_CashCounter_Sm")) Debug.Log("[Mostrador] otra caja " + t.name + " escala=" + t.lossyScale.ToString("F2") + " pos=" + t.position.ToString("F1"));
+        int n = 2;
+        foreach (var t in Object.FindObjectsByType<Transform>(FindObjectsSortMode.None))
+        {
+            if (t == principal || !t.name.StartsWith("Pref_CashCounter_Sm")) continue;
+            if (t.parent != null && t.parent.name.StartsWith("Pref_CashCounter")) continue;
+            numeroCaja = "CAJA " + n++;
+            Construir(null, t);
+        }
+        numeroCaja = "CAJA 1";
+    }
 
     public static void Construir(CajaRegistradora caja, Transform m)
     {
@@ -57,7 +74,8 @@ public static class MostradorNuevo
         // Faja de goma con textura que corre.
         Faja = Caja(raiz, "Faja", new Vector3((FajaXZ.xMin + FajaXZ.xMax) / 2f, hFaja - 0.004f, (FajaXZ.yMin + FajaXZ.yMax) / 2f),
                     new Vector3(FajaXZ.width - 0.01f, 0.008f, FajaXZ.height - 0.02f), goma, false);
-        Faja.gameObject.AddComponent<FajaMovil>();
+        var fm = Faja.gameObject.AddComponent<FajaMovil>();
+        fm.mostrador = m; fm.zona = FajaXZ; fm.altura = hFaja; fm.activa = caja != null;
         // Rieles de acero a los lados de la faja y rodillo al final.
         foreach (var x in new[] { FajaXZ.xMin + 0.004f, FajaXZ.xMax - 0.004f })
             Caja(raiz, "Riel", new Vector3(x, h + 0.008f, (FajaXZ.yMin + FajaXZ.yMax) / 2f), new Vector3(0.012f, 0.03f, FajaXZ.height), acero, false);
@@ -70,15 +88,15 @@ public static class MostradorNuevo
         rodillo.GetComponent<MeshRenderer>().sharedMaterial = acero;
         // Separador de clientes sobre el canto.
         Caja(raiz, "Separador", new Vector3(FajaXZ.xMax + 0.06f, h + 0.02f, 0.62f), new Vector3(0.04f, 0.035f, 0.38f), acero, false);
-        ObjetosCaja.Texto(raiz, "SIGUIENTE CLIENTE", new Vector3(FajaXZ.xMax + 0.039f, h + 0.02f, 0.62f), Quaternion.Euler(0f, -90f, 0f), new Vector2(360, 30), 0.001f, 24, new Color(0.1f, 0.1f, 0.12f));
+        if (caja != null) ObjetosCaja.Texto(raiz, "SIGUIENTE CLIENTE", new Vector3(FajaXZ.xMax + 0.039f, h + 0.02f, 0.62f), Quaternion.Euler(0f, -90f, 0f), new Vector2(360, 30), 0.001f, 24, new Color(0.1f, 0.1f, 0.12f));
         // Luz LED calida bajo el canto del lado del cliente.
         Caja(raiz, "LED", new Vector3(x1 + 0.012f, h - 0.05f, (z0 + z1) / 2f), new Vector3(0.006f, 0.008f, z1 - z0 - 0.06f), led, false);
 
         // ---------------- torre "CAJA 1"
         var poste = Caja(raiz, "Poste", new Vector3(x1 - 0.06f, h + 0.45f, z0 + 0.06f), new Vector3(0.035f, 0.9f, 0.035f), aceroOscuro, false);
         Caja(raiz, "Cartel CAJA 1", new Vector3(x1 - 0.06f, h + 0.98f, z0 + 0.06f), new Vector3(0.09f, 0.16f, 0.30f), led, false);
-        foreach (var lado in new[] { 1f, -1f })
-            ObjetosCaja.Texto(raiz, "CAJA 1", new Vector3(x1 - 0.06f + 0.047f * lado, h + 0.98f, z0 + 0.06f), Quaternion.Euler(0f, lado > 0 ? 90f : -90f, 0f),
+        if (m.lossyScale.x > 0f) foreach (var lado in new[] { 1f, -1f })
+            ObjetosCaja.Texto(raiz, numeroCaja, new Vector3(x1 - 0.06f + 0.047f * lado, h + 0.98f, z0 + 0.06f), Quaternion.Euler(0f, lado > 0 ? -90f : 90f, 0f),
                 new Vector2(280, 120), 0.001f, 72, new Color(0.15f, 0.08f, 0.02f));
 
         // ---------------- escaner manos libres
@@ -86,6 +104,7 @@ public static class MostradorNuevo
         // ---------------- monitor con la pantalla de la caja adentro
         Monitor(caja, m, raiz, h);
 
+        if (caja == null) { Debug.Log("[Mostrador] " + numeroCaja + " (cerrada) lista."); return; }
         // La pistola (ya no hace falta, pero queda a mano) sobre el escritorio.
         foreach (var l in Object.FindObjectsByType<LectorCodigos>(FindObjectsSortMode.None))
             if (!l.manosLibres && l.grab != null)
@@ -175,7 +194,7 @@ public static class MostradorNuevo
             Caja(cuerpo, "LED", new Vector3(-0.036f + i * 0.024f, 0.05f, 0.041f), new Vector3(0.012f, 0.006f, 0.002f), blancoLuz, false);
         Caja(cuerpo, "Sensor", new Vector3(0f, 0.005f, 0.04f), new Vector3(0.012f, 0.012f, 0.002f), cuerpoMat, false);
         Caja(cuerpo, "Etiqueta", new Vector3(0f, -0.043f, 0.041f), new Vector3(0.10f, 0.016f, 0.002f), amarillo, false);
-        ObjetosCaja.Texto(cuerpo, "WARNING  LED 1M", new Vector3(0f, -0.043f, 0.0425f), Quaternion.Euler(0f, 180f, 0f), new Vector2(200, 30), 0.0005f, 18, Color.black);
+        if (m.lossyScale.x > 0f) ObjetosCaja.Texto(cuerpo, "WARNING  LED 1M", new Vector3(0f, -0.043f, 0.0425f), Quaternion.Euler(0f, 180f, 0f), new Vector2(200, 30), 0.0005f, 18, Color.black);
         var luzRoja = Caja(cuerpo, "Luz de lectura", new Vector3(0f, 0.004f, 0.0415f), new Vector3(0.09f, 0.003f, 0.001f), rojo, false);
         luzRoja.gameObject.SetActive(false);
 
@@ -196,7 +215,7 @@ public static class MostradorNuevo
         foreach (var l in Object.FindObjectsByType<LectorCodigos>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             if (l != lector && l.clipBip != null) { lector.clipBip = l.clipBip; break; }
         zona.gameObject.AddComponent<DestelloEscaner>().luz = luzRoja.gameObject;
-        if (caja != null) caja.AgregarLector(lector);
+        if (caja != null) caja.AgregarLector(lector); else lector.enabled = false;
     }
 
     // ------------------------------------------------------------------ monitor
@@ -227,6 +246,12 @@ public static class MostradorNuevo
         // La pantalla de la caja (canvas) se mete en el panel.
         var centro = mo.TransformPoint(new Vector3(0f, centroY, -0.0135f));
         if (caja != null) caja.ColocarPantallaEn(centro, mo.rotation, ancho - 0.03f);
+        else
+        {
+            // Caja sin cajero: el monitor muestra que esta cerrada.
+            if (m.lossyScale.x > 0f) ObjetosCaja.Texto(mo, "<color=#F28C28>" + numeroCaja + "</color>\n<size=40>CERRADA · pase a la CAJA 1</size>", new Vector3(0f, centroY, -0.013f),
+                Quaternion.identity, new Vector2(560, 300), 0.001f, 70, Color.white);
+        }
     }
 
     // ------------------------------------------------------------------ materiales
@@ -296,19 +321,44 @@ public static class MostradorNuevo
     }
 }
 
-/// <summary>La faja corre (textura) cuando hay un cliente en la caja.</summary>
+/// <summary>
+/// La faja corre (textura) cuando hay un cliente en la caja y LLEVA los productos que
+/// estan encima hacia el escaner (no mueve los que tienes agarrados).
+/// </summary>
 public class FajaMovil : MonoBehaviour
 {
-    Material m; float off;
+    public Transform mostrador; public Rect zona; public float altura; public bool activa;
+    const float Velocidad = 0.12f;
+    Material m; float off; Transform productos;
+    readonly Collider[] buf = new Collider[48];
     void Start() { var r = GetComponent<Renderer>(); if (r != null) m = r.material; }
     void Update()
     {
-        if (m == null) return;
+        if (m == null || !activa) return;
         bool corre = GestorClientes.I != null && GestorClientes.I.ClienteEnCaja != null;
         if (!corre) return;
-        off -= Time.deltaTime * 0.6f;
+        off -= Time.deltaTime * Velocidad * 4f;
         if (m.HasProperty("_BaseMap")) m.SetTextureOffset("_BaseMap", new Vector2(0f, off));
         m.mainTextureOffset = new Vector2(0f, off);
+        if (mostrador == null) return;
+        if (productos == null) { var p = GameObject.Find("Productos"); if (p == null) return; productos = p.transform; }
+        var centro = mostrador.TransformPoint(new Vector3(zona.center.x, altura + 0.08f, zona.center.y));
+        int n = Physics.OverlapBoxNonAlloc(centro, new Vector3(zona.width / 2f, 0.09f, zona.height / 2f), buf, mostrador.rotation, ~0, QueryTriggerInteraction.Ignore);
+        float fin = zona.yMin + 0.07f;
+        var movidos = new System.Collections.Generic.HashSet<Transform>();
+        for (int i = 0; i < n; i++)
+        {
+            var c = buf[i];
+            if (c == null || !c.transform.IsChildOf(productos)) continue;
+            var grab = c.GetComponentInParent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+            if (grab != null && grab.isSelected) continue;
+            var t = grab != null ? grab.transform : c.transform;
+            if (!movidos.Add(t)) continue;
+            if (mostrador.InverseTransformPoint(t.position).z <= fin) continue;   // ya llego al final
+            var paso = -mostrador.forward * Velocidad * Time.deltaTime;
+            var rb = t.GetComponent<Rigidbody>();
+            if (rb != null && !rb.isKinematic) rb.MovePosition(rb.position + paso); else t.position += paso;
+        }
     }
 }
 
