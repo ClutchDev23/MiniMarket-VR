@@ -23,8 +23,8 @@ public static class ObjetosCaja
 {
     // Posiciones relativas al mostrador (Pref_CashCounter). Se ajustan mirando la escena.
     public static Vector3 BandejaLocal = new Vector3(0.55f, 0f, 0.05f);
-    public static Vector3 PosLocal = new Vector3(0.05f, 0f, -0.30f);
-    public static Vector3 ImpresoraLocal = new Vector3(-0.15f, 0f, -0.55f);
+    public static Vector3 PosLocal = new Vector3(0.10f, 0f, -0.42f);
+    public static Vector3 ImpresoraLocal = new Vector3(0.08f, 0f, -0.72f);
 
     /// <summary>Crea la bandeja, el POS y la impresora junto a esta caja.</summary>
     public static void Instalar(CajaRegistradora caja, Transform mostrador)

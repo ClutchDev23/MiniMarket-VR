@@ -19,7 +19,7 @@ public class Dinero : MonoBehaviour { public int centimos; }
 public class CajonDinero : MonoBehaviour
 {
     public static CajonDinero I { get; private set; }
-    public static Vector3 CajonLocal = new Vector3(-0.45f, 0f, -0.62f);
+    public static Vector3 CajonLocal = new Vector3(-0.24f, 0f, -0.55f);
 
     static readonly int[] Billetes = { 1000, 2000, 5000, 10000, 20000 };
     static readonly int[] Monedas = { 10, 20, 50, 100, 200, 500 };
@@ -40,10 +40,9 @@ public class CajonDinero : MonoBehaviour
     {
         I = this;
         caja = c;
-        SondeoMostrador.Sondear(m);
         transform.position = ObjetosCaja.SobreMostrador(m, CajonLocal);
         // +X local = hacia el cliente; la gaveta sale hacia -X (el cajero).
-        transform.rotation = Quaternion.LookRotation(m.forward, Vector3.up);
+        transform.rotation = m.rotation * Quaternion.Euler(0f, 90f, 0f);   // la gaveta sale hacia el cajero (+z)
 
         var metal = ObjetosCaja.Mat(new Color(0.16f, 0.17f, 0.19f), 0.55f);
         var metalClaro = ObjetosCaja.Mat(new Color(0.42f, 0.44f, 0.47f), 0.75f);
