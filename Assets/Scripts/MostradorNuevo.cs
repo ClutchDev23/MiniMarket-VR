@@ -58,6 +58,7 @@ public static class MostradorNuevo
         var raiz = new GameObject("Mostrador nuevo").transform;
         raiz.SetParent(m, false);
         if (caja != null) Bolsas.Instalar(raiz, h);
+        Balanza.Instalar(caja, raiz, h);
 
         // ---------------- B) escritorio del cajero
         Mueble(raiz, EscritorioXZ, h, true);
