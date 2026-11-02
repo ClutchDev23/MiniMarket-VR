@@ -222,17 +222,17 @@ public class CajaRegistradora : MonoBehaviour
     AudioClip cClick, cCobro, cError, cPos, cMoneda, cBillete, cCajon, cImpresora;
 
     // colores
-    static readonly Color CFondo = new Color(0.07f, 0.09f, 0.13f, 0.97f);
-    static readonly Color CPanel = new Color(0.12f, 0.15f, 0.20f, 1f);
-    static readonly Color CCabecera = new Color(0.10f, 0.55f, 0.35f, 1f);
-    static readonly Color CFila = new Color(0.15f, 0.18f, 0.24f, 1f);
-    static readonly Color CFilaSel = new Color(0.20f, 0.45f, 0.75f, 1f);
-    static readonly Color CBillete = new Color(0.20f, 0.50f, 0.32f, 1f);
-    static readonly Color CMoneda = new Color(0.62f, 0.50f, 0.18f, 1f);
-    static readonly Color CBoton = new Color(0.25f, 0.30f, 0.38f, 1f);
-    static readonly Color CPeligro = new Color(0.70f, 0.22f, 0.22f, 1f);
-    static readonly Color CVerde = new Color(0.10f, 0.62f, 0.30f, 1f);
-    static readonly Color CAzul = new Color(0.15f, 0.40f, 0.80f, 1f);
+    static readonly Color CFondo = new Color(0.055f, 0.065f, 0.10f, 0.98f);
+    static readonly Color CPanel = new Color(0.11f, 0.13f, 0.19f, 1f);
+    static readonly Color CCabecera = new Color(0.95f, 0.47f, 0.13f, 1f);
+    static readonly Color CFila = new Color(0.14f, 0.165f, 0.235f, 1f);
+    static readonly Color CFilaSel = new Color(0.30f, 0.42f, 0.95f, 1f);
+    static readonly Color CBillete = new Color(0.13f, 0.55f, 0.40f, 1f);
+    static readonly Color CMoneda = new Color(0.78f, 0.58f, 0.16f, 1f);
+    static readonly Color CBoton = new Color(0.22f, 0.26f, 0.36f, 1f);
+    static readonly Color CPeligro = new Color(0.86f, 0.26f, 0.30f, 1f);
+    static readonly Color CVerde = new Color(0.10f, 0.70f, 0.42f, 1f);
+    static readonly Color CAzul = new Color(0.30f, 0.42f, 0.95f, 1f);
     static readonly Color COk = new Color(0.45f, 1f, 0.6f, 1f);
     static readonly Color CError = new Color(1f, 0.45f, 0.4f, 1f);
     static readonly Color CAviso = new Color(1f, 0.85f, 0.3f, 1f);
@@ -977,6 +977,7 @@ public class CajaRegistradora : MonoBehaviour
         Txt(cab, "Nombre", nombreCaja + "  -  MiniMarket", 32, TextAnchor.MiddleLeft, FontStyle.Bold, 20, 0, 560, 60).color = Color.white;
         txtTurno = Txt(cab, "Turno", "", 24, TextAnchor.MiddleRight, FontStyle.Normal, 540, 0, 540, 60);
         txtTurno.color = new Color(1, 1, 1, 0.85f);
+        Img(raiz, "Acento", new Color(1f, 0.78f, 0.35f, 1f), 0, 58, W, 3);
 
         // ---- paso actual (lo que hay que hacer)
         var barraPaso = Img(raiz, "BarraPaso", new Color(0, 0, 0, 0.35f), 0, 60, W, 56);
@@ -1311,6 +1312,27 @@ public class CajaRegistradora : MonoBehaviour
         rt.sizeDelta = new Vector2(w, h);
     }
 
+    static Sprite redondo;
+    /// <summary>Sprite blanco con esquinas redondeadas (9-slice), hecho por codigo.</summary>
+    static Sprite Redondo()
+    {
+        if (redondo != null) return redondo;
+        const int N = 64, R = 18;
+        var tex = new Texture2D(N, N, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
+        var px = new Color32[N * N];
+        for (int y = 0; y < N; y++)
+            for (int x = 0; x < N; x++)
+            {
+                float cx = Mathf.Clamp(x + 0.5f, R, N - R), cy = Mathf.Clamp(y + 0.5f, R, N - R);
+                float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(cx, cy));
+                byte a = (byte)(Mathf.Clamp01(R - d + 0.5f) * 255);
+                px[y * N + x] = new Color32(255, 255, 255, a);
+            }
+        tex.SetPixels32(px); tex.Apply();
+        redondo = Sprite.Create(tex, new Rect(0, 0, N, N), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(R, R, R, R));
+        return redondo;
+    }
+
     static RectTransform Img(RectTransform padre, string nombre, Color color, float x, float y, float w, float h)
     {
         var go = new GameObject(nombre, typeof(RectTransform), typeof(Image));
@@ -1318,6 +1340,19 @@ public class CajaRegistradora : MonoBehaviour
         var img = go.GetComponent<Image>();
         img.color = color;
         img.raycastTarget = false;
+        // Esquinas redondeadas (todo menos los fondos/barras que ocupan el ancho completo).
+        if (color.a > 0.01f && nombre != "Fondo" && nombre != "BarraPaso" && nombre != "Cabecera" && w < 1000f)
+        {
+            img.sprite = Redondo();
+            img.type = Image.Type.Sliced;
+            img.pixelsPerUnitMultiplier = h < 50f ? 2.2f : 1.3f;
+            if (color.a > 0.9f && h >= 30f)
+            {
+                var sh = go.AddComponent<Shadow>();
+                sh.effectColor = new Color(0f, 0f, 0f, 0.35f);
+                sh.effectDistance = new Vector2(0f, -3f);
+            }
+        }
         var rt = (RectTransform)go.transform;
         Rect(rt, x, y, w, h);
         return rt;
@@ -1362,7 +1397,13 @@ public class CajaRegistradora : MonoBehaviour
         b.colors = cb;
         b.onClick.AddListener(() => accion());
         if (!string.IsNullOrEmpty(texto))
-            Txt(rt, "Texto", texto, tam, TextAnchor.MiddleCenter, FontStyle.Bold, 0, 0, w, h).color = Color.white;
+        {
+            var t = Txt(rt, "Texto", texto, tam, TextAnchor.MiddleCenter, FontStyle.Bold, 0, 0, w, h);
+            t.color = Color.white;
+            var sh = t.gameObject.AddComponent<Shadow>();
+            sh.effectColor = new Color(0f, 0f, 0f, 0.45f);
+            sh.effectDistance = new Vector2(1.5f, -1.5f);
+        }
         return b;
     }
 
