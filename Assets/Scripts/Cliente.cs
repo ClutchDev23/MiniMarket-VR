@@ -58,6 +58,7 @@ public class Cliente : MonoBehaviour
     float altura = 1.8f;
 
     CarritoCliente carrito;
+    float agarrarHasta, graciasHasta;
 
     // voz
     AudioSource voz;
@@ -353,6 +354,7 @@ public class Cliente : MonoBehaviour
                 imp.Entregar(b, pecho);
                 RecibioBoleta = true;
                 Decir("¡Gracias por la boleta!", 2.5f, "gracias");
+                graciasHasta = Time.time + 2f;
                 GestorClientes.Log(name + " recibio su boleta en la mano");
                 yield return new WaitForSeconds(2f);
                 yield break;
@@ -404,6 +406,7 @@ public class Cliente : MonoBehaviour
     {
         var p = BaseDatosProductos.Buscar(original.name);
         if (p == null) return;
+        agarrarHasta = Time.time + 1.6f;   // estira la mano al estante
         for (int i = 0; i < cantidad && lista.Count < maximo; i++)
         {
             lista.Add(p);
@@ -601,7 +604,10 @@ public class Cliente : MonoBehaviour
         if (anim == null) return;
         string quiero;
         float vel = agente != null ? agente.velocity.magnitude : 0f;
-        if (vel > 0.12f) quiero = "Walking";
+        bool conCarrito = carrito != null && carrito.Carrito != null;
+        if (vel > 0.12f) quiero = conCarrito && TieneEstado("Empujando") ? "Empujando" : "Walking";
+        else if (Time.time < agarrarHasta && TieneEstado("Agarrando")) quiero = "Agarrando";
+        else if (Time.time < graciasHasta && TieneEstado("Gracias")) quiero = "Gracias";
         else if (Time.time < saludarHasta && TieneEstado("Saludando")) quiero = "Saludando";
         else if (esperandoFila && TieneEstado(usaCelular ? "Celular" : "Aburrido")) quiero = usaCelular ? "Celular" : "Aburrido";
         else if (hablando) quiero = "Talking";
@@ -621,7 +627,7 @@ public class Cliente : MonoBehaviour
         }
 
         // La animacion avanza al ritmo real del paso (si no, los pies "patinan").
-        anim.speed = quiero == "Walking" ? Mathf.Clamp(vel / g.Config.velocidadAnimacion, 0.6f, 1.4f) : 1f;
+        anim.speed = (quiero == "Walking" || quiero == "Empujando") ? Mathf.Clamp(vel / g.Config.velocidadAnimacion, 0.6f, 1.4f) : 1f;
     }
 
     void LateUpdate()
