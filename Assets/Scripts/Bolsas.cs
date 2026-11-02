@@ -12,7 +12,7 @@ using UnityEngine;
 public class Bolsas : MonoBehaviour
 {
     public static Bolsas I { get; private set; }
-    static readonly Vector3 PuntoLocal = new Vector3(0.66f, 0f, -0.40f);
+    static readonly Vector3 PuntoLocal = new Vector3(0.74f, 0f, -0.72f);
     Transform abierta;
     Material plastico, asa;
     float h;

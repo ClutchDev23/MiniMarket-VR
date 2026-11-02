@@ -11,7 +11,7 @@ using UnityEngine;
 public class Balanza : MonoBehaviour
 {
     public static Balanza I { get; private set; }
-    static readonly Vector3 PuntoLocal = new Vector3(0.45f, 0f, -0.60f);
+    static readonly Vector3 PuntoLocal = new Vector3(0.40f, 0f, -0.52f);
 
     struct Tipo { public string nombre; public float precioKg; public Color color; public PrimitiveType forma; public Vector3 escala; }
     static readonly Tipo[] Tipos =
