@@ -38,10 +38,14 @@ public static class ClientesConfigurar
     // estado del Animator -> palabra que debe tener el nombre del archivo
     static readonly (string estado, string archivo)[] Estados =
     {
-        ("Idle", "idle"),
-        ("Walking", "walk"),
-        ("Talking", "talk"),
-        ("Looking", "look"),
+        // Primero las animaciones "Nat..." (mas naturales); si no estan, las de antes.
+        ("Idle", "natidle|idle"),
+        ("Walking", "natwalk|walk"),
+        ("Talking", "nattalk|talk"),
+        ("Looking", "natlook|look"),
+        ("Empujando", "natpush|push"),
+        ("Agarrando", "natpick|pick"),
+        ("Gracias", "natthumbs|thumb"),
         ("Saludando", "wav"),
         ("Celular", "texting"),
         ("Aburrido", "bored"),
@@ -190,7 +194,9 @@ public static class ClientesConfigurar
         AnimatorState porDefecto = null;
         foreach (var (estado, archivo) in Estados)
         {
-            var clip = clips.FirstOrDefault(c => c.name.ToLowerInvariant().Contains(archivo));
+            AnimationClip clip = null;
+            foreach (var clave in archivo.Split('|'))
+                if ((clip = clips.FirstOrDefault(c => c.name.ToLowerInvariant().Contains(clave))) != null) break;
             var st = sm.AddState(estado);
             st.motion = clip;
             st.iKOnFeet = true;   // Foot IK: pies bien apoyados al usar la animacion en otro personaje
