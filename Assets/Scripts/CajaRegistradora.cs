@@ -600,6 +600,8 @@ public class CajaRegistradora : MonoBehaviour
         if (entregado != VueltoCent)
         {
             erroresVuelto++;
+            RegistrarError("Venta #" + (ventas.Count + 1) + ": total " + Dinero(TotalCent) + ", recibiste " + Dinero(recibido) +
+                           " → el vuelto era " + Dinero(VueltoCent) + " (" + DesgloseVuelto(VueltoCent) + "), diste " + Dinero(entregado) + ".");
             Error(entregado < VueltoCent
                 ? "Vuelto incompleto: faltan " + Dinero(VueltoCent - entregado) + "."
                 : "Te pasaste por " + Dinero(entregado - VueltoCent) + ". Pulsa Borrar y vuelve a contar.");
@@ -693,6 +695,7 @@ public class CajaRegistradora : MonoBehaviour
         }
         ventas.Add(v);
         Ranking.Registrar(Evaluar());
+        Jornada.VentaHecha(this);
         inicioVenta = -1f;
 
         paso = Paso.Completada;
@@ -731,6 +734,7 @@ public class CajaRegistradora : MonoBehaviour
     public void ClienteSeFue()
     {
         abandonos++;
+        RegistrarError("Un cliente se fue sin pagar (esperó demasiado). Atiende más rápido o avísale que ya vas.");
         if (paso != Paso.Completada && lineas.Count > 0)
         {
             CancelarPOS();
@@ -838,7 +842,7 @@ public class CajaRegistradora : MonoBehaviour
 
     // ================================================================== refrescar UI
 
-    void Mensaje(string texto, Color color, bool tambienEnLector = false)
+    public void Mensaje(string texto, Color color, bool tambienEnLector = false)
     {
         if (txtMensaje != null) { txtMensaje.text = texto; txtMensaje.color = color; }
         if (tambienEnLector && txtAviso != null && lectorAviso != null)
@@ -849,7 +853,7 @@ public class CajaRegistradora : MonoBehaviour
         }
     }
 
-    void Refrescar()
+    public void Refrescar()
     {
         if (pantalla == null) return;
 
@@ -943,7 +947,8 @@ public class CajaRegistradora : MonoBehaviour
         // ---- turno
         int totalTurno = 0;
         foreach (var v in ventas) totalTurno += v.totalCent;
-        txtTurno.text = "Turno: " + ventas.Count + " venta(s)  -  " + Dinero(totalTurno);
+        txtTurno.text = (Examen.Activo ? "<color=#FFE08A>EXAMEN " + Examen.Restante + "</color>  ·  " : "Día " + Jornada.Dia + " (" + Jornada.VentasDelDia + "/" + Jornada.Meta + ")  ·  ") +
+                        ventas.Count + " venta(s)  ·  " + Dinero(totalTurno);
     }
 
     static string Recortar(string s, int max) => s.Length <= max ? s : s.Substring(0, max - 1) + ".";
@@ -1154,6 +1159,10 @@ public class CajaRegistradora : MonoBehaviour
         return e;
     }
 
+    readonly List<string> errores = new List<string>();
+    public IReadOnlyList<string> Errores => errores;
+    public void RegistrarError(string texto) { errores.Add(texto); if (errores.Count > 30) errores.RemoveAt(0); }
+
     public void MostrarResumen()
     {
         viendoResumen = true;
@@ -1176,6 +1185,7 @@ public class CajaRegistradora : MonoBehaviour
     public void NuevoTurno()
     {
         ventas.Clear();
+        errores.Clear();
         abandonos = 0;
         NuevaVenta();
         viendoResumen = false;
@@ -1217,8 +1227,30 @@ public class CajaRegistradora : MonoBehaviour
         Btn(rt, "Volver", "<  Volver a la caja", CVerde, nx, 340, nw, 100, 32, CerrarResumen);
         Btn(rt, "Nuevo", "Nuevo turno", CPeligro, nx, 456, nw, 80, 28, NuevoTurno);
         Txt(rt, "Regla", "Nota: 20 - 2 por queja - 1 por error de vuelto - 3 por cliente perdido - 1 por venta lenta",
-            18, TextAnchor.MiddleLeft, FontStyle.Normal, 24, 560, W - 48, 40).color = CTextoSuave;
+            18, TextAnchor.MiddleLeft, FontStyle.Normal, 24, 560, 690, 40).color = CTextoSuave;
+        Btn(rt, "MisErrores", "Ver mis errores", CAzul, nx, 552, nw, 56, 24, () => { pErrores.SetActive(true); RefrescarErrores(); });
+
+        // Repeticion de errores: cada falla con la cuenta correcta.
+        var pe = Img(rt, "Errores", new Color(CFondo.r, CFondo.g, CFondo.b, 1f), 0, 0, W, H - 60);
+        pe.GetComponent<Image>().raycastTarget = true;
+        pErrores = pe.gameObject;
+        Txt(pe, "Titulo", "MIS ERRORES DEL TURNO", 34, TextAnchor.MiddleLeft, FontStyle.Bold, 24, 8, 700, 56).color = CAviso;
+        var lista = Img(pe, "Lista", CPanel, 24, 70, W - 48, 470);
+        txtErrores = Txt(lista, "Texto", "", 22, TextAnchor.UpperLeft, FontStyle.Normal, 18, 14, W - 84, 450);
+        Btn(pe, "Volver", "<  Volver al resumen", CVerde, W - 360, 556, 336, 64, 26, () => pErrores.SetActive(false));
+        pErrores.SetActive(false);
         pResumen.SetActive(false);
+    }
+
+    GameObject pErrores; Text txtErrores;
+    void RefrescarErrores()
+    {
+        if (txtErrores == null) return;
+        if (errores.Count == 0) { txtErrores.text = "<color=#73FF99>¡Ningún error en este turno!</color>\n\nSigue así."; return; }
+        var sb = new System.Text.StringBuilder();
+        int desde = Mathf.Max(0, errores.Count - 9);
+        for (int i = desde; i < errores.Count; i++) sb.Append("<color=#FF7A70>•</color> ").Append(errores[i]).Append("\n\n");
+        txtErrores.text = sb.ToString();
     }
 
     void RefrescarResumen()
