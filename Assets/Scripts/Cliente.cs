@@ -58,7 +58,31 @@ public class Cliente : MonoBehaviour
     float altura = 1.8f;
 
     CarritoCliente carrito;
+
+    // ------------------------------------------------------------ personalidad
+    public enum Personalidad { Normal, Apurado, Amable, Quejon }
+    public Personalidad Tipo { get; private set; }
+    /// <summary>Segundos que aguanta esperando: el apurado mucho menos, el amable mas.</summary>
+    float Paciencia => g.Config.paciencia * Jornada.FactorPaciencia *
+        (Tipo == Personalidad.Apurado ? 0.4f : Tipo == Personalidad.Amable ? 1.6f : Tipo == Personalidad.Quejon ? 0.8f : 1f);
+    int comentarios;
+    /// <summary>Comentarios mientras espera en la caja, segun como es.</summary>
+    void Comentar(float esperando)
+    {
+        float[] cuando = { 0.3f, 0.6f };
+        if (comentarios >= cuando.Length || esperando < Paciencia * cuando[comentarios]) return;
+        comentarios++;
+        string t = null;
+        switch (Tipo)
+        {
+            case Personalidad.Apurado: t = comentarios == 1 ? "Disculpa, ¿puedes apurarte?\nTengo un poco de prisa." : "¡Rápido por favor,\nque me deja el bus!"; break;
+            case Personalidad.Quejon: t = comentarios == 1 ? "Uff... esta caja es lentísima." : "En la otra tienda\nme atienden más rápido..."; break;
+            case Personalidad.Amable: t = comentarios == 1 ? "Tranquilo, sin apuro." : "No te preocupes,\ntómate tu tiempo."; break;
+        }
+        if (t != null) Decir(t, 3.5f);
+    }
     float agarrarHasta, graciasHasta;
+    Producto fruta; int frutaTipo; float frutaKg;
 
     // voz
     AudioSource voz;
@@ -78,12 +102,14 @@ public class Cliente : MonoBehaviour
         anim.cullingMode = AnimatorCullingMode.AlwaysAnimate;   // solo son 3-4 clientes: asi nunca se ven en pose T
 
         QuiereTarjeta = Random.value < g.Config.probTarjeta;
+        float r = Random.value;
+        Tipo = r < 0.25f ? Personalidad.Apurado : r < 0.50f ? Personalidad.Amable : r < 0.68f ? Personalidad.Quejon : Personalidad.Normal;
 
         agente = gameObject.AddComponent<NavMeshAgent>();
         agente.agentTypeID = g.AgentTypeID;
         agente.radius = 0.28f;
         agente.height = 1.8f;
-        agente.speed = g.Config.velocidad * Random.Range(0.9f, 1.1f);
+        agente.speed = g.Config.velocidad * Random.Range(0.9f, 1.1f) * (Tipo == Personalidad.Apurado ? 1.25f : Tipo == Personalidad.Amable ? 0.92f : 1f);
         agente.angularSpeed = 300f;
         agente.acceleration = 6f;
         agente.stoppingDistance = 0.08f;
@@ -143,7 +169,7 @@ public class Cliente : MonoBehaviour
 
         // 2. comprar
         int paradas = Random.Range(1, 3);
-        int objetivo = Random.Range(g.Config.productosPorCliente.x, g.Config.productosPorCliente.y + 1);
+        int objetivo = Random.Range(g.Config.productosPorCliente.x, g.Config.productosPorCliente.y + 1 + Jornada.ProductosExtra);
         for (int i = 0; i < paradas && lista.Count < objetivo; i++)
         {
             // Busca un producto al que se pueda llegar caminando.
@@ -173,6 +199,8 @@ public class Cliente : MonoBehaviour
         }
         if (lista.Count == 0) { yield return Irse(); yield break; }
 
+        // A veces tambien lleva fruta o verdura (se cobra por peso en la balanza).
+        if (Balanza.I != null && Random.value < 0.35f) { fruta = Balanza.NuevaFruta(out frutaTipo, out frutaKg); lista.Add(fruta); }
         foreach (var p in lista) totalEsperadoCent += CajaRegistradora.ACentimos(p.precio);
         GestorClientes.Log(name + " eligio " + lista.Count + " producto(s), total esperado " + CajaRegistradora.Dinero(totalEsperadoCent));
 
@@ -228,9 +256,10 @@ public class Cliente : MonoBehaviour
                 // Si dejaste de escanear un rato, pregunta igual.
                 else if (caja.TotalCent > 0 && Time.time - ultimoCambio > 12f) listoParaPagar = true;
             }
-            if (Time.time - t0 > g.Config.paciencia)
+            Comentar(Time.time - t0);
+            if (Time.time - t0 > Paciencia)
             {
-                Decir("Ya me cansé de esperar... me voy.", 4f, "cansado");
+                Decir(Tipo == Personalidad.Quejon ? "¡Pésimo servicio! Me voy." : "Ya me cansé de esperar... me voy.", 4f, "cansado");
                 g.RegistrarResultado(false, true);
                 if (g.Caja != null) g.Caja.ClienteSeFue();
                 var bj = BandejaDinero.I; if (bj != null) bj.RetirarPago();
@@ -290,7 +319,8 @@ public class Cliente : MonoBehaviour
                     if (bandeja != null) bandeja.ClienteDeja(PagoCent);
                 }
             }
-            if (Time.time - t0 > g.Config.paciencia)
+            Comentar(Time.time - t0);
+            if (Time.time - t0 > Paciencia)
             {
                 Decir("¿Hola? Ya me voy...", 4f, "me_voy");
                 g.RegistrarResultado(false, true);
@@ -329,6 +359,7 @@ public class Cliente : MonoBehaviour
         }
         Decir(msg, 4f, clave);
         if (g.Caja != null) g.Caja.RegistrarOpinion(v, !queja, msg.Replace("\n", " "));
+        if (queja && g.Caja != null) g.Caja.RegistrarError("Queja de un cliente: \"" + msg.Replace("\n", " ") + "\" (le correspondía " + CajaRegistradora.Dinero(totalEsperadoCent) + ")");
         g.RegistrarResultado(bien, false);
         GestorClientes.Log(name + ": " + msg.Replace("\n", " ") + " (esperado " + CajaRegistradora.Dinero(totalEsperadoCent) + ")");
 
@@ -484,6 +515,11 @@ public class Cliente : MonoBehaviour
             copias.Add(copia);
             if (visual != null) yield return new WaitForSeconds(0.15f);
         }
+        if (fruta != null && Balanza.I != null)
+        {
+            var padre = copias.Count > 0 && copias[0] != null ? copias[0].transform.parent : null;
+            copias.Add(Balanza.I.SoltarFruta(fruta, frutaTipo, frutaKg, g.ZonaProductos + Vector3.up * 0.05f, padre));
+        }
         g.ActualizarLectores();
     }
 
@@ -532,6 +568,12 @@ public class Cliente : MonoBehaviour
         if (i < 0) return ((total / 20000) + 1) * 20000;
         // A veces paga con un billete mas grande (como en la vida real).
         if (i + 1 < billetes.Length && Random.value < 0.3f) i++;
+        // Dias avanzados: mas clientes pagan con billetes grandes (mas vuelto que contar).
+        if (Random.value < Jornada.ProbBilleteGrande)
+        {
+            int j = Array.FindIndex(billetes, b => b >= total * 4);
+            i = Mathf.Max(i, j >= 0 ? j : billetes.Length - 1);
+        }
         return billetes[i];
     }
 
