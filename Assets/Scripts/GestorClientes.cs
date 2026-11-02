@@ -164,8 +164,8 @@ public class GestorClientes : MonoBehaviour
 
         if (Time.time >= proximoCliente)
         {
-            if (clientes.Count < Config.maxClientes) TraerCliente();
-            proximoCliente = Time.time + Random.Range(Config.intervalo.x, Config.intervalo.y);
+            if (clientes.Count < Jornada.MaxClientes(Config.maxClientes)) TraerCliente();
+            proximoCliente = Time.time + Random.Range(Config.intervalo.x, Config.intervalo.y) * Jornada.FactorIntervalo;
         }
     }
 
