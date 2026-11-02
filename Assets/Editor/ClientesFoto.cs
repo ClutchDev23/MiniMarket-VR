@@ -185,6 +185,8 @@ public static class ClientesFoto
         Sacar("mn_arriba.png", L(0.05f, 3.2f, 0.0f), L(0.05f, 0.9f, -0.01f), 60f);
         Sacar("mn_cliente.png", L(1.9f, 1.6f, 0.3f), L(0.3f, 0.9f, -0.2f), 60f);
         Sacar("mn_escaner.png", L(-0.15f, 1.15f, 0.15f), L(0.40f, 1.0f, -0.08f), 45f);
+        var reloj = GameObject.Find("Reloj de pared");
+        if (reloj != null) Sacar("mn_reloj.png", L(-0.30f, 1.60f, 0.35f), reloj.transform.position, 50f);
         Debug.Log("[Foto] Mostrador nuevo: Logs/mn_*.png");
     }
 
