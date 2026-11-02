@@ -391,7 +391,9 @@ public class Cliente : MonoBehaviour
         if (caja != null) caja.VentaCobrada -= AlCobrar;
         g.SalirDeFila(this);
 
-        // Se lleva sus productos.
+        // Se lleva sus productos: si no trae carrito, se los embolsan y se lleva la bolsa.
+        bool sinCarrito = carrito == null || carrito.Carrito == null;
+        if (sinCarrito && copias.Count > 0 && Bolsas.I != null) Bolsas.I.Empacar(transform, copias, altura);
         foreach (var c in copias) if (c != null) Destroy(c);
         copias.Clear();
 
