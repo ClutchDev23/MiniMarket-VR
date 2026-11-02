@@ -77,14 +77,9 @@ public class Balanza : MonoBehaviour
         pantalla.anchor = TextAnchor.MiddleCenter; pantalla.alignment = TextAlignment.Center;
         pantalla.characterSize = 0.004f; pantalla.fontSize = 60; pantalla.color = new Color(0.45f, 1f, 0.55f);
         pantalla.text = "0.000 kg";
-        // TextMesh mira a -z local: lo giramos para que lo lea el cajero (que esta del lado -z)
-        t.transform.localRotation = Quaternion.Euler(0, 180, 0);
-        t.transform.localScale = new Vector3(-1, 1, 1);
         var cartel = new GameObject("Etiqueta");
         cartel.transform.SetParent(transform, false);
         cartel.transform.localPosition = new Vector3(0, 0.23f, -0.131f);
-        cartel.transform.localRotation = Quaternion.Euler(0, 180, 0);
-        cartel.transform.localScale = new Vector3(-1, 1, 1);
         var ct = cartel.AddComponent<TextMesh>();
         ct.anchor = TextAnchor.MiddleCenter; ct.characterSize = 0.0025f; ct.fontSize = 60; ct.color = new Color(0.95f, 0.47f, 0.13f);
         ct.text = "BALANZA - frutas y verduras";
