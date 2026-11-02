@@ -410,7 +410,7 @@ public class MenuPausa : MonoBehaviour
 
         sliderVolumen = CrearSlider("Volumen", colDer.transform, ref y2, "Volumen", PlayerPrefs.GetFloat("volume", 1f), SetVolumen);
         sliderVelocidad = CrearSlider("Velocidad", colDer.transform, ref y2, "Velocidad al caminar", PlayerPrefs.GetFloat("walkSpeed", 1f), SetVelocidad);
-        sliderTamano = CrearSlider("Tamano productos", colDer.transform, ref y2, "Tamano de los productos", PlayerPrefs.GetFloat("productScale", 1f), SetProductScale);
+        sliderTamano = CrearSlider("Tamano productos", colDer.transform, ref y2, "Tamaño productos", PlayerPrefs.GetFloat("productScale", 1f), SetProductScale);
         toggleBrazos = CrearToggle("Caminar con brazos", colDer.transform, ref y2, "Caminar con brazos", PlayerPrefs.GetInt("armSwing", 1) == 1, SetCaminarConBrazos);
         CrearSelectorCalidad(colDer.transform, ref y2);
 
