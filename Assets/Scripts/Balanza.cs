@@ -35,6 +35,7 @@ public class Balanza : MonoBehaviour
         var go = new GameObject("Balanza");
         go.transform.SetParent(raizMostrador, false);
         go.transform.localPosition = PuntoLocal + Vector3.up * h;
+        go.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);   // la pantalla mira al cajero
         I = go.AddComponent<Balanza>();
         I.caja = caja;
         I.Construir();
