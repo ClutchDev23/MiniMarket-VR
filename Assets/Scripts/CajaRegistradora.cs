@@ -1317,7 +1317,7 @@ public class CajaRegistradora : MonoBehaviour
 
     static Sprite redondo;
     /// <summary>Sprite blanco con esquinas redondeadas (9-slice), hecho por codigo.</summary>
-    static Sprite Redondo()
+    public static Sprite Redondo()
     {
         if (redondo != null) return redondo;
         const int N = 64, R = 18;

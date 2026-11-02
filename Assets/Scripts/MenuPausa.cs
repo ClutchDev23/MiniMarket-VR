@@ -291,8 +291,8 @@ public class MenuPausa : MonoBehaviour
 
         // Colores de la tienda (naranja Cajero XR sobre gris oscuro), iguales al
         // menu principal y a la caja. Se ponen aqui porque la escena guardaba los rosados.
-        colorFondo = new Color(0.06f, 0.07f, 0.09f, 0.95f);
-        colorBoton = new Color(0.18f, 0.20f, 0.25f, 1f);
+        colorFondo = new Color(0.055f, 0.065f, 0.10f, 0.985f);
+        colorBoton = new Color(0.20f, 0.24f, 0.33f, 1f);
         colorBotonHover = new Color(0.98f, 0.62f, 0.25f, 1f);
         colorTexto = new Color(0.96f, 0.96f, 0.97f, 1f);
         colorAcento = new Color(0.95f, 0.55f, 0.16f, 1f);
@@ -324,7 +324,18 @@ public class MenuPausa : MonoBehaviour
 
         var fondo = CrearUI("Fondo", panel.transform, typeof(Image));
         Stretch(fondo);
+        Redondear(fondo.GetComponent<Image>(), 0.6f);
         fondo.GetComponent<Image>().color = colorFondo;
+        var marco = fondo.AddComponent<Outline>();
+        marco.effectColor = new Color(1f, 0.6f, 0.2f, 0.6f);
+        marco.effectDistance = new Vector2(3f, -3f);
+        // Barra naranja arriba con el titulo
+        var barra = CrearUI("Barra", panel.transform, typeof(Image));
+        var brt0 = (RectTransform)barra.transform;
+        brt0.anchorMin = new Vector2(0f, 1f); brt0.anchorMax = new Vector2(1f, 1f); brt0.pivot = new Vector2(0.5f, 1f);
+        brt0.anchoredPosition = Vector2.zero; brt0.sizeDelta = new Vector2(0f, 110f);
+        Redondear(barra.GetComponent<Image>(), 0.6f);
+        barra.GetComponent<Image>().color = colorAcento;
 
         grupo = panel.AddComponent<CanvasGroup>();
         grupo.alpha = 1f;
@@ -339,14 +350,14 @@ public class MenuPausa : MonoBehaviour
         rr.sizeDelta = new Vector2(720f, 800f);
 
         var titulo = CrearTexto("Titulo", raiz.transform, "PAUSA");
-        titulo.fontSize = 60;
+        titulo.fontSize = 56;
         titulo.fontStyle = FontStyle.Bold;
-        titulo.color = colorAcento;
+        titulo.color = Color.white;
         titulo.alignment = TextAnchor.MiddleCenter;
         var tr = (RectTransform)titulo.transform;
         tr.anchorMin = new Vector2(0f, 1f); tr.anchorMax = new Vector2(1f, 1f);
         tr.pivot = new Vector2(0.5f, 1f);
-        tr.anchoredPosition = new Vector2(0f, -10f);
+        tr.anchoredPosition = new Vector2(0f, -12f);
         tr.sizeDelta = new Vector2(0f, 76f);
 
         // ------------------------------------------------------------- columna izquierda
@@ -354,7 +365,7 @@ public class MenuPausa : MonoBehaviour
         var ci = (RectTransform)colIzq.transform;
         ci.anchorMin = new Vector2(0f, 1f); ci.anchorMax = new Vector2(0.5f, 1f);
         ci.pivot = new Vector2(0f, 1f);
-        ci.anchoredPosition = new Vector2(0f, -100f);
+        ci.anchoredPosition = new Vector2(0f, -120f);
         // Con anclas estiradas (0..0.5) sizeDelta SUMA al ancho: -30 = media columna menos
         // un margen. Con 330 cada columna media 690 y se montaban una encima de otra.
         ci.sizeDelta = new Vector2(-30f, 620f);
@@ -380,7 +391,7 @@ public class MenuPausa : MonoBehaviour
         var cd = (RectTransform)colDer.transform;
         cd.anchorMin = new Vector2(0.5f, 1f); cd.anchorMax = new Vector2(1f, 1f);
         cd.pivot = new Vector2(0f, 1f);
-        cd.anchoredPosition = new Vector2(20f, -100f);
+        cd.anchoredPosition = new Vector2(20f, -120f);
         cd.sizeDelta = new Vector2(-30f, 620f);
 
         float y2 = 0f;
@@ -401,7 +412,7 @@ public class MenuPausa : MonoBehaviour
         sliderVelocidad = CrearSlider("Velocidad", colDer.transform, ref y2, "Velocidad al caminar", PlayerPrefs.GetFloat("walkSpeed", 1f), SetVelocidad);
         sliderTamano = CrearSlider("Tamano productos", colDer.transform, ref y2, "Tamano de los productos", PlayerPrefs.GetFloat("productScale", 1f), SetProductScale);
         toggleBrazos = CrearToggle("Caminar con brazos", colDer.transform, ref y2, "Caminar con brazos", PlayerPrefs.GetInt("armSwing", 1) == 1, SetCaminarConBrazos);
-        dropdownCalidad = CrearDropdown("Calidad", colDer.transform, ref y2, SetCalidad);
+        CrearSelectorCalidad(colDer.transform, ref y2);
 
         CrearBoton("Calibrar brazos", colDer.transform, ref y2, BotonCalibrarBrazos, false);
 
@@ -430,6 +441,59 @@ public class MenuPausa : MonoBehaviour
         }
 
         construyendo = false;
+    }
+
+    static void Redondear(Image img, float multiplicador)
+    {
+        img.sprite = CajaRegistradora.Redondo();
+        img.type = Image.Type.Sliced;
+        img.pixelsPerUnitMultiplier = multiplicador;
+    }
+
+    /// <summary>Calidad grafica como botones Baja / Media / Alta (el desplegable no se veia bien en VR).</summary>
+    void CrearSelectorCalidad(Transform padre, ref float y)
+    {
+        var cont = CrearUI("Calidad", padre);
+        var crt = (RectTransform)cont.transform;
+        crt.anchorMin = new Vector2(0f, 1f); crt.anchorMax = new Vector2(1f, 1f);
+        crt.pivot = new Vector2(0.5f, 1f);
+        crt.anchoredPosition = new Vector2(0f, y);
+        crt.sizeDelta = new Vector2(0f, 90f);
+        y -= 100f;
+
+        var txt = CrearTexto("Etiqueta", cont.transform, "Calidad grafica");
+        txt.fontSize = 25; txt.alignment = TextAnchor.MiddleLeft;
+        var trt = (RectTransform)txt.transform;
+        trt.anchorMin = new Vector2(0f, 1f); trt.anchorMax = new Vector2(1f, 1f); trt.pivot = new Vector2(0.5f, 1f);
+        trt.anchoredPosition = Vector2.zero; trt.sizeDelta = new Vector2(0f, 30f);
+
+        int n = QualitySettings.names.Length;
+        int[] niveles = n <= 3 ? System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Range(0, n)) : new[] { 0, n / 2, n - 1 };
+        string[] nombres = { "Baja", "Media", "Alta" };
+        var imgs = new System.Collections.Generic.List<Image>();
+        int actual = PlayerPrefs.GetInt("quality", QualitySettings.GetQualityLevel());
+        for (int i = 0; i < niveles.Length; i++)
+        {
+            int nivel = niveles[i];
+            var b = CrearUI("Op" + i, cont.transform, typeof(Image), typeof(Button));
+            var rt = (RectTransform)b.transform;
+            float a0 = i / (float)niveles.Length, a1 = (i + 1) / (float)niveles.Length;
+            rt.anchorMin = new Vector2(a0, 0f); rt.anchorMax = new Vector2(a1, 0f); rt.pivot = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(i == 0 ? 0f : 4f, 0f); rt.offsetMax = new Vector2(i == niveles.Length - 1 ? 0f : -4f, 50f);
+            var im = b.GetComponent<Image>(); Redondear(im, 1.4f);
+            imgs.Add(im);
+            var t = CrearTexto("T", b.transform, niveles.Length == 3 ? nombres[i] : QualitySettings.names[nivel]);
+            t.fontSize = 22; t.fontStyle = FontStyle.Bold; t.alignment = TextAnchor.MiddleCenter; t.color = Color.white; t.raycastTarget = false;
+            Stretch(t.gameObject);
+            b.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                SetCalidad(nivel);
+                for (int k = 0; k < imgs.Count; k++) imgs[k].color = niveles[k] == nivel ? colorAcento : colorBoton;
+            });
+        }
+        int masCerca = 0;
+        for (int k = 0; k < niveles.Length; k++) if (Mathf.Abs(niveles[k] - actual) < Mathf.Abs(niveles[masCerca] - actual)) masCerca = k;
+        for (int k = 0; k < imgs.Count; k++) imgs[k].color = k == masCerca ? colorAcento : colorBoton;
     }
 
     // ------------------------------------------------------------------ helpers UI
@@ -472,17 +536,21 @@ public class MenuPausa : MonoBehaviour
     {
         var go = CrearUI(nombre, padre, typeof(Image), typeof(Button));
         var img = go.GetComponent<Image>();
+        Redondear(img, 1.2f);
         img.color = acento ? colorAcento : colorBoton;
+        var sombra = go.AddComponent<Shadow>();
+        sombra.effectColor = new Color(0f, 0f, 0f, 0.4f); sombra.effectDistance = new Vector2(0f, -4f);
 
         var btn = go.GetComponent<Button>();
         btn.targetGraphic = img;
         btn.onClick.AddListener(() => { accion(); });
 
         var colores = btn.colors;
-        colores.normalColor = acento ? colorAcento : colorBoton;
-        colores.highlightedColor = colorBotonHover;
-        colores.pressedColor = colorBotonHover * 0.85f;
-        colores.selectedColor = colorBotonHover;
+        colores.normalColor = Color.white;
+        colores.highlightedColor = Color.white;
+        colores.pressedColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+        colores.selectedColor = Color.white;
+        colores.colorMultiplier = 1f;
         colores.fadeDuration = 0.08f;
         btn.colors = colores;
 
@@ -541,15 +609,17 @@ public class MenuPausa : MonoBehaviour
 
         var fondo = CrearUI("Fondo", sliderGo.transform, typeof(Image));
         Stretch(fondo);
-        fondo.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.15f);
+        Redondear(fondo.GetComponent<Image>(), 2.5f);
+        fondo.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.12f);
 
         var rellenoArea = CrearUI("Relleno", sliderGo.transform);
         var rat = (RectTransform)rellenoArea.transform;
-        rat.anchorMin = new Vector2(0f, 0f); rat.anchorMax = new Vector2(1f, 0f);
-        rat.offsetMin = Vector2.zero; rat.offsetMax = Vector2.zero;
+        rat.anchorMin = new Vector2(0f, 0f); rat.anchorMax = new Vector2(1f, 1f);
+        rat.offsetMin = Vector2.zero; rat.offsetMax = new Vector2(-14f, 0f);
 
         var relleno = CrearUI("RellenoImg", rellenoArea.transform, typeof(Image));
         Stretch(relleno);
+        Redondear(relleno.GetComponent<Image>(), 2.5f);
         relleno.GetComponent<Image>().color = colorAcento;
 
         var area = CrearUI("Area", sliderGo.transform);
@@ -557,11 +627,21 @@ public class MenuPausa : MonoBehaviour
 
         var handleArea = CrearUI("HandleArea", area.transform);
         Stretch(handleArea);
+        var hart = (RectTransform)handleArea.transform; hart.offsetMin = new Vector2(14f, 0f); hart.offsetMax = new Vector2(-14f, 0f);
 
         var handle = CrearUI("Handle", handleArea.transform, typeof(Image));
         var hrt = (RectTransform)handle.transform;
-        hrt.sizeDelta = new Vector2(32f, 32f);
+        hrt.anchorMin = new Vector2(0f, 0f); hrt.anchorMax = new Vector2(0f, 1f);
+        hrt.sizeDelta = new Vector2(30f, 8f);
+        Redondear(handle.GetComponent<Image>(), 3.5f);
         handle.GetComponent<Image>().color = Color.white;
+        var hs = handle.AddComponent<Shadow>(); hs.effectColor = new Color(0, 0, 0, 0.5f); hs.effectDistance = new Vector2(0, -2);
+
+        var valor = CrearTexto("Valor", cont.transform, Mathf.RoundToInt(valorInicial * 100f) + "%");
+        valor.fontSize = 23; valor.alignment = TextAnchor.MiddleRight; valor.color = colorAcento; valor.fontStyle = FontStyle.Bold;
+        var vrt = (RectTransform)valor.transform;
+        vrt.anchorMin = new Vector2(0f, 1f); vrt.anchorMax = new Vector2(1f, 1f); vrt.pivot = new Vector2(0.5f, 1f);
+        vrt.anchoredPosition = Vector2.zero; vrt.sizeDelta = new Vector2(0f, 30f);
 
         slider.fillRect = (RectTransform)relleno.transform;
         slider.handleRect = hrt;
@@ -571,6 +651,7 @@ public class MenuPausa : MonoBehaviour
         slider.maxValue = 1f;
         slider.SetValueWithoutNotify(valorInicial);
         slider.onValueChanged.AddListener(onChanged);
+        slider.onValueChanged.AddListener(v => valor.text = Mathf.RoundToInt(v * 100f) + "%");
 
         return slider;
     }
@@ -601,10 +682,13 @@ public class MenuPausa : MonoBehaviour
         brt.anchoredPosition = new Vector2(0f, 0f);
         brt.sizeDelta = new Vector2(38f, 38f);
         var bimg = box.GetComponent<Image>();
-        bimg.color = new Color(1f, 1f, 1f, 0.2f);
+        Redondear(bimg, 2f);
+        bimg.color = new Color(1f, 1f, 1f, 0.15f);
 
         var check = CrearUI("Check", box.transform, typeof(Image));
         Stretch(check);
+        var crt2 = (RectTransform)check.transform; crt2.offsetMin = new Vector2(6f, 6f); crt2.offsetMax = new Vector2(-6f, -6f);
+        Redondear(check.GetComponent<Image>(), 3f);
         check.GetComponent<Image>().color = colorAcento;
 
         var toggle = cont.AddComponent<Toggle>();
