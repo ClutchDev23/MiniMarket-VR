@@ -16,9 +16,9 @@ using UnityEngine;
 public static class MostradorNuevo
 {
     // Medidas (local del mostrador, metros). Ver Logs del sondeo.
-    static readonly Rect LargoXZ = new Rect(0.25f, -0.86f, 0.63f, 1.80f);    // x 0.25..0.88, z -0.86..0.94
+    static readonly Rect LargoXZ = new Rect(0.25f, -0.86f, 0.63f, 2.30f);    // x 0.25..0.88, z -0.86..1.44 (faja mas larga)
     static readonly Rect EscritorioXZ = new Rect(-0.76f, -0.86f, 1.01f, 0.58f); // x -0.76..0.25, z -0.86..-0.28
-    static readonly Rect FajaXZ = new Rect(0.33f, 0.15f, 0.42f, 0.75f);      // x 0.33..0.75, z 0.15..0.90
+    static readonly Rect FajaXZ = new Rect(0.33f, 0.15f, 0.42f, 1.25f);      // x 0.33..0.75, z 0.15..1.40
     public static Vector3 EscanerLocal = new Vector3(0.40f, 0f, -0.08f);
     public static Vector3 MonitorLocal = new Vector3(-0.47f, 0f, -0.74f);
     public static Vector3 PuntoCajero = new Vector3(-0.30f, 0f, 0.35f);
