@@ -974,14 +974,16 @@ public class CajaRegistradora : MonoBehaviour
 
         // ---- cabecera
         var cab = Img(raiz, "Cabecera", CCabecera, 0, 0, W, 60);
-        Txt(cab, "Nombre", nombreCaja + "  -  MiniMarket", 32, TextAnchor.MiddleLeft, FontStyle.Bold, 20, 0, 560, 60).color = Color.white;
+        var logo = Img(cab, "Logo", Color.white, 14, 9, 42, 42);
+        Txt(logo, "MM", "<color=#F07820>M</color>", 30, TextAnchor.MiddleCenter, FontStyle.Bold, 0, 0, 42, 42);
+        Txt(cab, "Nombre", nombreCaja + "  ·  MiniMarket", 30, TextAnchor.MiddleLeft, FontStyle.Bold, 68, 0, 520, 60).color = Color.white;
         txtTurno = Txt(cab, "Turno", "", 24, TextAnchor.MiddleRight, FontStyle.Normal, 540, 0, 540, 60);
         txtTurno.color = new Color(1, 1, 1, 0.85f);
-        Img(raiz, "Acento", new Color(1f, 0.78f, 0.35f, 1f), 0, 58, W, 3);
 
         // ---- paso actual (lo que hay que hacer)
-        var barraPaso = Img(raiz, "BarraPaso", new Color(0, 0, 0, 0.35f), 0, 60, W, 56);
-        txtPaso = Txt(barraPaso, "Paso", "", 34, TextAnchor.MiddleCenter, FontStyle.Bold, 0, 0, W, 56);
+        var barraPaso = Img(raiz, "Pildora", new Color(0.16f, 0.19f, 0.28f, 1f), 160, 68, W - 320, 50);
+        txtPaso = Txt(barraPaso, "Paso", "", 32, TextAnchor.MiddleCenter, FontStyle.Bold, 0, 0, W - 320, 50);
+        var sp = txtPaso.gameObject.AddComponent<Shadow>(); sp.effectColor = new Color(0, 0, 0, 0.5f); sp.effectDistance = new Vector2(1.5f, -1.5f);
 
         // ---- lista (izquierda)
         float lx = 16, lw = 620;
@@ -1326,7 +1328,12 @@ public class CajaRegistradora : MonoBehaviour
                 float cx = Mathf.Clamp(x + 0.5f, R, N - R), cy = Mathf.Clamp(y + 0.5f, R, N - R);
                 float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(cx, cy));
                 byte a = (byte)(Mathf.Clamp01(R - d + 0.5f) * 255);
-                px[y * N + x] = new Color32(255, 255, 255, a);
+                // Relieve: arriba un poco mas claro, abajo mas oscuro, y un brillo fino en el borde superior.
+                float t = y / (float)(N - 1);
+                float luz = Mathf.Lerp(0.80f, 1f, t);
+                if (y >= N - 3 && d < R - 1f) luz = 1f;
+                byte c = (byte)(luz * 255);
+                px[y * N + x] = new Color32(c, c, c, a);
             }
         tex.SetPixels32(px); tex.Apply();
         redondo = Sprite.Create(tex, new Rect(0, 0, N, N), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(R, R, R, R));
@@ -1341,7 +1348,19 @@ public class CajaRegistradora : MonoBehaviour
         img.color = color;
         img.raycastTarget = false;
         // Esquinas redondeadas (todo menos los fondos/barras que ocupan el ancho completo).
-        if (color.a > 0.01f && nombre != "Fondo" && nombre != "BarraPaso" && nombre != "Cabecera" && w < 1000f)
+        if (nombre == "Fondo" || nombre == "Cabecera")
+        {
+            img.sprite = Redondo();
+            img.type = Image.Type.Sliced;
+            img.pixelsPerUnitMultiplier = 0.7f;
+            if (nombre == "Fondo")
+            {
+                var o = go.AddComponent<Outline>();
+                o.effectColor = new Color(1f, 0.6f, 0.2f, 0.55f);
+                o.effectDistance = new Vector2(3f, -3f);
+            }
+        }
+        else if (color.a > 0.01f && nombre != "BarraPaso" && w < 1000f)
         {
             img.sprite = Redondo();
             img.type = Image.Type.Sliced;
@@ -1396,6 +1415,7 @@ public class CajaRegistradora : MonoBehaviour
         cb.fadeDuration = 0.06f;
         b.colors = cb;
         b.onClick.AddListener(() => accion());
+        rt.gameObject.AddComponent<BotonXR>();
         if (!string.IsNullOrEmpty(texto))
         {
             var t = Txt(rt, "Texto", texto, tam, TextAnchor.MiddleCenter, FontStyle.Bold, 0, 0, w, h);
@@ -1525,5 +1545,44 @@ public class CajaRegistradora : MonoBehaviour
             foreach (var d in DesgloseLista(VueltoCent)) EntregarDenominacion(d);
             ConfirmarVuelto();
         }
+    }
+}
+
+/// <summary>
+/// Respuesta de boton estilo XR: al apuntarlo crece un poco y se ilumina el borde;
+/// al presionarlo se hunde. Asi se nota bien en el visor que boton esta bajo el rayo.
+/// </summary>
+public class BotonXR : MonoBehaviour,
+    UnityEngine.EventSystems.IPointerEnterHandler, UnityEngine.EventSystems.IPointerExitHandler,
+    UnityEngine.EventSystems.IPointerDownHandler, UnityEngine.EventSystems.IPointerUpHandler
+{
+    float objetivo = 1f, actual = 1f;
+    Outline brillo;
+    bool encima;
+
+    void Awake()
+    {
+        // Que crezca desde el centro (el pivote venia arriba a la izquierda).
+        var rt = (RectTransform)transform;
+        var antes = rt.pivot;
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition += Vector2.Scale(rt.pivot - antes, rt.sizeDelta);
+        brillo = gameObject.AddComponent<Outline>();
+        brillo.effectColor = new Color(1f, 1f, 1f, 0f);
+        brillo.effectDistance = new Vector2(3f, -3f);
+    }
+
+    public void OnPointerEnter(UnityEngine.EventSystems.PointerEventData e) { encima = true; objetivo = 1.05f; }
+    public void OnPointerExit(UnityEngine.EventSystems.PointerEventData e) { encima = false; objetivo = 1f; }
+    public void OnPointerDown(UnityEngine.EventSystems.PointerEventData e) { objetivo = 0.95f; }
+    public void OnPointerUp(UnityEngine.EventSystems.PointerEventData e) { objetivo = encima ? 1.05f : 1f; }
+
+    void Update()
+    {
+        actual = Mathf.Lerp(actual, objetivo, Time.unscaledDeltaTime * 18f);
+        transform.localScale = new Vector3(actual, actual, 1f);
+        var c = brillo.effectColor;
+        c.a = Mathf.Lerp(c.a, encima ? 0.85f : 0f, Time.unscaledDeltaTime * 14f);
+        brillo.effectColor = c;
     }
 }
