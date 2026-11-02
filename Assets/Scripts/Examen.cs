@@ -11,6 +11,7 @@ public class Examen : MonoBehaviour
 {
     public const float Duracion = 300f;
     public static bool Activo { get; private set; }
+    public static string UltimoCertificado { get; private set; }
     static float fin;
     static Examen runner;
 
@@ -19,14 +20,16 @@ public class Examen : MonoBehaviour
         get { int s = Mathf.Max(0, Mathf.CeilToInt(fin - Time.time)); return (s / 60) + ":" + (s % 60).ToString("00"); }
     }
 
-    public static void Empezar()
+    public static void Empezar() { Empezar(Duracion); }
+
+    public static void Empezar(float segundos)
     {
         var caja = FindAnyObjectByType<CajaRegistradora>();
         if (caja == null) return;
         if (runner == null) runner = new GameObject("Examen").AddComponent<Examen>();
         caja.NuevoTurno();
         Activo = true;
-        fin = Time.time + Duracion;
+        fin = Time.time + segundos;
         caja.Mensaje("EXAMEN: tienes 5 minutos. ¡Atiende bien a cada cliente!", new Color(1f, 0.85f, 0.3f));
         Haptica.Ambos(0.4f, 0.15f);
         Debug.Log("[Examen] Empieza (5 min).");
@@ -46,6 +49,7 @@ public class Examen : MonoBehaviour
         caja.MostrarResumen();
         caja.Mensaje("EXAMEN TERMINADO: " + e.nota + "/20. Certificado guardado.", new Color(1f, 0.85f, 0.3f));
         Haptica.Ambos(0.6f, 0.3f);
+        UltimoCertificado = ruta;
         Debug.Log("[Examen] Terminado. Nota " + e.nota + "/20. Certificado: " + ruta);
     }
 
