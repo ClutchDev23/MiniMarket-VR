@@ -80,8 +80,6 @@ public class OptimizacionQuest : MonoBehaviour
             {
                 smr.updateWhenOffscreen = false;
                 smr.quality = SkinQuality.Bone2;
-                var a = smr.GetComponentInParent<Animator>();
-                if (a != null) a.cullingMode = AnimatorCullingMode.CullCompletely;
                 continue;
             }
             var b = r.bounds;
