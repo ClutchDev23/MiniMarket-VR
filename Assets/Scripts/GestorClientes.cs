@@ -97,8 +97,17 @@ public class GestorClientes : MonoBehaviour
         RaizProductos = raiz != null ? raiz.transform : null;
 
         // La caja "de verdad" es la que tiene el lector encima.
-        var lector = FindAnyObjectByType<LectorCodigos>();
-        Mostrador = BuscarMostrador(lector != null ? lector.transform.position : Vector3.zero);
+        // OJO: las cajas cerradas tambien tienen escaner; la buena es la de la pistola
+        // (o la que ya eligio la CajaRegistradora).
+        var cr = FindAnyObjectByType<CajaRegistradora>();
+        if (cr != null && cr.Mostrador != null) Mostrador = cr.Mostrador;
+        else
+        {
+            LectorCodigos lector = null;
+            foreach (var l in FindObjectsByType<LectorCodigos>(FindObjectsSortMode.None))
+                if (!l.manosLibres && l.grab != null) { lector = l; break; }
+            Mostrador = BuscarMostrador(lector != null ? lector.transform.position : Vector3.zero);
+        }
         if (Mostrador == null)
         {
             Debug.LogWarning("[Clientes] No encontre la caja (Pref_CashCounter).");
