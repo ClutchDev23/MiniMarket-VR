@@ -61,9 +61,11 @@ public class Cliente : MonoBehaviour
 
     // ------------------------------------------------------------ personalidad
     public enum Personalidad { Normal, Apurado, Amable, Quejon }
-    public Personalidad Tipo { get; private set; }
+    public Personalidad Tipo { get; set; }
+    /// <summary>Solo para pruebas: si es mayor que 0, todos los clientes aguantan esos segundos.</summary>
+    public static float PacienciaPrueba;
     /// <summary>Segundos que aguanta esperando: el apurado mucho menos, el amable mas.</summary>
-    float Paciencia => g.Config.paciencia * Jornada.FactorPaciencia *
+    float Paciencia => PacienciaPrueba > 0f ? PacienciaPrueba : g.Config.paciencia * Jornada.FactorPaciencia *
         (Tipo == Personalidad.Apurado ? 0.4f : Tipo == Personalidad.Amable ? 1.6f : Tipo == Personalidad.Quejon ? 0.8f : 1f);
     int comentarios;
     /// <summary>Comentarios mientras espera en la caja, segun como es.</summary>
@@ -79,7 +81,7 @@ public class Cliente : MonoBehaviour
             case Personalidad.Quejon: t = comentarios == 1 ? "Uff... esta caja es lentísima." : "En la otra tienda\nme atienden más rápido..."; break;
             case Personalidad.Amable: t = comentarios == 1 ? "Tranquilo, sin apuro." : "No te preocupes,\ntómate tu tiempo."; break;
         }
-        if (t != null) Decir(t, 3.5f);
+        if (t != null) { Decir(t, 3.5f); GestorClientes.Log(name + " (" + Tipo + ") comenta: " + t.Replace("\n", " ")); }
     }
     float agarrarHasta, graciasHasta;
     Producto fruta; int frutaTipo; float frutaKg;
