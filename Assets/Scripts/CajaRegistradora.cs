@@ -692,6 +692,7 @@ public class CajaRegistradora : MonoBehaviour
             if (l.producto.stock == 0) Debug.Log("[Caja] Se acabo el stock de " + l.producto.nombre + ".");
         }
         ventas.Add(v);
+        Ranking.Registrar(Evaluar());
         inicioVenta = -1f;
 
         paso = Paso.Completada;
