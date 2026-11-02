@@ -77,6 +77,7 @@ public class AlternarDiaNoche : MonoBehaviour
         // CADA frame: dia -> noche -> dia sin parar.
         // Ahora el dia dura 5 minutos reales (12:00 -> 20:00) y la noche otros 5 (20:00 -> 04:00).
         minutos = 5f;
+        PlayerPrefs.SetFloat(GameSettings.NightMinutes, 5f);   // el sol (DayNightCycle) usa el mismo valor
 
         Debug.Log("[Noche] alternador activo, cada " + minutos + " min (escena actual: " + Escenas[idx] + ")");
     }
