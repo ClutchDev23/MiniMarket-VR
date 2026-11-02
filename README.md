@@ -23,6 +23,7 @@ y atiende a clientes que hacen fila, pagan y se quejan si te equivocas.
 
 [**Qué es**](#-qué-es) &nbsp;·&nbsp;
 [**Cómo se cobra**](#-cómo-se-cobra) &nbsp;·&nbsp;
+[**Lo nuevo**](#-lo-nuevo) &nbsp;·&nbsp;
 [**Capturas**](#-capturas) &nbsp;·&nbsp;
 [**Controles**](#-controles) &nbsp;·&nbsp;
 [**Instalación**](#-instalación) &nbsp;·&nbsp;
@@ -157,6 +158,44 @@ flowchart LR
 
 <br>
 
+## 🆕 Lo nuevo
+
+<table>
+<tr>
+<td width="50%"><img src="docs/img/pantalla_xr.jpg" alt="Pantalla de la caja rediseñada estilo XR"></td>
+<td width="50%"><img src="docs/img/mostrador.jpg" alt="Mostrador nuevo en L con faja y monitor"></td>
+</tr>
+<tr>
+<td align="center"><sub><b>Pantalla estilo XR</b> · relieve, marco luminoso y botones que reaccionan al apuntarlos</sub></td>
+<td align="center"><sub><b>Mostrador nuevo en L</b> · faja que mueve los productos, monitor de 27", cajón de dinero</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/img/escaner.jpg" alt="Escáner manos libres"></td>
+<td width="50%"><img src="docs/img/ofertas.jpg" alt="Pantallas de ofertas interactivas"></td>
+</tr>
+<tr>
+<td align="center"><sub><b>Escáner manos libres</b> · basta pasar el producto por delante</sub></td>
+<td align="center"><sub><b>Ofertas interactivas</b> · pantallas digitales que se pueden tocar</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/img/tutorial.jpg" alt="Tutorial interactivo"></td>
+<td width="50%"><img src="docs/img/billetes.jpg" alt="Billetes y monedas de soles con marca MUESTRA"></td>
+</tr>
+<tr>
+<td align="center"><sub><b>Tutorial interactivo</b> · cada paso se completa haciéndolo</sub></td>
+<td align="center"><sub><b>Soles del BCRP</b> · siempre con la marca MUESTRA</sub></td>
+</tr>
+</table>
+
+- 🧍 **Clientes más naturales**: animaciones de Mixamo para caminar, esperar, hablar, mirar, **empujar el carrito**, **agarrar del estante**, saludar, mirar el celular en la fila y agradecer con el pulgar.
+- 💵 **Cajón de dinero** que se abre al cobrar en efectivo; el pago entra volando y el vuelto sale de sus compartimentos.
+- 📱 **POS tipo celular Android** para que el cliente acerque su tarjeta.
+- 🧾 **Entrega de boleta**: el cliente espera su comprobante, lo pide si tardas y te agradece.
+- 🌀 **Anti-mareo**: viñeta al moverse, giro por saltos y teletransporte.
+- 🏪 Los clientes van siempre a **la caja abierta** (las cajas 2 y 3 están cerradas).
+
+<br>
+
 ## 📸 Capturas
 
 <table>
@@ -188,10 +227,12 @@ flowchart LR
 | Acción | 🎮 Controladores | 🤲 Manos |
 |---|---|---|
 | **Agarrar** | Tocar el objeto y apretar **Grip** | Tocar el objeto y cerrar la mano |
-| **Escanear** | Con la pistola en la mano, apretar el **gatillo** | Pellizcar con la pistola en la mano |
+| **Escanear** | Pasa el producto frente al **escáner manos libres** del mostrador (o usa la pistola con el **gatillo**) | Pasa el producto frente al escáner |
 | **Pulsar la pantalla** | Apuntar con el rayo y apretar el **gatillo** | Apuntar y pellizcar |
 | **Caminar** | Joystick izquierdo | Estirar los brazos y moverlos |
-| **Girar** | Joystick derecho | Girar el cuerpo |
+| **Girar** | Joystick derecho a los lados (saltos de 45°, anti-mareo) | Girar el cuerpo |
+| **Teletransporte** | Joystick derecho **hacia adelante**, apunta al piso y **suelta** | — |
+| **Tocar botones con el dedo** | Mantén el **gatillo** y toca la pantalla con el índice | Tocar con el dedo |
 | **Pausa** | Botón **☰** (mando izquierdo) o **B** · **Escape** en PC | — |
 | **Hablar a un cliente** | Di una frase corta: *"hola"*, *"¿cómo va a pagar?"*, *"¿algo más?"*, *"gracias"*. En PC / Link basta con decirla; en el Quest solo, **mantén el stick izquierdo** mientras hablas (Wit.ai) | Mantén **V** y habla (con Wit.ai) |
 
@@ -357,6 +398,12 @@ En `Assets/Resources/ConfigClientes.asset` puedes cambiar cuántos clientes entr
 
 - [x] Billetes y monedas con la imagen del BCRP (anverso y reverso), siempre con la marca **MUESTRA** y "sin valor · solo práctica"
 - [x] Conversación por voz en el Quest sin PC con Wit.ai, el servicio de voz de Meta (pide el token en *Tools → Minimarket → Voz → Configurar Wit.ai*)
+- [x] Mostrador nuevo en L con faja, monitor, escáner manos libres y cajón de dinero
+- [x] Animaciones naturales de Mixamo para los clientes
+- [x] Pantalla de caja rediseñada estilo XR
+- [x] Opciones anti-mareo y teletransporte
+- [ ] Bolsas al final de la faja
+- [ ] Ranking con el mejor puntaje en el menú
 - [ ] Modo realidad mixta (passthrough + detección de planos)
 - [ ] Multijugador con varias cajas
 - [ ] Supervisor que guía la capacitación
