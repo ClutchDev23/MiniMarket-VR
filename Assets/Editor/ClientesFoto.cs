@@ -188,6 +188,24 @@ public static class ClientesFoto
         Debug.Log("[Foto] Mostrador nuevo: Logs/mn_*.png");
     }
 
+    /// <summary>Abre el menu de pausa y le saca foto de frente y de lado (en Play).</summary>
+    [MenuItem("Tools/Minimarket/Menu/Foto del menu de pausa (Play)")]
+    public static void FotoPausa()
+    {
+        var mp = Object.FindAnyObjectByType<MenuPausa>();
+        if (mp == null || !Application.isPlaying) { Debug.LogWarning("[Foto] Dale Play primero."); return; }
+        if (!mp.estaAbierto) mp.Abrir();
+        EditorApplication.delayCall += () =>
+        {
+            var go = GameObject.Find("MenuPausa_Canvas");
+            Transform p = go != null ? go.transform : null;
+            if (p == null) { Debug.LogWarning("[Foto] No encontre el panel de pausa."); return; }
+            Sacar("foto_pausa.png", p.position - p.forward * 1.3f, p.position, 60f);
+            Sacar("foto_pausa_lado.png", p.position - p.forward * 1.0f + p.right * 0.8f, p.position, 60f);
+            Debug.Log("[Foto] Pausa: Logs/foto_pausa.png");
+        };
+    }
+
     [MenuItem("Tools/Minimarket/Tutorial/Siguiente paso (Play)")]
     public static void SiguientePaso() { Tutorial.Saltar(); }
 
