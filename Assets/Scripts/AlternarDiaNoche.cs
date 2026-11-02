@@ -29,6 +29,17 @@ public class AlternarDiaNoche : MonoBehaviour
     float t;
     int idx;
 
+    /// <summary>Hora del juego (0-24): de dia va de 12:00 a 20:00, de noche de 20:00 a 04:00.</summary>
+    public static float Hora
+    {
+        get
+        {
+            if (I == null) return 12f;
+            float h = (I.idx == 0 ? 12f : 20f) + 8f * Mathf.Clamp01(I.t / (I.minutos * 60f));
+            return h % 24f;
+        }
+    }
+
     static bool EscenaDeJuego()
     {
         string activa = SceneManager.GetActiveScene().name;
@@ -64,9 +75,8 @@ public class AlternarDiaNoche : MonoBehaviour
         // Por defecto 10 min, igual que el menu. Antes era 0 y, si nunca se habia
         // pasado por el menu (Play directo en la escena), cambiaba de escena en
         // CADA frame: dia -> noche -> dia sin parar.
-        float delMenu = PlayerPrefs.GetFloat(GameSettings.NightMinutes, 10f);
-        if (delMenu > 0.01f) minutos = delMenu;
-        if (minutos < 0.5f) minutos = 10f;
+        // Ahora el dia dura 5 minutos reales (12:00 -> 20:00) y la noche otros 5 (20:00 -> 04:00).
+        minutos = 5f;
 
         Debug.Log("[Noche] alternador activo, cada " + minutos + " min (escena actual: " + Escenas[idx] + ")");
     }
